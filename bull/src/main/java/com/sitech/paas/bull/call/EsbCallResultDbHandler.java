@@ -1,6 +1,5 @@
 package com.sitech.paas.bull.call;
 
-import com.sitech.paas.inparam.db.ServiceParametersHandler;
 import com.sitech.paas.inparam.handler.Handler;
 import com.sitech.paas.inparam.jdbc.Column;
 import com.sitech.paas.inparam.jdbc.JdbcOperate;
@@ -14,29 +13,26 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * 对esb调用结果的处理
+ * 对esb调用结果保存到数据库中去
  */
 public class EsbCallResultDbHandler implements Handler<EsbResult> {
 
-    String esbCallResult2Table;
 
     JdbcOperate jdbcOperate;
 
-    public EsbCallResultDbHandler(JdbcOperate jdbcOperate,String tableName){
-        this.esbCallResult2Table = tableName;
+    public EsbCallResultDbHandler(JdbcOperate jdbcOperate){
         this.jdbcOperate = jdbcOperate;
     }
 
     public void preHand() {
         jdbcOperate.openConnection();
-        System.out.println("准备将esb的调用结果写入表："+esbCallResult2Table);
-        jdbcOperate.setTableName(esbCallResult2Table);
+        System.out.println("准备将esb的调用结果写入表："+jdbcOperate.getPassword());
         if(jdbcOperate.isTableExist()){
             jdbcOperate.dropTable();
-            System.out.println(esbCallResult2Table+"表存在，被删除了");
+            System.out.println(jdbcOperate.getPassword()+"表存在，被删除了");
         }
         jdbcOperate.createTable(TableUtils.cast(EsbResult.class));
-        System.out.println("创建了表："+esbCallResult2Table);
+        System.out.println("创建了表："+jdbcOperate.getPassword());
     }
 
     public void hand(List<EsbResult> t) {

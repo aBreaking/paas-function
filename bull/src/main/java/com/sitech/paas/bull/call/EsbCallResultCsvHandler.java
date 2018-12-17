@@ -13,7 +13,7 @@ public class EsbCallResultCsvHandler extends AbstractFileWriteHandler<EsbResult>
 
     @Override
     public String title() {
-        String title = "srv_name,call_begintime,phone_no,esb_retcode,retcode,retmsg";
+        String title = "srv_name,conditions,call_begintime,phone_no,esb_retcode,retcode,retmsg";
         return title;
     }
 
@@ -21,6 +21,8 @@ public class EsbCallResultCsvHandler extends AbstractFileWriteHandler<EsbResult>
     public String content(EsbResult esbResult) {
         StringBuilder builder = new StringBuilder();
         builder.append(esbResult.getSrvName());
+        builder.append(",");
+        builder.append(esbResult.getConditions());
         builder.append(",");
         builder.append(esbResult.getCallBegintime());
         builder.append(",");

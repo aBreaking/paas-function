@@ -12,6 +12,7 @@ import com.sitech.paas.inparam.io.Resource;
 import com.sitech.paas.inparam.io.ResourceLoader;
 import com.sitech.paas.inparam.jdbc.JdbcOperate;
 import com.sitech.paas.inparam.resovler.Resolver;
+import com.sitech.paas.inparam.util.StringUtils;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -43,6 +44,7 @@ public class BullRunner {
         String esbIpPort = cp.getProperty("bull.esb.ipPort");
         String csvFile = cp.getProperty("bull.out.csvFile");
 
+
         //srv_args配置文件的信息
         HashMap<String, String[]> map = new HashMap<String, String[]>();
         for (Object key : sap.keySet()){
@@ -65,7 +67,16 @@ public class BullRunner {
 
         //下一个线程开始，将符合条件的inparam再次调用
         EsbCaller esbCaller = new EsbCaller(esbIpPort);
-        handler = new EsbCallResultCsvHandler(csvFile);
+        if(StringUtils.isBlank(csvFile)){  //是存入csv文件，还是db中去
+            JdbcOperate jdbcOperate = new JdbcOperate();
+            jdbcOperate.setUrl(cp.getProperty("jdbc.url"));
+            jdbcOperate.setUsername(cp.getProperty("jdbc.username"));
+            jdbcOperate.setPassword(cp.getProperty("jdbc.password"));
+            jdbcOperate.setTableName(cp.getProperty("bull.out.table"));
+            handler = new EsbCallResultDbHandler(jdbcOperate);
+        }else{
+            handler = new EsbCallResultCsvHandler(csvFile);
+        }
 
         Thread mqThread = new Thread(new BullTask(esbCaller,handler,count),"esb调用线程");
         mqThread.start();

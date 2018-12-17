@@ -39,11 +39,12 @@ public class EsbCaller {
             String esbretcode = root.getString("ESBRETCODE");
             String retcode = root.getString("RETURN_CODE");
             if(esbretcode==null){
-
                 JSONObject body = root.getJSONObject("BODY");
-                retmsg =body.getString("RETURN_MSG");
-                esbretcode =body.getString("ESBRETCODE");
-                retcode =body.getString("RETURN_CODE");
+                if(body!=null){
+                    retmsg =body.getString("RETURN_MSG");
+                    esbretcode =body.getString("ESBRETCODE");
+                    retcode =body.getString("RETURN_CODE");
+                }
             }
             esbResult.setRetmsg(retmsg);
             esbResult.setEsbretcode(esbretcode);
@@ -51,7 +52,9 @@ public class EsbCaller {
             return esbResult;
         }catch (Exception e){
             //调用失败x
-            throw new RuntimeException(e);
+            e.printStackTrace();
+            return esbResult;
+
         }
 
     }

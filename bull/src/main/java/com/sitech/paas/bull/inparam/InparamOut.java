@@ -9,6 +9,10 @@ public class InparamOut {
     String srvName;
     String phoneNo;
     String callBeginTime;
+    //在配置文件中配置的条件
+    String condition;
+
+    public InparamOut(){};
 
     public InparamOut(String jsonPin, String srvName, String phoneNo,String callBeginTime) {
         this.jsonPin = jsonPin;
@@ -47,5 +51,13 @@ public class InparamOut {
 
     public void setCallBeginTime(String callBeginTime) {
         this.callBeginTime = callBeginTime;
+    }
+
+    public String getCondition() {
+        return condition;
+    }
+
+    public void setCondition(String condition) {
+        this.condition = condition;
     }
 }

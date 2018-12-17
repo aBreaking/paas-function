@@ -9,6 +9,7 @@ import com.sitech.paas.inparam.util.StringUtils;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Map;
 
 
@@ -67,7 +68,7 @@ public class InparamBullResolver implements Resolver<String> {
             String callBeginTime = serviceParameters.getCallBeginTime();
             try {
                 //筛选某个时间段记录，timeRange为null那就所有
-                if(timeRange!=null&&!onRange(callBeginTime,timeRange)){
+                if(!StringUtils.isBlank(timeRange)&&!onRange(callBeginTime,timeRange)){
                     continue;
                 }
             } catch (ParseException e) {
@@ -77,7 +78,8 @@ public class InparamBullResolver implements Resolver<String> {
             //从serviceParameters结果中确认下，是否参数值符合
             Map<String, String> paramMap = serviceParameters.getParamMap();
             //如果没有指定keyValue参数，那么也符合条件
-            if(keyValues==null||match(paramMap,keyValues)){
+            String condition = "";
+            if(keyValues==null||(condition=match(paramMap,keyValues))!=null){
                 //如果是符合条件的
                 //拿到该条入参的服务名等信息InparamOut，并加入到队列中去，等待被执行
                 String jsonPin = serviceParameterResolver.cut(statement);
@@ -86,6 +88,7 @@ public class InparamBullResolver implements Resolver<String> {
                     srvName = serviceParameters.getServiceName();
                 }
                 InparamOut inparamOut = new InparamOut(jsonPin,srvName,serviceParameters.getRouteValue(),serviceParameters.getCallBeginTime());
+                inparamOut.setCondition(condition);
 
                 Bull.queue.add(inparamOut);
                 //返回该条入参
@@ -95,13 +98,49 @@ public class InparamBullResolver implements Resolver<String> {
         return null;
     }
 
+    private String match(Map<String, String> paramMap,String keyValues[]){
+        StringBuilder builder = new StringBuilder();
+        if(paramMap.size()==0){
+            return null;
+        }
+        for (String arg :keyValues){
+            String[] split = arg.split(":");
+            String key = split[0];
+            String value = split[1];
+            if(!paramMap.containsKey(key)){
+                return null;
+            }
+            //value可以取或
+            boolean hasVal = false;
+            String[] vals = value.split("\\|");
+            for(String v : vals){
+                if(v.equals(paramMap.get(key))){
+                    hasVal = true;
+                    builder.append(key);
+                    builder.append(":");
+                    builder.append(v);
+                    builder.append("&");
+                    break;
+                }
+                hasVal = false;
+            }
+            if(!hasVal){
+                return null;
+            }
+        }
+        if(builder==null){
+            return null;
+        }
+        return builder.substring(0,builder.length()-1);
+    }
+
     /**
      * 这两个是否匹配，值必须都匹配，key一样，value也是一样的
      * @param paramMap 普通的map，key=value...
      * @param keyValues  [key:value,key:value]
      * @return
      */
-    private boolean match(Map<String, String> paramMap,String keyValues[]){
+    private boolean match_bak(Map<String, String> paramMap,String keyValues[]){
         if(paramMap.size()==0){
             return false;
         }
@@ -112,7 +151,17 @@ public class InparamBullResolver implements Resolver<String> {
             if(!paramMap.containsKey(key)){
                 return false;
             }
-            if(!value.equals(paramMap.get(key))){
+            //value可以取或
+            boolean hasVal = false;
+            String[] vals = value.split("\\|");
+            for(String v : vals){
+                if(v.equals(paramMap.get(key))){
+                    hasVal = true;
+                    break;
+                }
+                hasVal = false;
+            }
+            if(!hasVal){
                 return false;
             }
         }
@@ -129,5 +178,16 @@ public class InparamBullResolver implements Resolver<String> {
         Date endDate = new SimpleDateFormat("HH:mm:ss").parse(endTime);
         Date date = new SimpleDateFormat("HH:mm:ss").parse(time);
         return  date.after(startDate)&&date.before(endDate);
+    }
+
+    public static void main(String args[]){
+        Map<String,String[]> map = new HashMap<>();
+        map.put("first",new String[]{"a:v1|v2|v3","b:v1|v2"});
+        map.put("second",new String[]{"a:v1","b:v2","c:v3"});
+
+        //"3"已经匹配
+        String[] firsts = map.get("first");
+        String[] st = new String[firsts.length-1];
+
     }
 }

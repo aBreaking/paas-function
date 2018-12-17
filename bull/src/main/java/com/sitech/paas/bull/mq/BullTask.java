@@ -36,6 +36,8 @@ public class BullTask implements Runnable {
             EsbResult result = esbCaller.call(inparamOut.getSrvName(), inparamOut.getJsonPin());
             result.setPhoneNo(inparamOut.getPhoneNo());
             result.setCallBegintime(inparamOut.getCallBeginTime());
+
+            result.setConditions(inparamOut.getCondition());
             list.add(result);
             i++;
             if(i<count){

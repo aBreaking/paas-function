@@ -21,6 +21,8 @@ public class EsbResult {
     String retCode;  //out  ROOT.RETURN_CODE
     @Column(colName = "retmsg",size = 128)
     String retmsg;   //out  ROOT.RETURN_MSG
+    @Column(colName = "conditions",size = 255)
+    String conditions;
 
     public String getCallBegintime() {
         return callBegintime;
@@ -68,5 +70,13 @@ public class EsbResult {
 
     public void setRetmsg(String retmsg) {
         this.retmsg = retmsg;
+    }
+
+    public String getConditions() {
+        return conditions;
+    }
+
+    public void setConditions(String conditions) {
+        this.conditions = conditions;
     }
 }
