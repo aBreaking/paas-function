@@ -43,7 +43,7 @@ public class BullRunner {
         String timeRange = cp.getProperty("bull.timeRange");
         String esbIpPort = cp.getProperty("bull.esb.ipPort");
         String csvFile = cp.getProperty("bull.out.csvFile");
-
+        boolean distinct = Boolean.valueOf(cp.getProperty("bull.out.distinct"));
 
         //srv_args配置文件的信息
         HashMap<String, String[]> map = new HashMap<String, String[]>();
@@ -53,7 +53,7 @@ public class BullRunner {
         //配置文件信息读取完毕
 
 
-        Resolver resolver = new InparamBullResolver(map,timeRange);
+        Resolver resolver = new InparamBullResolver(map,timeRange,distinct);
         Handler handler = new InparamOutBullHandler(outFilePath);
 
         int parseCount = 1000;

@@ -33,11 +33,18 @@ public class InparamBullResolver implements Resolver<String> {
      */
     String timeRange ;
 
+    //针对同一条件(服务名相同，参数键值相同)，是否只筛选一条的记录
+    boolean distinct;
+
+    public InparamBullResolver(Map<String,String[]> srvArgMap,String timeRange,boolean distinct){
+        this(srvArgMap,timeRange);
+        this.distinct = distinct;
+    }
+
     public InparamBullResolver(Map<String,String[]> srvArgMap,String timeRange){
         this.srvArgsMap = srvArgMap;
         this.timeRange = timeRange;
     }
-
 
     /**
      *
@@ -51,7 +58,6 @@ public class InparamBullResolver implements Resolver<String> {
                 //只要这个服务的入参
                 continue;
             }
-
             //如果是这个服务
             //再看参数中是否符合
             String keyValues[] = srvArgsMap.get(srvName);
@@ -79,7 +85,7 @@ public class InparamBullResolver implements Resolver<String> {
             Map<String, String> paramMap = serviceParameters.getParamMap();
             //如果没有指定keyValue参数，那么也符合条件
             String condition = "";
-            if(keyValues==null||(condition=match(paramMap,keyValues))!=null){
+            if(arrayIsNull(srvName,keyValues)||(condition=match(srvName,paramMap,keyValues))!=null){
                 //如果是符合条件的
                 //拿到该条入参的服务名等信息InparamOut，并加入到队列中去，等待被执行
                 String jsonPin = serviceParameterResolver.cut(statement);
@@ -98,18 +104,45 @@ public class InparamBullResolver implements Resolver<String> {
         return null;
     }
 
-    private String match(Map<String, String> paramMap,String keyValues[]){
+    private boolean arrayIsNull(String srvName,String[] s){
+        boolean flag = false;
+        if(s.length==0){
+            flag =  true;
+        }
+        if (s.length==1){
+            flag =  StringUtils.isBlank(s[0]);
+        }
+        if(flag){
+            Condition condition = new Condition();
+            condition.setSrvName(srvName);
+            if(Bull.CONDITION_PARAMS.contains(condition)){
+                return false;
+            }else{
+                //如果没有，那么将这个条件放在全局的条件中
+                Bull.CONDITION_PARAMS.add(condition);
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private String match(String srvName,Map<String, String> paramMap,String keyValues[]){
         StringBuilder builder = new StringBuilder();
+        Param[] params = new Param[keyValues.length];
+        Condition condition = new Condition();
+        condition.setSrvName(srvName);
         if(paramMap.size()==0){
             return null;
         }
-        for (String arg :keyValues){
+        //在配置文件中配置的参数键值，是否能够在paramMap找到
+        for (int i=0;i<keyValues.length;i++){
+            String arg = keyValues[i];
             String[] split = arg.split(":");
             String key = split[0];
-            String value = split[1];
-            if(!paramMap.containsKey(key)){
+            if(StringUtils.isBlank(key)||!paramMap.containsKey(key)){
                 return null;
             }
+            String value = split[1];
             //value可以取或
             boolean hasVal = false;
             String[] vals = value.split("\\|");
@@ -120,6 +153,9 @@ public class InparamBullResolver implements Resolver<String> {
                     builder.append(":");
                     builder.append(v);
                     builder.append("&");
+                    if(distinct){ //如果是同样的条件只要一个记录
+                        params[i] = new Param(key, v);
+                    }
                     break;
                 }
                 hasVal = false;
@@ -131,6 +167,17 @@ public class InparamBullResolver implements Resolver<String> {
         if(builder==null){
             return null;
         }
+        if(distinct){//
+            condition.setParams(params);
+            //判断在之前的集合中是否已经包含了这个条件
+            if(Bull.CONDITION_PARAMS.contains(condition)){
+                return null;
+            }else{
+                //如果没有，那么将这个条件放在全局的条件中
+                Bull.CONDITION_PARAMS.add(condition);
+            }
+        }
+
         return builder.substring(0,builder.length()-1);
     }
 
@@ -189,5 +236,29 @@ public class InparamBullResolver implements Resolver<String> {
         String[] firsts = map.get("first");
         String[] st = new String[firsts.length-1];
 
+    }
+
+    public Map<String, String[]> getSrvArgsMap() {
+        return srvArgsMap;
+    }
+
+    public void setSrvArgsMap(Map<String, String[]> srvArgsMap) {
+        this.srvArgsMap = srvArgsMap;
+    }
+
+    public String getTimeRange() {
+        return timeRange;
+    }
+
+    public void setTimeRange(String timeRange) {
+        this.timeRange = timeRange;
+    }
+
+    public boolean isDistinct() {
+        return distinct;
+    }
+
+    public void setDistinct(boolean distinct) {
+        this.distinct = distinct;
     }
 }

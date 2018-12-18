@@ -4,7 +4,9 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 入参文件中HEADER里面基本的参数
+ * 入参文件中HEADER、BODY里面基本的参数
+ * HEADER参数：非Map的属性
+ * BODY参数: Map里面的
  */
 public class ServiceParameters {
     private Long id;
@@ -19,6 +21,7 @@ public class ServiceParameters {
     private String username;
     private String password;
     private String poolId;
+    //BODY里面的参数
     private Map<String,String> paramMap = new HashMap<String, String>();
     public void put(String key,String value){
         this.paramMap.put(key,value);
