@@ -1,4 +1,4 @@
-package com.sitech.esb.mouse.io;
+package com.sitech.esb.mouse.resource;
 
 import java.io.IOException;
 import java.io.InputStream;

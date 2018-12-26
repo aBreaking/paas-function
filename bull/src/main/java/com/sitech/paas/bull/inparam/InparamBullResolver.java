@@ -1,8 +1,8 @@
 package com.sitech.paas.bull.inparam;
 
 import com.sitech.paas.bull.mq.Bull;
-import com.sitech.paas.inparam.db.ServiceParameterResolver;
-import com.sitech.paas.inparam.db.ServiceParameters;
+import com.sitech.paas.inparam.inparam.InparamResolver;
+import com.sitech.paas.inparam.inparam.Inparam;
 import com.sitech.paas.inparam.resovler.Resolver;
 import com.sitech.paas.inparam.util.StringUtils;
 
@@ -68,10 +68,10 @@ public class InparamBullResolver implements Resolver<String> {
                 args[i] = split[0];
             }
             //使用ServiceParameterResolver解析器去解析
-            ServiceParameterResolver serviceParameterResolver = new ServiceParameterResolver(srvName,args);
-            ServiceParameters serviceParameters = serviceParameterResolver.resolve(statement);
+            InparamResolver inparamResolver = new InparamResolver(srvName,args);
+            Inparam inparam = inparamResolver.resolve(statement);
             //时间范围是否符合
-            String callBeginTime = serviceParameters.getCallBeginTime();
+            String callBeginTime = inparam.getCallBeginTime();
             try {
                 //筛选某个时间段记录，timeRange为null那就所有
                 if(!StringUtils.isBlank(timeRange)&&!onRange(callBeginTime,timeRange)){
@@ -82,18 +82,18 @@ public class InparamBullResolver implements Resolver<String> {
             }
 
             //从serviceParameters结果中确认下，是否参数值符合
-            Map<String, String> paramMap = serviceParameters.getParamMap();
+            Map<String, String> paramMap = inparam.getParamMap();
             //如果没有指定keyValue参数，那么也符合条件
             String condition = "";
             if(arrayIsNull(srvName,keyValues)||(condition=match(srvName,paramMap,keyValues))!=null){
                 //如果是符合条件的
                 //拿到该条入参的服务名等信息InparamOut，并加入到队列中去，等待被执行
-                String jsonPin = serviceParameterResolver.cut(statement);
+                String jsonPin = inparamResolver.cut(statement);
                 //允许服务名为空，那么匹配所有的服务
                 if(StringUtils.isBlank(srvName)){
-                    srvName = serviceParameters.getServiceName();
+                    srvName = inparam.getServiceName();
                 }
-                InparamOut inparamOut = new InparamOut(jsonPin,srvName,serviceParameters.getRouteValue(),serviceParameters.getCallBeginTime());
+                InparamOut inparamOut = new InparamOut(jsonPin,srvName,inparam.getRouteValue(),inparam.getCallBeginTime());
                 inparamOut.setCondition(condition);
 
                 Bull.queue.add(inparamOut);

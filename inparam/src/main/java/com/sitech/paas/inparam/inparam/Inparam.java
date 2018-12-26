@@ -1,14 +1,14 @@
-package com.sitech.paas.inparam.db;
+package com.sitech.paas.inparam.inparam;
 
 import java.util.HashMap;
 import java.util.Map;
 
 /**
- * 入参文件中HEADER、BODY里面基本的参数
+ * esb入参文件inParam.log*中HEADER、BODY里面基本的参数
  * HEADER参数：非Map的属性
  * BODY参数: Map里面的
  */
-public class ServiceParameters {
+public class Inparam {
     private Long id;
     private String serviceName;
     private String funName;

@@ -1,7 +1,7 @@
 package com.sitech.paas.inparam.parse;
 
-import com.sitech.paas.inparam.io.Resource;
-import com.sitech.paas.inparam.io.ResourceLoader;
+import com.sitech.paas.inparam.resource.Resource;
+import com.sitech.paas.inparam.resource.ResourceLoader;
 
 import java.io.File;
 import java.io.FileOutputStream;

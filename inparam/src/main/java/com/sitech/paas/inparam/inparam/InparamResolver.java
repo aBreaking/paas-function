@@ -1,4 +1,4 @@
-package com.sitech.paas.inparam.db;
+package com.sitech.paas.inparam.inparam;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
@@ -6,55 +6,62 @@ import com.alibaba.fastjson.JSONObject;
 import com.sitech.paas.inparam.util.FilterUtil;
 import com.sitech.paas.inparam.util.StringUtils;
 import com.sitech.paas.inparam.resovler.Resolver;
-
 import java.util.HashMap;
 import java.util.Map;
 
-public  class ServiceParameterResolver implements Resolver<ServiceParameters> {
+/**
+ * 将入参文件中每一条inparam记录解析成inparam对象
+ */
+public  class InparamResolver implements Resolver<Inparam> {
 
     private static final String NOT_FIND = "no parameter find!";
     private String srvName;
     private String[] args;
-    public ServiceParameterResolver(String srvName,String[] args){
+    public InparamResolver(String srvName,String[] args){
         this.srvName = srvName;
         this.args = args;
     }
 
-    public ServiceParameters resolve(String inparam){
+    /**
+     * 将入参语句解析成Inparam对象
+     * @param inparamStatement
+     * @return
+     */
+    public Inparam resolve(String inparamStatement){
 
-        if(!FilterUtil.filter(inparam,srvName)){
+        if(!FilterUtil.filter(inparamStatement,srvName)){
             return null;
         }
 
-        ServiceParameters serviceParameters = new ServiceParameters();
-        String prefix = inparam.substring(0, inparam.indexOf("~!~IN="));
-        resolvePrefix(serviceParameters,prefix,srvName);
+        Inparam inparam = new Inparam();
+        String prefix = inparamStatement.substring(0, inparamStatement.indexOf("~!~IN="));
+        resolvePrefix(inparam,prefix,srvName);
 
-        String jsonStr = cut(inparam);
+        String jsonStr = cut(inparamStatement);
         JSONObject jsonObject = null;
         try{
             jsonObject = JSON.parseObject(jsonStr);
         }catch (JSONException e){
-            return serviceParameters;
+            return inparam;
         }
 
         if(jsonObject==null){
-            return serviceParameters;
+            return inparam;
         }
         JSONObject root = jsonObject.getJSONObject("ROOT");
         if(root==null){
-            return serviceParameters;
+            return inparam;
         }
         JSONObject header = root.getJSONObject("HEADER");
-        resolvedHeader(serviceParameters,header);
+        resolvedHeader(inparam,header);
 
         JSONObject body = root.getJSONObject("BODY");
         if(body==null){
-            return serviceParameters;
+            return inparam;
         }
-        resolvedBody(serviceParameters,body,args);
+        resolvedBody(inparam,body,args);
 
-        return serviceParameters;
+        return inparam;
     }
 
     public String cut(String inparam){
@@ -69,30 +76,30 @@ public  class ServiceParameterResolver implements Resolver<ServiceParameters> {
         return json;
     }
 
-    private void resolvePrefix(ServiceParameters serviceParameters, String prefix, String serviceName){
+    private void resolvePrefix(Inparam Inparam, String prefix, String serviceName){
         String[] split = prefix.split("~!~");
         String name= StringUtils.isBlank(serviceName)?split[0]:serviceName;
-        serviceParameters.setServiceName(name);
-        serviceParameters.setFunName(split[1]);
-        serviceParameters.setClientIp(split[2]);
-        serviceParameters.setCallBeginTime(split[3]);
-        serviceParameters.setRetCode(split[4]);
+        Inparam.setServiceName(name);
+        Inparam.setFunName(split[1]);
+        Inparam.setClientIp(split[2]);
+        Inparam.setCallBeginTime(split[3]);
+        Inparam.setRetCode(split[4]);
     }
 
-    private void resolvedHeader(ServiceParameters serviceParameters, JSONObject header){
+    private void resolvedHeader(Inparam Inparam, JSONObject header){
         JSONObject routing = header.getJSONObject("ROUTING");
         if(routing==null){
             return;
         }
-        serviceParameters.setRouteKey(routing.getString("ROUTE_KEY"));
-        serviceParameters.setRouteValue(routing.getString("ROUTE_VALUE"));
-        serviceParameters.setChannelId(header.getString("CHANNEL_ID"));
-        serviceParameters.setUsername(header.getString("USERNAME"));
-        serviceParameters.setPassword(header.getString("PASSWORD"));
-        serviceParameters.setPoolId(header.getString("POOL_ID"));
+        Inparam.setRouteKey(routing.getString("ROUTE_KEY"));
+        Inparam.setRouteValue(routing.getString("ROUTE_VALUE"));
+        Inparam.setChannelId(header.getString("CHANNEL_ID"));
+        Inparam.setUsername(header.getString("USERNAME"));
+        Inparam.setPassword(header.getString("PASSWORD"));
+        Inparam.setPoolId(header.getString("POOL_ID"));
     }
 
-    private void resolvedBody(ServiceParameters serviceParameters, JSONObject body, String...findStr){
+    private void resolvedBody(Inparam Inparam, JSONObject body, String...findStr){
         Map<String,String> map = new HashMap<String, String>();
         for (String find : findStr){
             if(find.indexOf("->")!=-1){
@@ -125,7 +132,7 @@ public  class ServiceParameterResolver implements Resolver<ServiceParameters> {
                 continue;
             }
         }
-        serviceParameters.setParamMap(map);
+        Inparam.setParamMap(map);
     }
 
 

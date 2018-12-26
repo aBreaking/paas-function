@@ -2,35 +2,28 @@ package com.sitech.paas.inparam;
 
 
 import com.sitech.paas.inparam.handler.Handler;
-import com.sitech.paas.inparam.db.ServiceParameterResolver;
-import com.sitech.paas.inparam.db.ServiceParametersHandler;
-import com.sitech.paas.inparam.io.Resource;
-import com.sitech.paas.inparam.io.ResourceLoader;
+import com.sitech.paas.inparam.inparam.InparamHandler;
+import com.sitech.paas.inparam.inparam.InparamResolver;
+import com.sitech.paas.inparam.resource.Resource;
+import com.sitech.paas.inparam.resource.ResourceLoader;
 import com.sitech.paas.inparam.resovler.Resolver;
 
 import java.util.Properties;
 
-public class SrvParamRunner {
+public class InParamRunner {
     static Properties properties = new Properties();
     private static volatile Thread currentTaskThread;
     private static String TABLE_NAME ;
     public static void main(String args[]) throws Exception{
         String config = "config.properties";
-        Resource configResource;
-        if(args.length>0){
-            //如果指定了路径
-            config = args[0];
-            configResource = ResourceLoader.getAbsoluteResource(config);
-        }else{
-            //如果没有，就在该项目的所在目录下
-            configResource = ResourceLoader.getResourceOnJarLocaiton(SrvParamRunner.class,config);
-        }
+        Resource configResource = args.length>0?ResourceLoader.getAbsoluteResource(args[0]):ResourceLoader.getResourceOnJarLocation(InParamRunner.class,config);
+
         if(args.length>1){
             TABLE_NAME = args[1];
         }
         properties.load(configResource.getInputStream());
-         Handler  handler = new ServiceParametersHandler(properties);
-         Resolver resolver = new ServiceParameterResolver(properties.getProperty("srvName"),properties.getProperty("args").split(","));
+         Handler  handler = new InparamHandler(properties);
+         Resolver resolver = new InparamResolver(properties.getProperty("srvName"),properties.getProperty("args").split(","));
 
         long beginTime = System.currentTimeMillis();
 

@@ -1,4 +1,4 @@
-package com.sitech.paas.inparam.db;
+package com.sitech.paas.inparam.inparam;
 
 import com.sitech.paas.inparam.jdbc.JdbcOperate;
 import com.sitech.paas.inparam.util.StringUtils;
@@ -7,21 +7,23 @@ import com.sitech.paas.inparam.handler.Handler;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-public class ServiceParametersHandler implements Handler<ServiceParameters> {
+/**
+ * 将批量解析的Inparam保存到数据库里面去
+ */
+public class InparamHandler implements Handler<Inparam> {
 
     JdbcOperate dao;
     private Properties properties;
     private String specifiedTableName;
     private String tempTableName;
-    public ServiceParametersHandler(Properties properties,String specifiedTableName){
+    public InparamHandler(Properties properties,String specifiedTableName){
         this(properties);
         this.specifiedTableName = specifiedTableName;
     }
-    public ServiceParametersHandler(Properties properties){
+    public InparamHandler(Properties properties){
         this.properties = properties;
         this.dao = new JdbcOperate();
     }
-
 
     /**
      * 初始化数据库连接
@@ -39,8 +41,8 @@ public class ServiceParametersHandler implements Handler<ServiceParameters> {
         dao.createIndex(getIndexName(),getIndexList());
     }
 
-    public void hand(List<ServiceParameters> serviceParameters) {
-        dao.saveAll(serviceParameters);
+    public void hand(List<Inparam> inparams) {
+        dao.saveAll(inparams);
     }
 
     public void postHand() {
@@ -67,6 +69,7 @@ public class ServiceParametersHandler implements Handler<ServiceParameters> {
         }
         return this.specifiedTableName;
     }
+
     private String getIndexName(){
         return StringUtils.isBlank(this.specifiedTableName)?tempTableName+"_INDEX":specifiedTableName+"_INDEX";
     }

@@ -1,11 +1,11 @@
-package com.sitech.esb.mouse.io;
+package com.sitech.esb.mouse.resource;
 
 import java.io.BufferedInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-public class AbsoluteResource implements Resource{
+public class AbsoluteResource implements Resource {
     String file;
     public AbsoluteResource(String file){
         this.file = file;

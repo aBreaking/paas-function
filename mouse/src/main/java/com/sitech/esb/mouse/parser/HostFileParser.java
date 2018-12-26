@@ -2,7 +2,7 @@ package com.sitech.esb.mouse.parser;
 
 import com.sitech.esb.mouse.filter.DefaultFilter;
 import com.sitech.esb.mouse.filter.Filter;
-import com.sitech.esb.mouse.io.Resource;
+import com.sitech.esb.mouse.resource.Resource;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,11 +15,14 @@ import java.util.Map;
 public class HostFileParser implements Parser<List<String>>{
 
     Filter filter;
-    public HostFileParser(Filter filter){
+    int colSize;
+    public HostFileParser(Filter filter,int colSize){
+        this.colSize = colSize;
         this.filter = filter;
     }
 
-    public HostFileParser(){
+    public HostFileParser(int colSize){
+        this.colSize = colSize;
         this.filter = new DefaultFilter();
     }
 
@@ -38,7 +41,6 @@ public class HostFileParser implements Parser<List<String>>{
             ...
      *解析成values部分：
         "监控指标1","监控指标2","监控指标3"
-     * TODO 还有问题，主键呢？  insertTime倒是好办
      * 默认还会插入主键
      * @param resource
      * @return
@@ -46,7 +48,6 @@ public class HostFileParser implements Parser<List<String>>{
      */
     public List<String> parse(Resource resource) throws IOException {
         Map<String, List<String>> listMap = resolve(resource);
-
         List<String> sqlValues = new ArrayList<>();
         for(String host : listMap.keySet()){
             List<String> statements = listMap.get(host);
@@ -55,11 +56,16 @@ public class HostFileParser implements Parser<List<String>>{
                 if(filter.passCheck(statement)){
 
                     StringBuilder builder = new StringBuilder("");
-
                     builder.append("'"+host+"'"+",");
                     String[] split = statement.split(",");
-                    for(String _s : split){
-                        builder.append("'"+_s+"'"+",");
+                    int length = split.length;
+                    for(int i=0;i<colSize;i++){
+                        //可能数据文件中的某些字段并没有值
+                        if(i<length){
+                            builder.append("'"+split[i]+"'"+",");
+                        }else{
+                            builder.append("'',");
+                        }
                     }
                     builder.replace(builder.length()-1,builder.length()," ");
                     sqlValues.add(builder.toString());
@@ -87,17 +93,64 @@ public class HostFileParser implements Parser<List<String>>{
             if(s.startsWith("#")){
                 String host = s.substring(1,s.length()-1);
                 if(host.equals(hostTemp)){
-                    listMap.put(host,bigList);
+                    listMap.put(host, bigList);
                 }else{
                     hostTemp = host;
-                    bigList = new ArrayList<>();
                 }
+                bigList = new ArrayList<>();
             }else{
                 bigList.add(s);
             }
         }
         return listMap;
     }
+
+
+    /**
+     * 考虑下这种的情况
+     * Mouse
+     * String name;
+     *     List<String> statements = new ArrayList<>();
+     *     List<Mouse> sonMouseList = new ArrayList<>();
+     */
+    /*public Mouse resolve(Resource resource,int tmp) throws IOException {
+        BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream()));
+        Mouse mouseTemp = new Mouse();
+        Mouse sonMouseTemp = new Mouse();
+        Mouse bigMouse = new Mouse();
+        String s = "";
+        while ((s=reader.readLine())!=null){
+            //目前只考虑子模块
+            if(s.startsWith("##")){
+                //子mouse
+                String sonMouseName = s.substring(2, s.length() - 2);
+                if(sonMouseName.equals(mouseTemp.getName())){
+                    mouseTemp.getSonMouseList().add(sonMouseTemp);
+                    sonMouseTemp = new Mouse();
+                    continue;
+                }else{
+                    //TODO这里有问题
+                    mouseTemp.getSonMouseList().add(sonMouseTemp);
+                }
+                sonMouseTemp.setName(sonMouseName);
+                continue;
+            }
+            if(s.startsWith("#")){
+                String name = s.substring(1, s.length() - 1);
+                if(name.equals(mouseTemp.getName())){
+                    bigMouse.getSonMouseList().add(mouseTemp);
+                    mouseTemp = new Mouse();
+                    continue;
+                }else{
+                    mouseTemp.setName(name);
+                }
+                continue;
+            }
+            sonMouseTemp.getStatements().add(s);
+        }
+        return bigMouse;
+    }*/
+
 
     @Deprecated
     public Map<String, List> parse_back(Resource resource) throws IOException {
@@ -129,5 +182,13 @@ public class HostFileParser implements Parser<List<String>>{
             }
         }
         return listMap;
+    }
+
+    public void setFilter(Filter filter) {
+        this.filter = filter;
+    }
+
+    public void setColSize(int colSize) {
+        this.colSize = colSize;
     }
 }

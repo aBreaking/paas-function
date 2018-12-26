@@ -1,8 +1,8 @@
 package com.sitech.paas.inparam;
 
 import com.sitech.paas.inparam.handler.Handler;
-import com.sitech.paas.inparam.io.Resource;
-import com.sitech.paas.inparam.io.ResourceLoader;
+import com.sitech.paas.inparam.resource.Resource;
+import com.sitech.paas.inparam.resource.ResourceLoader;
 import com.sitech.paas.inparam.parse.FileParser;
 import com.sitech.paas.inparam.parse.Parser;
 import com.sitech.paas.inparam.parse.ZipParser;

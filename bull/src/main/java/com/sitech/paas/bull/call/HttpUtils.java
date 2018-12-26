@@ -62,4 +62,9 @@ public class HttpUtils{
         return sbf.toString();
     }
 
+    public static void main(String args[]){
+        String esbUrl = "http://172.21.11.64:50000/esbWS/rest/";
+        String pin  = "{}";
+    }
+
 }

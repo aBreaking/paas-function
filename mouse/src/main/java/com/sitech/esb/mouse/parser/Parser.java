@@ -1,6 +1,6 @@
 package com.sitech.esb.mouse.parser;
 
-import com.sitech.esb.mouse.io.Resource;
+import com.sitech.esb.mouse.resource.Resource;
 
 import java.io.IOException;
 

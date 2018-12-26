@@ -16,7 +16,7 @@ public class JdbcHelper {
     }
 
     public static Connection getConnection(String url,String username,String password) throws SQLException {
-        String oracleDriver = "oracle.com.sitech.esb.db.jdbc.driver.OracleDriver";
+        String oracleDriver = "oracle.com.sitech.esb.inparam.jdbc.driver.OracleDriver";
         Connection connection = getConnection(oracleDriver,url, username, password);
         return connection;
     }

@@ -8,8 +8,8 @@ import com.sitech.paas.bull.inparam.InparamOutBullHandler;
 import com.sitech.paas.bull.mq.BullTask;
 import com.sitech.paas.inparam.InparamParseTask;
 import com.sitech.paas.inparam.handler.Handler;
-import com.sitech.paas.inparam.io.Resource;
-import com.sitech.paas.inparam.io.ResourceLoader;
+import com.sitech.paas.inparam.resource.Resource;
+import com.sitech.paas.inparam.resource.ResourceLoader;
 import com.sitech.paas.inparam.jdbc.JdbcOperate;
 import com.sitech.paas.inparam.resovler.Resolver;
 import com.sitech.paas.inparam.util.StringUtils;
@@ -25,10 +25,10 @@ public class BullRunner {
         String defaultSrvArgsFile = "srv_args.properties";
         Resource configResource = args.length>1?
                 ResourceLoader.getAbsoluteResource(args[0]):
-                ResourceLoader.getResourceOnJarLocaiton(BullRunner.class,defaultConfigFile);
+                ResourceLoader.getResourceOnJarLocation(BullRunner.class,defaultConfigFile);
         Resource srvArgsResource = args.length>2?
                 ResourceLoader.getAbsoluteResource(args[1]):
-                ResourceLoader.getResourceOnJarLocaiton(BullRunner.class,defaultSrvArgsFile);
+                ResourceLoader.getResourceOnJarLocation(BullRunner.class,defaultSrvArgsFile);
         Properties cp = new Properties();
         Properties sap = new Properties();
         //加载bull的配置文件  config.properties

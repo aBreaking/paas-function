@@ -1,4 +1,4 @@
-package com.sitech.paas.inparam.io;
+package li.wei.domaincheck.resource;
 
 import java.io.IOException;
 import java.io.InputStream;

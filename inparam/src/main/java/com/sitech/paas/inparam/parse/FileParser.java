@@ -1,6 +1,6 @@
 package com.sitech.paas.inparam.parse;
 import com.sitech.paas.inparam.handler.Handler;
-import com.sitech.paas.inparam.io.Resource;
+import com.sitech.paas.inparam.resource.Resource;
 import com.sitech.paas.inparam.resovler.Resolver;
 
 import java.io.BufferedReader;
@@ -13,7 +13,7 @@ import java.util.List;
 
 public class FileParser<T> implements Parser {
     private List<T> dataList = new ArrayList<T>();
-    private int count = 1000; //每次读存多少数据
+    private int count; //每次读存多少数据
 
     private Resolver<T> resolver;
     private Handler handler;

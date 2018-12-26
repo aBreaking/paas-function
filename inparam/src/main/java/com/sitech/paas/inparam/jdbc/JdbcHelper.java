@@ -42,6 +42,4 @@ public class JdbcHelper {
     public String getDialect() {
         return dialect;
     }
-
-
 }

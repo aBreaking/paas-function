@@ -1,6 +1,6 @@
 package com.sitech.paas.inparam.jdbc;
 
-import com.sitech.paas.inparam.db.ServiceParameters;
+import com.sitech.paas.inparam.inparam.Inparam;
 
 import java.sql.Connection;
 import java.sql.SQLException;
@@ -18,7 +18,9 @@ public class JdbcOperate{
     private String tableName;
 
     public JdbcOperate(){
+
     }
+
     public JdbcOperate(String tableName){
         this.tableName = tableName;
     }
@@ -80,12 +82,12 @@ public class JdbcOperate{
         }
     }
 
-    public void saveAll(List<ServiceParameters> list){
+    public void saveAll(List<Inparam> list){
         Statement statement = null;
         try{
             connection.setAutoCommit(false);
             statement = connection.createStatement();
-            for (ServiceParameters serviceParameters:list){
+            for (Inparam serviceParameters:list){
                 String sql = parseSql(serviceParameters);
                 statement.addBatch(sql);
             }
@@ -289,7 +291,7 @@ public class JdbcOperate{
     }
 
 
-    public String parseSql(ServiceParameters sp){
+    public String parseSql(Inparam sp){
 
         Map<String, String> map = sp.getParamMap();
         String sqlPrefix = "INSERT INTO "+tableName+"(" +

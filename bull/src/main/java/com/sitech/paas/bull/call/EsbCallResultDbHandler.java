@@ -53,7 +53,7 @@ public class EsbCallResultDbHandler implements Handler<EsbResult> {
     }
 
 
-    public static  Map<String, String>  toMap(EsbResult esbResult) throws Exception {
+    public  Map<String, String>  toMap(EsbResult esbResult) throws Exception {
         Map<String, String> map = new HashMap<String, String>();
         Class<? extends EsbResult> clazz = esbResult.getClass();
         Field[] declaredFields = clazz.getDeclaredFields();
