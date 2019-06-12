@@ -13,6 +13,9 @@ import java.sql.Connection;
 import java.util.List;
 import java.util.Properties;
 
+/**
+ * region分裂：java -jar . . . HDP_HBASE_UTR_STATUS_TEMP
+ */
 public class Runner {
 
     static String  COMMAND[] ;
@@ -27,21 +30,28 @@ public class Runner {
      * @throws Exception
      */
     public static void main(String args[]) throws Exception {
+        //hbase 租户告警的参数
+        /*if(args==null){
+            args = new String[]{"D:\\workspace\\demo\\mouse\\src\\main\\resources\\mouse.properties",
+                    "D:\\workspace\\demo\\mouse\\src\\main\\resources\\hbase-ur-data.txt",
+                    ".","hdp_hbase_utr_status_temp",
+                    "hadoop_id=10","user_name:32","table_name:128","CURRENT_REGION_NUM:int"};
+        }*/
         COMMAND = args;
-        String dataFile = "data.txt";
+        String dataFile = "checkIo.txt";
         String mouseFile = "mouse.properties";
-        Resource configResource = isNotNull(0)?ResourceLoader.getAbsoluteResource(args[0]):
-                ResourceLoader.getResourceOnJarLocation(Runner.class,mouseFile);
-        Resource mouseDataResource = isNotNull(1)?ResourceLoader.getAbsoluteResource(args[1]):
-                ResourceLoader.getResourceOnJarLocation(Runner.class,dataFile);
+        Resource configResource = isDefault(0)?ResourceLoader.getResourceOnJarLocation(Runner.class,mouseFile):
+                ResourceLoader.getAbsoluteResource(args[0]);
+        Resource mouseDataResource = isDefault(1)?ResourceLoader.getResourceOnJarLocation(Runner.class,dataFile):
+                ResourceLoader.getAbsoluteResource(args[1]);
         Properties properties = new Properties();
         properties.load(configResource.getInputStream());
         //数据过滤器
-        String filterStr = isNotNull(2)?args[2]:properties.getProperty("filter");
+        String filterStr = isDefault(2)?properties.getProperty("filter"):args[2];
         //表名
-        String tableName = isNotNull(3)?args[3]:properties.getProperty("table.name");
+        String tableName = isDefault(3)?properties.getProperty("table.name"):args[3];
         //外键
-        String foreignKey =  isNotNull(4)?args[4]:properties.getProperty("foreign.key");
+        String foreignKey =  isDefault(4)?properties.getProperty("foreign.key"):args[4];
 
         //表字段及字段大小
         String[] dataCols = args.length>5?cutArray(args,5):properties.getProperty("table.column").split(",");
@@ -57,19 +67,30 @@ public class Runner {
         Connection connection = null;
         try{
             connection = JdbcHelper.getConnection(properties);
-            //表名，配置文件或者命令的第4个参数来获取
+            JdbcOperator jdbcOperator = new JdbcOperator(connection);
 
+            //表名，配置文件或者命令的第4个参数来获取
             if(tableName==null){
                 System.out.println("请指定下表名");
                 throw new IllegalArgumentException("表名为空");
             }
+            //外键
+            if(foreignKey!=null){
+                String[] split = foreignKey.split("=");
+                String foreignName = split[0];
+                String foreignValue = split.length>1?split[1]:null;
+                jdbcOperator.setForeignName(foreignName);
+                jdbcOperator.setForeignValue(foreignValue);
+            }
             //列名，配置文件或者命令中第五个参数及以后
 
-            JdbcOperator jdbcOperator = new JdbcOperator(connection);
+
+            jdbcOperator.setTableName(tableName);
 
             if(!jdbcOperator.isTableExist()){
-                jdbcOperator.createTable(tableName,foreignKey,dataCols);
+                jdbcOperator.createTable(dataCols);
             }
+
             jdbcOperator.insertBatch(insertSqlValues);
         }catch (Exception e){
             e.printStackTrace();
@@ -97,7 +118,22 @@ public class Runner {
         return cols;
     }
 
-    private static boolean isNotNull(int size){
-        return COMMAND.length>size&&!COMMAND[size].equals("null");
+    private static boolean isDefault(int size){
+        if(COMMAND.length<=size){
+            return true;
+        }
+        String defaultValue = ".";
+        if(COMMAND.length>size){
+            if(COMMAND[size].equals(defaultValue)){
+                return true;
+            }
+            if(COMMAND[size].equals("default")){
+                return true;
+            }
+            if(COMMAND[size].equals("null")){
+                return true;
+            }
+        }
+        return false;
     }
 }

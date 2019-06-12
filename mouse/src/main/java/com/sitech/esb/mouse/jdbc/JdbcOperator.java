@@ -1,21 +1,32 @@
 package com.sitech.esb.mouse.jdbc;
 
+import com.mysql.jdbc.StringUtils;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
+import java.util.Date;
 import java.util.List;
 
 public class JdbcOperator {
 
 
-    private static final String COL_ID = "id"; //主键
-    private static final String COL_INSERTTIME = "insert_time"; //记录插入时间
+    private static final String COL_ID = "ID"; //主键
+
+    /**
+     * 每次的批量插入的insert_id
+     * INSERT_ID应该与外键关联，从而保证每一次批次插入的数据insert_id是主键递增的
+     */
+    private static final String COL_INSERT_ID = "INSERT_ID";
+
+    private static final String COL_INSERTTIME = "INSERT_TIME"; //记录插入时间
+
 
     public static String DIALECT = "mysql";
     private Connection connection;
-
     private String tableName;
+    private String foreignName = "FOREIGN_ID";//可能会关联的外键，要是没有，这个就是null
     private String foreignValue;
 
     /**
@@ -32,13 +43,15 @@ public class JdbcOperator {
      */
     public void insertBatch(List<String> insertSqlValues){
         //找出最大值，手动分配主键
-        Long maxId = getMaxId();
+        Long maxId = getMaxKey(COL_ID,null);
+        Long maxInsertId = getMaxKey(COL_INSERT_ID,foreignValue);
+        Long insertId = ++maxInsertId;
         Statement statement = null;
         try{
             connection.setAutoCommit(false);
             statement = connection.createStatement();
             for (String value:insertSqlValues){
-                String insertSql = parseInsertSql(value, ++maxId);
+                String insertSql = parseInsertSql(value, ++maxId,insertId,foreignValue);
                 System.out.println("sql:"+insertSql);
                 statement.addBatch(insertSql);
             }
@@ -65,16 +78,17 @@ public class JdbcOperator {
 
     }
 
-    private String parseInsertSql(String statement,Long id){
+    private String parseInsertSql(String statement,Long id,Long insertId,String foreignValue){
         StringBuilder builder = new StringBuilder();
         builder.append("insert into "+tableName+" values(");
         builder.append(id);
         builder.append(",");
-        if(this.foreignValue!=null){ //如果有外键，那么补充外键
-            builder.append(this.foreignValue);
-            builder.append(",");
-        }
+        builder.append(insertId);
+        builder.append(",");
 
+        builder.append(foreignValue);
+
+        builder.append(",");
         builder.append(statement);
         builder.append(",");
         String sysdate = DIALECT.equals("mysql")?"sysdate()":"sysdate";
@@ -84,17 +98,34 @@ public class JdbcOperator {
     }
 
     //找  出最大主键的值，针对oracle主键不能自增
-    public Long getMaxId()  {
-        String sqlMysql = "select max("+COL_ID+") from "+tableName;
-        String sqlOracle = "select max(\""+COL_ID+"\") from "+tableName;
-        String sql = DIALECT.equals("mysql")?sqlMysql:sqlOracle;
-        try {
-            Statement statement = connection.createStatement();
-            ResultSet resultSet = statement.executeQuery(sql);
 
+    /**
+     * 找到某个字段的最大值
+     * 如果有外键，那么这个最大值应该所关联的外键的  字段最大值。
+     * @param key
+     * @return
+     */
+    public Long getMaxKey(String key,String foreignValue)  {
+        String sqlMysql = "select max("+key+") from "+tableName;
+        String sqlOracle = "select max(\""+key+"\") from "+tableName;
+        String sql = DIALECT.equals("mysql")?sqlMysql:sqlOracle;
+        String whereSql = StringUtils.isNullOrEmpty(foreignValue) ?"":" where "+foreignName+"="+foreignValue;
+        sql +=whereSql;
+        Statement statement = null;
+        try {
+            statement = connection.createStatement();
+            ResultSet resultSet = statement.executeQuery(sql);
             return resultSet.next()?resultSet.getLong(1):0;
         } catch (SQLException e) {
             throw new RuntimeException("获取最大id失败",e);
+        }finally {
+            if(statement!=null){
+                try {
+                    statement.close();
+                } catch (SQLException e) {
+                    e.printStackTrace();
+                }
+            }
         }
     }
 
@@ -119,49 +150,60 @@ public class JdbcOperator {
     }
 
     //根据动态的列的创建表
-    public void createTable(String tableName,String foreignCol,String[] cols) {
-        this.tableName = tableName;
-        String foreignKey = null; //外键
-        if(foreignCol!=null&&foreignCol.trim().length()>1){
-            String[] split = foreignCol.split("=");
-            foreignKey = split[0];
-            this.foreignValue = split[1];
-        }
+    public void createTable(String[] cols) {
 
         StringBuilder createTableMysql = new StringBuilder();
-        createTableMysql.append("CREATE TABLE `"+tableName+"` (\n");
+        createTableMysql.append("CREATE TABLE `"+tableName.toUpperCase()+"` (\n");
         createTableMysql.append("  `"+COL_ID+"` bigint(20) NOT NULL AUTO_INCREMENT,\n");
-        if(foreignKey!=null){
-            createTableMysql.append("  `"+foreignKey+"` int DEFAULT NULL,\n");
-        }
-
+        createTableMysql.append("  `"+COL_INSERT_ID+"` bigint(13) NOT NULL ,\n");
+        createTableMysql.append("  `"+foreignName.toUpperCase()+"` int DEFAULT NULL,\n");
         for(String col : cols){
+
+
+
             String[] c = col.split(":");
             String key = c[0];
-            String size = c.length>1?c[1]:"255";
-            createTableMysql.append("  `"+key+"` varchar("+size+") DEFAULT NULL,\n");
+            String type = "varchar(128)";
+            if(c.length>1){
+                if(c[1].matches("\\d+")){ //如果是数字
+                    type = "varchar("+c[1]+")";
+                }else{
+                    //不然直接就是传入的类型
+                    type = c[1];
+                }
+            }
+
+            createTableMysql.append("  `"+key.toUpperCase()+"` "+type+" DEFAULT NULL,\n");
         }
         createTableMysql.append("  `"+COL_INSERTTIME+"` datetime DEFAULT NULL,\n");
         createTableMysql.append("  PRIMARY KEY (`"+COL_ID+"`)\n");
         createTableMysql.append(") ");
+        createTableMysql.append("ENGINE=InnoDB DEFAULT CHARSET=utf8");
+
 
         StringBuilder createTableOracle = new StringBuilder();
-        createTableOracle.append("CREATE TABLE "+tableName+" (\r\n");
+        createTableOracle.append("CREATE TABLE "+tableName.toUpperCase()+" (\r\n");
         createTableOracle.append("  \""+COL_ID+"\" NUMBER(*,0),\r\n");
-        if(foreignKey!=null){
-            createTableOracle.append("	\""+foreignKey+"\" NUMBER,\r\n");
-        }
+        createTableOracle.append("  \""+COL_INSERT_ID+"\" NUMBER(*,0),\r\n");
+        createTableOracle.append("	\""+foreignName.toUpperCase()+"\" NUMBER,\r\n");
         for (String col : cols){
             String[] c = col.split(":");
             String key = c[0];
-            String size = c.length>1?c[1]:"255";
-            createTableOracle.append("	\""+key+"\" VARCHAR2("+size+" BYTE),\r\n");
+            String type = "VARCHAR2(128 BYTE)";
+            if(c.length>1){
+                if(c[1].matches("\\d+")){ //如果是数字
+                    type = "VARCHAR2("+c[1]+" BYTE)";
+                }else{
+                    //不然直接就是传入的类型
+                    type = c[1];
+                }
+            }
+            createTableOracle.append("	\""+key.toUpperCase()+"\""+type+",\r\n");
         }
-
         createTableOracle.append("	\""+COL_INSERTTIME+"\" TIMESTAMP (6) \r\n");
         createTableOracle.append(")");
-        String createTableSql = DIALECT.equals("mysql")?createTableMysql.toString():createTableOracle.toString();
 
+        String createTableSql = DIALECT.equals("mysql")?createTableMysql.toString():createTableOracle.toString();
         exec(createTableSql);
 
     }
@@ -192,4 +234,21 @@ public class JdbcOperator {
     public void setTableName(String tableName) {
         this.tableName = tableName;
     }
+
+    public String getForeignName() {
+        return foreignName;
+    }
+
+    public void setForeignName(String foreignName) {
+        this.foreignName = foreignName;
+    }
+
+    public String getForeignValue() {
+        return foreignValue;
+    }
+
+    public void setForeignValue(String foreignValue) {
+        this.foreignValue = foreignValue;
+    }
+
 }

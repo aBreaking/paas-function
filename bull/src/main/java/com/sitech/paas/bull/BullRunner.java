@@ -83,11 +83,8 @@ public class BullRunner {
         System.out.println(mqThread.getName()+"开始");
         mqThread.join();
         System.out.println(mqThread.getName()+"完毕");
-
         Thread.sleep(1000);
         System.out.println("程序结束");
-
     }
-
 
 }

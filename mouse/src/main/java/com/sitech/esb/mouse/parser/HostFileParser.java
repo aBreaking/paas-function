@@ -1,5 +1,6 @@
 package com.sitech.esb.mouse.parser;
 
+import com.mysql.jdbc.StringUtils;
 import com.sitech.esb.mouse.filter.DefaultFilter;
 import com.sitech.esb.mouse.filter.Filter;
 import com.sitech.esb.mouse.resource.Resource;
@@ -7,10 +8,7 @@ import com.sitech.esb.mouse.resource.Resource;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class HostFileParser implements Parser<List<String>>{
 
@@ -62,7 +60,7 @@ public class HostFileParser implements Parser<List<String>>{
                     for(int i=0;i<colSize;i++){
                         //可能数据文件中的某些字段并没有值
                         if(i<length){
-                            builder.append("'"+split[i]+"'"+",");
+                            builder.append("'"+split[i].trim()+"'"+",");
                         }else{
                             builder.append("'',");
                         }
@@ -85,7 +83,7 @@ public class HostFileParser implements Parser<List<String>>{
     public Map<String, List<String>> resolve(Resource resource) throws IOException {
         BufferedReader reader = new BufferedReader(new InputStreamReader(resource.getInputStream()));
         String s = "";
-        Map<String, List<String>> listMap = new HashMap<>();
+        Map<String, List<String>> listMap = new LinkedHashMap<>();
 
         List<String> bigList = new ArrayList<>();
         String hostTemp = "";
@@ -99,12 +97,24 @@ public class HostFileParser implements Parser<List<String>>{
                 }
                 bigList = new ArrayList<>();
             }else{
-                bigList.add(s);
+                if(isVaild(s)){
+                    bigList.add(s);
+                }
             }
         }
         return listMap;
     }
 
+    private boolean isVaild(String statement){
+        if(StringUtils.isEmptyOrWhitespaceOnly(statement)){
+            return false;
+        }
+        //默认使用*作为注释
+        if(statement.startsWith("*")){
+            return false;
+        }
+        return true;
+    }
 
     /**
      * 考虑下这种的情况
