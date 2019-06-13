@@ -1,0 +1,6 @@
+Manifest-Version: 1.0
+Class-Path: slf4j-api-1.7.25.jar javassist-3.9.0.jar hsfsc-2.0.9.jar z
+ kclient-0.10.jar zookeeper-3.4.6.jar log4j-1.2.17.jar jackson-core-2.
+ 8.9.jar
+Main-Class: com.sitech.pass.tiger.TigerRunner
+
