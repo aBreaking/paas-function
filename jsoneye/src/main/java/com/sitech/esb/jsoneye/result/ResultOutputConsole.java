@@ -4,6 +4,7 @@ import com.sitech.esb.jsoneye.Result;
 import com.sitech.esb.jsoneye.ResultOutput;
 
 import java.io.IOException;
+import java.util.List;
 import java.util.Map;
 
 /**
@@ -13,26 +14,16 @@ import java.util.Map;
  */
 public class ResultOutputConsole implements ResultOutput {
 
-    public void output(Map<String, Result> map) throws IOException {
-        for (String key : map.keySet()){
-            System.out.println(key+"的比较结果");
-            prettyPrint(map.get(key));
-            System.out.println("-----------------\n");
-        }
-        System.out.println("比较完成");
+    public void output(Result result) throws IOException {
+        System.out.println("缺少的节点：");
+        prettyPrint(result.getLackMap(),"缺少");
+        System.out.println("多的节点：");
+        prettyPrint(result.getRemainMap(),"多余");
     }
 
-    private void prettyPrint(Result result){
-        StringBuilder builder = new StringBuilder();
-        builder.append(Result.LACK+"节点：\n");
-        for (String s : result.lack()){
-            builder.append(s);
-            builder.append("\n");
+    private void prettyPrint(Map<String, List<String>> map,String desc){
+        for (String key : map.keySet()){
+            System.out.println("\t"+key+"下面，"+desc+"了这些节点："+map.get(key));
         }
-        builder.append(Result.REMAIN+"节点：\n");
-        for (String s : result.remain()){
-            builder.append(s);
-        }
-        System.out.println(builder.toString());
     }
 }

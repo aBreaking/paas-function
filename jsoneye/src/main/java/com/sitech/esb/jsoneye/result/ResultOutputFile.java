@@ -14,7 +14,7 @@ import java.util.Map;
  * @author liwei_paas
  * @date 2019/6/11
  */
-public class ResultOutputFile implements ResultOutput {
+public class ResultOutputFile {
     String outputFile;
 
     public ResultOutputFile(String outputFile){
@@ -28,8 +28,8 @@ public class ResultOutputFile implements ResultOutput {
         for (String key : map.keySet()){
             writer.println(key+"的比较差异如下：");
             Result result = map.get(key);
-            List<String> lack = result.lack();
-            List<String> remain = result.remain();
+            List<String> lack = null;
+            List<String> remain = null;
             boolean hasContent = false;
             if (!lack.isEmpty()){
                 hasContent = true;

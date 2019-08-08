@@ -9,5 +9,5 @@ import java.util.Map;
  * @date 2019/6/12
  */
 public interface ResultOutput {
-    void output(Map<String,Result> map) throws IOException;
+    void output(Result result) throws IOException;
 }

@@ -11,22 +11,33 @@ import java.util.Set;
  */
 public class Node {
     String name;
-    Node parent; //父节点
+    //它爹的名字，考虑是否有必要还要parent Node
+    String parentName;
     Set<Node> childNodes = new HashSet<>(); //子节点，子节点会有多个
     int constraint; //约束，是否可为空  0表示可空
 
-    private transient int hashCode = 0;
+    public void addChild(Node node){
+        childNodes.add(node);
+    }
+
     @Override
     public boolean equals(Object object) {
         if (this == object) return true;
         if (object == null || getClass() != object.getClass()) return false;
         Node node = (Node) object;
-        return Objects.equals(name, node.name) && hashCode()==node.hashCode();
+        return Objects.equals(name, node.name) &&
+                Objects.equals(parentName, node.parentName);
     }
 
     @Override
     public int hashCode() {
-        return hashCode==0?Objects.hash(name,parent):hashCode;
+
+        return Objects.hash(name, parentName);
+    }
+
+    @Override
+    public String toString() {
+        return parentName+"."+name;
     }
 
     public String getName() {
@@ -37,12 +48,12 @@ public class Node {
         this.name = name;
     }
 
-    public Node getParent() {
-        return parent;
+    public String getParentName() {
+        return parentName;
     }
 
-    public void setParent(Node parent) {
-        this.parent = parent;
+    public void setParentName(String parentName) {
+        this.parentName = parentName;
     }
 
     public Set<Node> getChildNodes() {
@@ -59,14 +70,5 @@ public class Node {
 
     public void setConstraint(int constraint) {
         this.constraint = constraint;
-    }
-
-    public void setHashCode(int hashCode) {
-        this.hashCode = hashCode;
-    }
-
-    @Override
-    public String toString() {
-        return parent==null?name:parent.getName()+"."+name;
     }
 }

@@ -19,7 +19,7 @@ import java.util.Map;
  * @author liwei_paas
  * @date 2019/6/12
  */
-public class ResultOutputExcel implements ResultOutput {
+public class ResultOutputExcel{
 
     /**
      * 指定输出的文件
@@ -57,8 +57,9 @@ public class ResultOutputExcel implements ResultOutput {
         say(titleRow,0,Result.LACK);
         say(titleRow,1,Result.REMAIN);
 
-        List<String> lack = result.lack();
-        List<String> remain = result.remain();
+        List<String> lack = null;
+        List<String> remain = null;
+
         //找出两个最大的部分
 
         //lack部分插入
