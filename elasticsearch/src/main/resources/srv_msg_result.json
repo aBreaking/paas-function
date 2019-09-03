@@ -1,0 +1,536 @@
+{
+  "took": 12,
+  "timed_out": false,
+  "_shards": {
+    "total": 5,
+    "successful": 5,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": 78,
+    "max_score": 2,
+    "hits": [
+      {
+        "_index": "esb-srvlog-2019-07-21",
+        "_type": "doc",
+        "_id": "-AUg8WwBtwPLiPnE8kN8",
+        "_score": 2,
+        "_source": {
+          "routeKey": "10",
+          "sSrvExecuteTime": "85",
+          "reqLength": "null",
+          "source": "/chnesb/domains/esbdomain8/fileLogs/srvLog_201907211726.10.113.161.53_58000.log",
+          "retCode": "422015535",
+          "type": "srvlog",
+          "endUsrIp": "",
+          "protocol": "HTTP/1.1",
+          "sSrvBeginTime": "1563701223121",
+          "flowCode": "23558882019072105270310625381001",
+          "tmp": "",
+          "clientIP": "10.112.2.46",
+          "dbId": "C2",
+          "esbCurrentIP": "10.113.161.53",
+          "chanId": "97",
+          "esbCurrentPort": "58000",
+          "respLength": "",
+          "esbRetCode": "0",
+          "callId": "",
+          "prospector": {
+            "type": "log"
+          },
+          "retMsg": "该用户没有符合条件的支付账户 ERRID:17051223",
+          "tags": [
+            "_dissectfailure"
+          ],
+          "pCallId": "",
+          "endPoint": "BOSS_TEMPLATE_32C2_TCEC150BOSS2",
+          "childService": "null",
+          "@timestamp": "2019-07-21T17:27:03.120Z",
+          "phone": "18228579168",
+          "routeValue": "18228579168",
+          "poolId": "41",
+          "beginTimeStr": "20190721 17:27:03.120",
+          "srvName": "sSmallPay",
+          "fields": {
+            "host": "fqchanesb3",
+            "_clientip": "10.113.161.53",
+            "_product": "ESB",
+            "_software": "dzgesb",
+            "_kafka_topic": "esb-srvlog"
+          },
+          "funName": "POST",
+          "executeTime": "87"
+        }
+      },
+      {
+        "_index": "esb-srvlog-2019-07-21",
+        "_type": "doc",
+        "_id": "eAUh8WwBtwPLiPnEBEY1",
+        "_score": 1,
+        "_source": {
+          "routeKey": "10",
+          "sSrvExecuteTime": "7",
+          "reqLength": "null",
+          "source": "/chnesb/domains/esbdomain3/fileLogs/srvLog_201907211735.10.113.161.53_53000.log",
+          "retCode": "40005231",
+          "type": "srvlog",
+          "endUsrIp": "10.113.158.69",
+          "protocol": "HTTP/1.1",
+          "sSrvBeginTime": "1563701767533",
+          "flowCode": "022014091516075847800758348",
+          "tmp": "",
+          "clientIP": "10.113.158.81",
+          "dbId": "A1",
+          "esbCurrentIP": "10.113.161.53",
+          "chanId": "05",
+          "esbCurrentPort": "53000",
+          "respLength": "",
+          "esbRetCode": "0",
+          "callId": "",
+          "prospector": {
+            "type": "log"
+          },
+          "retMsg": "无法获取该错误代码的错误信息 请直接查看明细信息 ERRID:17071767",
+          "tags": [
+            "_dissectfailure"
+          ],
+          "pCallId": "",
+          "endPoint": "CRM_TEMPLATE_31A1_TAEC126CRM1",
+          "childService": "null",
+          "@timestamp": "2019-07-21T17:36:07.532Z",
+          "phone": "15928929008",
+          "routeValue": "15928929008",
+          "poolId": "31",
+          "beginTimeStr": "20190721 17:36:07.532",
+          "srvName": "sUserOrdQry",
+          "fields": {
+            "host": "fqchanesb3",
+            "_clientip": "10.113.161.53",
+            "_product": "ESB",
+            "_software": "dzgesb",
+            "_kafka_topic": "esb-srvlog"
+          },
+          "funName": "POST",
+          "executeTime": "8"
+        }
+      },
+      {
+        "_index": "esb-srvlog-2019-07-21",
+        "_type": "doc",
+        "_id": "-QUh8WwBtwPLiPnEB0Yj",
+        "_score": 1,
+        "_source": {
+          "routeKey": "10",
+          "sSrvExecuteTime": "8",
+          "reqLength": "null",
+          "source": "/chnesb/domains/esbdomain3/fileLogs/srvLog_201907211725.10.113.161.17_53000.log",
+          "retCode": "422015037",
+          "type": "srvlog",
+          "endUsrIp": "10.113.192.188",
+          "protocol": "HTTP/1.1",
+          "sSrvBeginTime": "1563701164860",
+          "flowCode": "-1",
+          "tmp": "",
+          "clientIP": "10.113.162.229",
+          "dbId": "A1",
+          "esbCurrentIP": "10.113.161.17",
+          "chanId": "40",
+          "esbCurrentPort": "53000",
+          "respLength": "",
+          "esbRetCode": "0",
+          "callId": "",
+          "prospector": {
+            "type": "log"
+          },
+          "retMsg": "此用户无外省集团帐单明细记录 ERRID:42021164",
+          "tags": [
+            "_dissectfailure"
+          ],
+          "pCallId": "3672312202E83F103C7B48FC62B280F3",
+          "endPoint": "BOSS_TEMPLATE_11A1_TABS116BOSS1",
+          "childService": "null",
+          "@timestamp": "2019-07-21T17:26:04.859Z",
+          "phone": "15908158105",
+          "routeValue": "15908158105",
+          "poolId": "11",
+          "beginTimeStr": "20190721 17:26:04.859",
+          "srvName": "sHjhzzGjUpd",
+          "fields": {
+            "host": "fqbusesb7",
+            "_clientip": "10.113.161.17",
+            "_product": "ESB",
+            "_software": "dzgesb",
+            "_kafka_topic": "esb-srvlog"
+          },
+          "funName": "POST",
+          "executeTime": "9"
+        }
+      },
+      {
+        "_index": "esb-srvlog-2019-07-21",
+        "_type": "doc",
+        "_id": "1wUg8WwBtwPLiPnE8UNm",
+        "_score": 1,
+        "_source": {
+          "routeKey": "10",
+          "sSrvExecuteTime": "4",
+          "reqLength": "null",
+          "source": "/chnesb/domains/esbdomain8/fileLogs/srvLog_201907211727.10.113.161.52_58000.log",
+          "retCode": "40005231",
+          "type": "srvlog",
+          "endUsrIp": "10.113.158.74",
+          "protocol": "HTTP/1.1",
+          "sSrvBeginTime": "1563701288642",
+          "flowCode": "022014091516075847800758348",
+          "tmp": "",
+          "clientIP": "10.113.158.84",
+          "dbId": "A1",
+          "esbCurrentIP": "10.113.161.52",
+          "chanId": "05",
+          "esbCurrentPort": "58000",
+          "respLength": "",
+          "esbRetCode": "0",
+          "callId": "",
+          "prospector": {
+            "type": "log"
+          },
+          "retMsg": "无法获取该错误代码的错误信息 请直接查看明细信息 ERRID:87211288",
+          "tags": [
+            "_dissectfailure"
+          ],
+          "pCallId": "",
+          "endPoint": "CRM_TEMPLATE_31A1_TAEC131CRM2",
+          "childService": "null",
+          "@timestamp": "2019-07-21T17:28:08.641Z",
+          "phone": "13558781302",
+          "routeValue": "13558781302",
+          "poolId": "31",
+          "beginTimeStr": "20190721 17:28:08.641",
+          "srvName": "sUserOrdQry",
+          "fields": {
+            "host": "fqchanesb2",
+            "_clientip": "10.113.161.52",
+            "_product": "ESB",
+            "_software": "dzgesb",
+            "_kafka_topic": "esb-srvlog"
+          },
+          "funName": "POST",
+          "executeTime": "5"
+        }
+      },
+      {
+        "_index": "esb-srvlog-2019-07-21",
+        "_type": "doc",
+        "_id": "UwUg8WwBtwPLiPnE-0Xm",
+        "_score": 1,
+        "_source": {
+          "routeKey": "11",
+          "sSrvExecuteTime": "8",
+          "reqLength": "null",
+          "source": "/chnesb/domains/esbdomain1/fileLogs/srvLog_201907211726.10.113.161.57_51000.log",
+          "retCode": "422015450",
+          "type": "srvlog",
+          "endUsrIp": "10.112.137.20",
+          "protocol": "HTTP/1.1",
+          "sSrvBeginTime": "1563701227602",
+          "flowCode": "-1",
+          "tmp": "",
+          "clientIP": "10.113.162.86",
+          "dbId": "C2",
+          "esbCurrentIP": "10.113.161.57",
+          "chanId": "40",
+          "esbCurrentPort": "51000",
+          "respLength": "",
+          "esbRetCode": "0",
+          "callId": "",
+          "prospector": {
+            "type": "log"
+          },
+          "retMsg": "用户信息不存在 ERRID:86321227",
+          "tags": [
+            "_dissectfailure"
+          ],
+          "pCallId": "C31D75EF8430FA34F2AC17CE1B84F31E",
+          "endPoint": "BOSS_TEMPLATE_32C2_TCEC146BOSS2",
+          "childService": "null",
+          "@timestamp": "2019-07-21T17:27:07.601Z",
+          "phone": "",
+          "routeValue": "33511009580785",
+          "poolId": "31",
+          "beginTimeStr": "20190721 17:27:07.601",
+          "srvName": "sQryCreditInfo",
+          "fields": {
+            "host": "fqchanesb7",
+            "_clientip": "10.113.161.57",
+            "_product": "ESB",
+            "_software": "dzgesb",
+            "_kafka_topic": "esb-srvlog"
+          },
+          "funName": "POST",
+          "executeTime": "10"
+        }
+      },
+      {
+        "_index": "esb-srvlog-2019-07-21",
+        "_type": "doc",
+        "_id": "OQUh8WwBtwPLiPnECUes",
+        "_score": 1,
+        "_source": {
+          "routeKey": "10",
+          "sSrvExecuteTime": "7",
+          "reqLength": "null",
+          "source": "/chnesb/domains/esbdomain5/fileLogs/srvLog_201907211727.10.113.161.52_55000.log",
+          "retCode": "40005231",
+          "type": "srvlog",
+          "endUsrIp": "10.113.158.70",
+          "protocol": "HTTP/1.1",
+          "sSrvBeginTime": "1563701299433",
+          "flowCode": "022014091516075847800758348",
+          "tmp": "",
+          "clientIP": "10.113.158.84",
+          "dbId": "A2",
+          "esbCurrentIP": "10.113.161.52",
+          "chanId": "05",
+          "esbCurrentPort": "55000",
+          "respLength": "",
+          "esbRetCode": "0",
+          "callId": "",
+          "prospector": {
+            "type": "log"
+          },
+          "retMsg": "无法获取该错误代码的错误信息 请直接查看明细信息 ERRID:96641299",
+          "tags": [
+            "_dissectfailure"
+          ],
+          "pCallId": "",
+          "endPoint": "CRM_TEMPLATE_31A2_TAEC127CRM2",
+          "childService": "null",
+          "@timestamp": "2019-07-21T17:28:19.432Z",
+          "phone": "15984193230",
+          "routeValue": "15984193230",
+          "poolId": "31",
+          "beginTimeStr": "20190721 17:28:19.432",
+          "srvName": "sUserOrdQry",
+          "fields": {
+            "host": "fqchanesb2",
+            "_clientip": "10.113.161.52",
+            "_product": "ESB",
+            "_software": "dzgesb",
+            "_kafka_topic": "esb-srvlog"
+          },
+          "funName": "POST",
+          "executeTime": "8"
+        }
+      },
+      {
+        "_index": "esb-srvlog-2019-07-21",
+        "_type": "doc",
+        "_id": "NgUh8WwBtwPLiPnEg1k5",
+        "_score": 1,
+        "_source": {
+          "routeKey": "14",
+          "sSrvExecuteTime": "90",
+          "reqLength": "null",
+          "source": "/chnesb/domains/esbdomain3/fileLogs/srvLog_201907211727.10.113.161.67_53000.log",
+          "endUsrIp": "",
+          "type": "srvlog",
+          "retCode": "409005000",
+          "protocol": "HTTP/1.1",
+          "flowCode": "052019072117273381128866694",
+          "sSrvBeginTime": "1563701253912",
+          "tmp": "",
+          "clientIP": "10.113.193.114",
+          "dbId": "B1",
+          "esbCurrentIP": "10.113.161.67",
+          "chanId": "05",
+          "esbCurrentPort": "53000",
+          "respLength": "",
+          "esbRetCode": "0",
+          "callId": "",
+          "prospector": {
+            "type": "log"
+          },
+          "retMsg": "无法获取该错误代码的错误信息 请直接查看明细信息 ERRID:80981254",
+          "tags": [
+            "_dissectfailure"
+          ],
+          "endPoint": "SORS_TEMPLATE_31B1_RESTDOM1",
+          "pCallId": "",
+          "childService": "null",
+          "@timestamp": "2019-07-21T17:27:33.911Z",
+          "phone": "",
+          "routeValue": "faya11222",
+          "poolId": "31",
+          "beginTimeStr": "20190721 17:27:33.911",
+          "srvName": "sQryBandAddress",
+          "fields": {
+            "host": "fqdzgesb2",
+            "_clientip": "10.113.161.67",
+            "_product": "ESB",
+            "_software": "dzgesb",
+            "_kafka_topic": "esb-srvlog"
+          },
+          "executeTime": "91",
+          "funName": "POST"
+        }
+      },
+      {
+        "_index": "esb-srvlog-2019-07-21",
+        "_type": "doc",
+        "_id": "-AUh8WwBtwPLiPnEiFlC",
+        "_score": 1,
+        "_source": {
+          "routeKey": "15",
+          "sSrvExecuteTime": "6",
+          "reqLength": "null",
+          "source": "/chnesb/domains/esbdomain3/fileLogs/srvLog_201907211727.10.113.161.13_53000.log",
+          "endUsrIp": "",
+          "type": "srvlog",
+          "retCode": "500290588",
+          "protocol": "HTTP/1.1",
+          "flowCode": "112019072117273341119435677",
+          "sSrvBeginTime": "1563701253412",
+          "tmp": "",
+          "clientIP": "10.113.176.11",
+          "dbId": "A1",
+          "esbCurrentIP": "10.113.161.13",
+          "chanId": "11",
+          "esbCurrentPort": "53000",
+          "respLength": "",
+          "esbRetCode": "0",
+          "callId": "",
+          "prospector": {
+            "type": "log"
+          },
+          "retMsg": "外部系统信息不存在! ERRID:13171253",
+          "tags": [
+            "_dissectfailure"
+          ],
+          "endPoint": "CRM_TEMPLATE_11A1_TABS108CRM1",
+          "pCallId": "",
+          "childService": "null",
+          "@timestamp": "2019-07-21T17:27:33.411Z",
+          "phone": "",
+          "routeValue": "35",
+          "poolId": "11",
+          "beginTimeStr": "20190721 17:27:33.411",
+          "srvName": "sOutSysQry",
+          "fields": {
+            "host": "fqbusesb3",
+            "_clientip": "10.113.161.13",
+            "_product": "ESB",
+            "_software": "dzgesb",
+            "_kafka_topic": "esb-srvlog"
+          },
+          "executeTime": "7",
+          "funName": "POST"
+        }
+      },
+      {
+        "_index": "esb-srvlog-2019-07-21",
+        "_type": "doc",
+        "_id": "PgUh8WwBtwPLiPnEiVrP",
+        "_score": 1,
+        "_source": {
+          "routeKey": "14",
+          "sSrvExecuteTime": "15",
+          "reqLength": "null",
+          "source": "/chnesb/domains/esbdomain2/fileLogs/srvLog_201907211740.10.113.161.66_52000.log",
+          "endUsrIp": "",
+          "type": "srvlog",
+          "retCode": "422001001",
+          "protocol": "HTTP/1.1",
+          "flowCode": "052019072117401731301911215",
+          "sSrvBeginTime": "1563702017471",
+          "tmp": "",
+          "clientIP": "10.113.193.114",
+          "dbId": "B2",
+          "esbCurrentIP": "10.113.161.66",
+          "chanId": "05",
+          "esbCurrentPort": "52000",
+          "respLength": "",
+          "esbRetCode": "0",
+          "callId": "",
+          "prospector": {
+            "type": "log"
+          },
+          "retMsg": "用户不存在 ERRID:19712017",
+          "tags": [
+            "_dissectfailure"
+          ],
+          "endPoint": "BOSS_TEMPLATE_31B1_TBBS32BOOS1",
+          "pCallId": "",
+          "childService": "null",
+          "@timestamp": "2019-07-21T17:40:17.470Z",
+          "phone": "",
+          "routeValue": "ic02k0000",
+          "poolId": "31",
+          "beginTimeStr": "20190721 17:40:17.470",
+          "srvName": "sPFeeQuery",
+          "fields": {
+            "host": "fqdzgesb1",
+            "_clientip": "10.113.161.66",
+            "_product": "ESB",
+            "_software": "dzgesb",
+            "_kafka_topic": "esb-srvlog"
+          },
+          "executeTime": "16",
+          "funName": "POST"
+        }
+      },
+      {
+        "_index": "esb-srvlog-2019-07-21",
+        "_type": "doc",
+        "_id": "MAUh8WwBtwPLiPnEnV1q",
+        "_score": 1,
+        "_source": {
+          "routeKey": "10",
+          "sSrvExecuteTime": "7",
+          "reqLength": "null",
+          "source": "/chnesb/domains/esbdomain1/fileLogs/srvLog_201907211727.10.113.161.51_51000.log",
+          "endUsrIp": "10.113.158.75",
+          "type": "srvlog",
+          "retCode": "40005231",
+          "protocol": "HTTP/1.1",
+          "flowCode": "022014091516075847800758348",
+          "sSrvBeginTime": "1563701265414",
+          "tmp": "",
+          "clientIP": "10.113.228.134",
+          "dbId": "A1",
+          "esbCurrentIP": "10.113.161.51",
+          "chanId": "05",
+          "esbCurrentPort": "51000",
+          "respLength": "",
+          "esbRetCode": "0",
+          "callId": "",
+          "prospector": {
+            "type": "log"
+          },
+          "retMsg": "无法获取该错误代码的错误信息 请直接查看明细信息 ERRID:70811265",
+          "tags": [
+            "_dissectfailure"
+          ],
+          "endPoint": "CRM_TEMPLATE_31A1_TAEC133CRM2",
+          "pCallId": "",
+          "childService": "null",
+          "@timestamp": "2019-07-21T17:27:45.412Z",
+          "phone": "13550268207",
+          "routeValue": "13550268207",
+          "poolId": "31",
+          "beginTimeStr": "20190721 17:27:45.412",
+          "srvName": "sUserOrdQry",
+          "fields": {
+            "host": "fqchanesb1",
+            "_clientip": "10.113.161.51",
+            "_product": "ESB",
+            "_software": "dzgesb",
+            "_kafka_topic": "esb-srvlog"
+          },
+          "executeTime": "9",
+          "funName": "POST"
+        }
+      }
+    ]
+  }
+}

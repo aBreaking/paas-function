@@ -1,0 +1,57 @@
+{
+  "size":0,
+  "query":{
+    "bool":{
+      "must":[
+        {
+          "range":{
+            "@timestamp":{
+              "gte": "2019-07-21T17:23:47.473Z",
+              "lt": "2019-07-21T17:30:47.473Z"
+            }
+          }
+        }
+      ],
+      "must_not":[
+        {
+          "terms":{
+            "retMsg":["ok!","OK"]
+          }
+        },
+        {
+          "term":{
+            "retCode":"0"
+          }
+        },
+        {
+          "regexp":{
+            "endPoint":".*TEMPLATE.*"
+          }
+        }
+      ]
+    }
+  },
+
+  "aggs":{
+    "srvName":{
+      "terms":{
+        "field":"srvName"
+      },
+      "aggs":{
+        "retCode":{
+          "terms":{
+            "field":"retCode"
+          },
+          "aggs":{
+            "retMsg":{
+              "terms":{
+                "field":"retMsg"
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+}

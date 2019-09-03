@@ -1,0 +1,521 @@
+{
+  "took": 30,
+  "timed_out": false,
+  "_shards": {
+    "total": 5,
+    "successful": 5,
+    "skipped": 0,
+    "failed": 0
+  },
+  "hits": {
+    "total": 9940,
+    "max_score": 0,
+    "hits": []
+  },
+  "aggregations": {
+    "srvName": {
+      "doc_count_error_upper_bound": 80,
+      "sum_other_doc_count": 5596,
+      "buckets": [
+        {
+          "key": "sDynSvc",
+          "doc_count": 1510,
+          "retCode": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "0",
+                "doc_count": 1510,
+                "retMsg": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": [
+                    {
+                      "key": "ok!",
+                      "doc_count": 1510
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "sAppQry",
+          "doc_count": 514,
+          "retCode": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "0",
+                "doc_count": 514,
+                "retMsg": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": [
+                    {
+                      "key": "ok!",
+                      "doc_count": 514
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "sPFeeQuery",
+          "doc_count": 496,
+          "retCode": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "0",
+                "doc_count": 464,
+                "retMsg": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": [
+                    {
+                      "key": "ok!",
+                      "doc_count": 464
+                    }
+                  ]
+                }
+              },
+              {
+                "key": "422001001",
+                "doc_count": 32,
+                "retMsg": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 22,
+                  "buckets": [
+                    {
+                      "key": "用户不存在 ERRID:10901775",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "用户不存在 ERRID:13251308",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "用户不存在 ERRID:13251646",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "用户不存在 ERRID:17221789",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "用户不存在 ERRID:17221981",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "用户不存在 ERRID:19291136",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "用户不存在 ERRID:19291555",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "用户不存在 ERRID:19712017",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "用户不存在 ERRID:19861746",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "用户不存在 ERRID:20151131",
+                      "doc_count": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "sIdentChk",
+          "doc_count": 374,
+          "retCode": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "0",
+                "doc_count": 374,
+                "retMsg": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": [
+                    {
+                      "key": "ok!",
+                      "doc_count": 374
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "sQryCreditInfo",
+          "doc_count": 357,
+          "retCode": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "0",
+                "doc_count": 356,
+                "retMsg": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": [
+                    {
+                      "key": "ok!",
+                      "doc_count": 356
+                    }
+                  ]
+                }
+              },
+              {
+                "key": "422015450",
+                "doc_count": 1,
+                "retMsg": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": [
+                    {
+                      "key": "用户信息不存在 ERRID:86321227",
+                      "doc_count": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "sUserOrdQry",
+          "doc_count": 355,
+          "retCode": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "40005231",
+                "doc_count": 230,
+                "retMsg": {
+                  "doc_count_error_upper_bound": 5,
+                  "sum_other_doc_count": 220,
+                  "buckets": [
+                    {
+                      "key": "无法获取该错误代码的错误信息 请直接查看明细信息 ERRID:10611319",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "无法获取该错误代码的错误信息 请直接查看明细信息 ERRID:11811276",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "无法获取该错误代码的错误信息 请直接查看明细信息 ERRID:11831910",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "无法获取该错误代码的错误信息 请直接查看明细信息 ERRID:11841951",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "无法获取该错误代码的错误信息 请直接查看明细信息 ERRID:11851215",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "无法获取该错误代码的错误信息 请直接查看明细信息 ERRID:11871289",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "无法获取该错误代码的错误信息 请直接查看明细信息 ERRID:11901058",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "无法获取该错误代码的错误信息 请直接查看明细信息 ERRID:11911452",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "无法获取该错误代码的错误信息 请直接查看明细信息 ERRID:11931161",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "无法获取该错误代码的错误信息 请直接查看明细信息 ERRID:11931722",
+                      "doc_count": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "key": "0",
+                "doc_count": 125,
+                "retMsg": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": [
+                    {
+                      "key": "ok!",
+                      "doc_count": 125
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "com_sitech_ordersvc_person_atom_inter_s1018_IDynamicSqlQryAoSvc_qry",
+          "doc_count": 213,
+          "retCode": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "0",
+                "doc_count": 213,
+                "retMsg": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": [
+                    {
+                      "key": "OK",
+                      "doc_count": 213
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "sIntegratedQryOfCen",
+          "doc_count": 210,
+          "retCode": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "0",
+                "doc_count": 209,
+                "retMsg": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": [
+                    {
+                      "key": "ok!",
+                      "doc_count": 209
+                    }
+                  ]
+                }
+              },
+              {
+                "key": "406110002",
+                "doc_count": 1,
+                "retMsg": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": [
+                    {
+                      "key": "该客户不存在！ ERRID:27881876",
+                      "doc_count": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "sSmsQryScL",
+          "doc_count": 164,
+          "retCode": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "0",
+                "doc_count": 161,
+                "retMsg": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": [
+                    {
+                      "key": "ok!",
+                      "doc_count": 161
+                    }
+                  ]
+                }
+              },
+              {
+                "key": "402034812",
+                "doc_count": 3,
+                "retMsg": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": [
+                    {
+                      "key": "对不起 没有该服务号码对应的用户信息 ERRID:56091960",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "对不起 没有该服务号码对应的用户信息 ERRID:65941896",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "对不起 没有该服务号码对应的用户信息 ERRID:78531050",
+                      "doc_count": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        },
+        {
+          "key": "sMobOnlineSvc",
+          "doc_count": 151,
+          "retCode": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+              {
+                "key": "0",
+                "doc_count": 134,
+                "retMsg": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": [
+                    {
+                      "key": "ok!",
+                      "doc_count": 134
+                    }
+                  ]
+                }
+              },
+              {
+                "key": "422015900",
+                "doc_count": 10,
+                "retMsg": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": [
+                    {
+                      "key": "无法获取该错误代码的错误信息 请直接查看明细信息 ERRID:14861613",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "无法获取该错误代码的错误信息 请直接查看明细信息 ERRID:14871532",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "无法获取该错误代码的错误信息 请直接查看明细信息 ERRID:15551384",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "无法获取该错误代码的错误信息 请直接查看明细信息 ERRID:16561878",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "无法获取该错误代码的错误信息 请直接查看明细信息 ERRID:20221636",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "无法获取该错误代码的错误信息 请直接查看明细信息 ERRID:22331657",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "无法获取该错误代码的错误信息 请直接查看明细信息 ERRID:22361295",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "无法获取该错误代码的错误信息 请直接查看明细信息 ERRID:25161231",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "无法获取该错误代码的错误信息 请直接查看明细信息 ERRID:41231824",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "无法获取该错误代码的错误信息 请直接查看明细信息 ERRID:42281844",
+                      "doc_count": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "key": "422002000",
+                "doc_count": 3,
+                "retMsg": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": [
+                    {
+                      "key": "用户不存在该账期的费用! ERRID:10981683",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "用户不存在该账期的费用! ERRID:10991671",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "用户不存在该账期的费用! ERRID:21821745",
+                      "doc_count": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "key": "422015252",
+                "doc_count": 3,
+                "retMsg": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": [
+                    {
+                      "key": "取家庭成员信息不存在！ ERRID:10961677",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "取家庭成员信息不存在！ ERRID:22341963",
+                      "doc_count": 1
+                    },
+                    {
+                      "key": "取家庭成员信息不存在！ ERRID:98801348",
+                      "doc_count": 1
+                    }
+                  ]
+                }
+              },
+              {
+                "key": "422015013",
+                "doc_count": 1,
+                "retMsg": {
+                  "doc_count_error_upper_bound": 0,
+                  "sum_other_doc_count": 0,
+                  "buckets": [
+                    {
+                      "key": "打印月份早于过户月份 ERRID:15531855",
+                      "doc_count": 1
+                    }
+                  ]
+                }
+              }
+            ]
+          }
+        }
+      ]
+    }
+  }
+}

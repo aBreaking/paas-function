@@ -1,0 +1,23 @@
+{
+  "query":{
+    "bool":{
+      "should":[
+        {
+          "regexp":{
+            "retMsg":".*12.*"
+          }
+        },
+        {
+          "regexp":{
+            "retMsg":".*170.*"
+          }
+        },
+        {
+          "regexp":{
+            "retMsg":".*420.*"
+          }
+        }
+      ]
+    }
+  }
+}
