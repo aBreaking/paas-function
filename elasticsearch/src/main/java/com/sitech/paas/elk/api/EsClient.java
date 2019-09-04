@@ -55,7 +55,7 @@ public class EsClient {
         return new String(b);
     }
 
-    static class EsConfig{
+    public static class EsConfig{
         private Integer id;
         private String esUrl;
         private String esUser;

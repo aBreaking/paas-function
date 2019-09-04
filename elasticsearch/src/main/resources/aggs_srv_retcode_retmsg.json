@@ -6,8 +6,8 @@
         {
           "range":{
             "@timestamp":{
-              "gte": "2019-07-21T17:23:47.473Z",
-              "lt": "2019-07-21T17:30:47.473Z"
+              "gte": "2019-07-21T00:23:47.473Z",
+              "lt": "2019-07-21T24:30:47.473Z"
             }
           }
         }
@@ -15,17 +15,17 @@
       "must_not":[
         {
           "terms":{
-            "retMsg":["ok!","OK"]
+            "retMsg":["c1","c2"]
           }
         },
         {
           "term":{
-            "retCode":"0"
+            "retCode":"123"
           }
         },
         {
           "regexp":{
-            "endPoint":".*TEMPLATE.*"
+            "endPoint":".*mytest.*"
           }
         }
       ]
@@ -35,7 +35,11 @@
   "aggs":{
     "srvName":{
       "terms":{
-        "field":"srvName"
+        "size":10,
+        "field":"srvName",
+        "order":{
+          "_count":"desc"
+        }
       },
       "aggs":{
         "retCode":{
