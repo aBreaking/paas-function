@@ -17,7 +17,9 @@ import org.elasticsearch.search.aggregations.bucket.terms.Terms;
 import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilder;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import java.io.IOException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
@@ -25,12 +27,16 @@ public class EsQueryImpl implements EsQuery {
 
     RestHighLevelClient client;
 
-    public EsQueryImpl(RestHighLevelClient client){
+    String index;
+
+    public EsQueryImpl(RestHighLevelClient client,Date date){
         this.client = client;
+        this.index = getIndex(date);
     }
 
     public Object querySrvRetAgg() throws IOException {
-        SearchRequest searchRequest = new SearchRequest();
+        SearchRequest searchRequest = new SearchRequest(index);
+
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
         BoolQueryBuilder query = QueryBuilders.boolQuery();
@@ -54,7 +60,7 @@ public class EsQueryImpl implements EsQuery {
     }
 
     public Object querySrvMsg(Map<String,String> map) throws IOException {
-        SearchRequest searchRequest = new SearchRequest();
+        SearchRequest searchRequest = new SearchRequest(index);
         SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
 
         BoolQueryBuilder query = QueryBuilders.boolQuery();
@@ -84,6 +90,12 @@ public class EsQueryImpl implements EsQuery {
         return null;
     }
 
+    private String getIndex(Date date){
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        String prefix = "esb-srvlog-";
+        String time = dateFormat.format(date);
+        return prefix + time;
+    }
     /**
      * TODO 这个日后整成递归把
      * @param aggregations
