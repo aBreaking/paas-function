@@ -1,0 +1,42 @@
+[{
+  "query":{
+    "bool":{
+      "must_not":[
+        {
+          "term":{
+            "retMsg":"ok!"
+          }
+        },
+        {
+          "term":{
+            "retMsg":"success"
+          }
+        }
+      ]
+    }
+  }
+}
+,
+{
+  "size":0,
+  "query":{
+    "bool":{
+      "must_not":[
+        {
+          "term":{
+            "retCode":"0"
+          }
+        }
+      ]
+    }
+  },
+  "aggs":{
+    "retMsgAgg":{
+      "terms":{
+        "field":"retMsg"
+      }
+    }
+  }
+}
+
+  ]

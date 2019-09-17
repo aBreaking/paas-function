@@ -30,7 +30,7 @@ public class EsHighClient {
 
     public RestHighLevelClient getRestHighLevelClient(){
         RestClientBuilder restClientBuilder = RestClient.builder(
-                new HttpHost("localhost", 9200, "http"),
+                new HttpHost("172.21.11.65", 9200, "http"),
                 new HttpHost("localhost", 9201, "http"));
         //elasticsearch验证的用户名密码。
         String username = "admin";

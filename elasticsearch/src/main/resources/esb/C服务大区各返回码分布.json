@@ -6,51 +6,48 @@
         {
           "range":{
             "@timestamp":{
-              "gte": "2019-07-21T00:23:47.473Z",
-              "lt": "2019-07-21T24:30:47.473Z"
+              "gte": "2019-09-01T00:00:00.000Z",
+              "lt": "2019-09-01T00:10:00.000Z"
             }
-          }
-        }
-
-      ],
-      "must_not":[
-        {
-          "terms":{
-            "retMsg":["c1","c2"]
-          }
-        },
-        {
-          "term":{
-            "retCode":"123"
           }
         },
         {
           "regexp":{
-            "endPoint":".*mytest.*"
+            "endPoint":".*TEMPLATE.*"
+          }
+        },
+        {
+          "terms":{
+            "clientIP":["10.113.228.130","10.113.158.84"]
           }
         }
       ]
     }
   },
-
   "aggs":{
-    "srvName":{
+    "srvNameAgg":{
       "terms":{
-        "size":10,
         "field":"srvName",
         "order":{
           "_count":"desc"
         }
       },
       "aggs":{
-        "retCode":{
+        "retCodeAgg":{
           "terms":{
             "field":"retCode"
           },
           "aggs":{
-            "retMsg":{
+            "dbIdAgg":{
               "terms":{
-                "field":"retMsg"
+                "field":"dbId"
+              },
+              "aggs":{
+                "executeTimeAvg":{
+                  "avg":{
+                    "field":"executeTime"
+                  }
+                }
               }
             }
           }
@@ -58,5 +55,4 @@
       }
     }
   }
-
 }

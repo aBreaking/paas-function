@@ -21,9 +21,14 @@ public class EsClient {
     final static EsClient esClient = new EsClient();
 
     public static RestClient getClient(){
+
+        return getClient("localhost:9200");
+    }
+
+    public static RestClient getClient(String url){
         if (restClient==null){
             EsConfig esConfig = new EsConfig();
-            esConfig.setEsUrl("localhost:9200");
+            esConfig.setEsUrl(url);
             esConfig.setEsUser("user");
             esConfig.setEsbPwd("pwd");
             restClient = esClient.buildClient(esConfig);

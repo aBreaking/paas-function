@@ -1,6 +1,5 @@
 package com.sitech.paas.elk.dao.impl;
 
-import com.sitech.paas.elk.dao.EsQuery;
 import com.sitech.paas.elk.domain.BaseEsbSrvLog;
 import com.sitech.paas.elk.domain.BaseEsbSrvLogAgg;
 import org.elasticsearch.action.search.SearchRequest;
@@ -23,7 +22,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-public class EsQueryImpl implements EsQuery {
+public class EsQueryImpl {
 
     RestHighLevelClient client;
 
@@ -58,6 +57,7 @@ public class EsQueryImpl implements EsQuery {
         List<BaseEsbSrvLogAgg> agg = parseAgg(aggregations);
         return agg;
     }
+
 
     public Object querySrvMsg(Map<String,String> map) throws IOException {
         SearchRequest searchRequest = new SearchRequest(index);
@@ -124,6 +124,8 @@ public class EsQueryImpl implements EsQuery {
         }
         return list;
     }
+
+
 
 
     private String matchValue(Map<String,String> map,String key){

@@ -1,0 +1,17 @@
+{
+  "size":0,
+  "aggs":{
+    "callTimeAggs":{
+      "date_histogram":{
+        "field":"@timestamp",
+        "interval":"minute",
+        "format":"yyyy-MM-dd HH:mm:ss",
+        "min_doc_count":0,
+        "extended_bounds":{
+          "min":"2019-09-01 00:00:00",
+          "max":"2019-09-01 00:60:00"
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,118 @@
+{
+  "mappings": {
+    "doc": {
+      "_all":{
+        "enabled":false
+      },
+      "properties": {
+        "@timestamp": {
+          "type": "date"
+        },
+        "routeKey": {
+          "type": "keyword"
+        },
+        "sSrvExecuteTime": {
+          "type": "keyword"
+        },
+        "reqLength": {
+          "type": "keyword"
+        },
+        "source": {
+          "type": "keyword"
+        },
+        "retCode": {
+          "type": "keyword"
+        },
+        "type": {
+          "type": "keyword"
+        },
+        "endUsrIp": {
+          "type": "keyword"
+        },
+        "protocol": {
+          "type": "keyword"
+        },
+        "sSrvBeginTime": {
+          "type": "keyword"
+        },
+        "flowCode": {
+          "type": "keyword"
+        },
+        "clientIP": {
+          "type": "keyword"
+        },
+        "dbId": {
+          "type": "keyword"
+        },
+        "esbCurrentIP": {
+          "type": "keyword"
+        },
+        "chanId": {
+          "type": "keyword"
+        },
+        "esbCurrentPort": {
+          "type": "keyword"
+        },
+        "respLength": {
+          "type": "keyword"
+        },
+        "esbRetCode": {
+          "type": "keyword"
+        },
+        "callId": {
+          "type": "keyword"
+        },
+        "retMsg": {
+          "type": "keyword"
+        },
+        "pCallId": {
+          "type": "keyword"
+        },
+        "endPoint": {
+          "type": "keyword"
+        },
+        "childService": {
+          "type": "keyword"
+        },
+
+        "phone": {
+          "type": "keyword"
+        },
+        "routeValue": {
+          "type": "keyword"
+        },
+        "poolId": {
+          "type": "keyword"
+        },
+        "beginTimeStr": {
+          "type": "keyword"
+        },
+        "srvName": {
+          "type": "keyword"
+        },
+        "host": {
+          "type": "keyword"
+        },
+        "_clientip": {
+          "type": "keyword"
+        },
+        "_product": {
+          "type": "keyword"
+        },
+        "_software": {
+          "type": "keyword"
+        },
+        "_kafka_topic": {
+          "type": "keyword"
+        },
+        "funName": {
+          "type": "keyword"
+        },
+        "executeTime": {
+          "type": "long"
+        }
+      }
+    }
+  }
+}
+
