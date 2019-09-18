@@ -1,6 +1,7 @@
 package com.sitech.paas.elk.dao;
 
 import com.sitech.paas.elk.dao.impl.BaseEsQuery;
+import com.sitech.paas.elk.dao.impl.EsbwsEsQuery;
 import com.sitech.paas.elk.domain.EsEsbConfig;
 import org.apache.commons.codec.binary.Base64;
 import org.apache.http.Header;
@@ -13,7 +14,12 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 /**
- * 
+ * FIXME 有这么几个问题，
+ *  EsQuery的生产应该只是根据索引；
+ *  通用的查询：esb池、时间范围这个应该怎么处理
+ *
+ * 目前将上面条件全部作为EsQuery的生产，还是有点问题的
+ *
  * @author liwei_paas 
  * @date 2019/9/9
  */
@@ -44,6 +50,14 @@ public class EsQueryFactory {
         return baseEsQuery;
     }
 
+    public EsbwsEsQuery buildEsbwsQuery(Integer esbPoolId,Date begin,Date end){
+        EsEsbConfig esEsbConfig = getEsEsbConfig(esbPoolId);
+        String[] esbHosts = getEsbHosts(esbPoolId);
+        RestHighLevelClient esClient = getEsClient(esEsbConfig);
+        EsbwsEsQuery baseEsQuery = new EsbwsEsQuery(esClient, indices(INDEX_ESB_ESBWS,begin,end));
+        baseEsQuery.addNecessaryEsbHosts(esbHosts).addNecessaryBeginTime(begin).addNecessaryEndTime(end);
+        return baseEsQuery;
+    }
 
     private EsEsbConfig getEsEsbConfig(Integer esbPoolId){
         EsEsbConfig config = new EsEsbConfig();
@@ -124,20 +138,30 @@ public class EsQueryFactory {
      * @return
      */
     private String[] between(String index,Date begin,Date end){
-        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
 
         Calendar beginCalendar = Calendar.getInstance();
         Calendar endCalendar = Calendar.getInstance();
         beginCalendar.setTime(begin);
         endCalendar.setTime(end);
 
+        if (endCalendar.before(beginCalendar)){
+            return new String[]{_index(index,begin)};
+        }
+        if (endCalendar.get(Calendar.DATE)==beginCalendar.get(Calendar.DATE)){
+            return new String[]{_index(index,end)};
+        }
         ArrayList<String> list = new ArrayList<>();
         while(beginCalendar.before(endCalendar)){
-            list.add(index+"-"+dateFormat.format(beginCalendar.getTime()));
+            list.add(_index(index,beginCalendar.getTime()));
             beginCalendar.add(Calendar.DAY_OF_YEAR,1);
         }
         //最后一天也得加上
-        list.add(index+"-"+dateFormat.format(end));
+        list.add(_index(index,end));
         return list.toArray(new String[list.size()]);
+    }
+
+    private String _index(String index,Date date){
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd");
+        return index+"-"+dateFormat.format(date);
     }
 }

@@ -8,6 +8,7 @@ import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.Aggregation;
 
 import java.io.IOException;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -29,8 +30,11 @@ public interface EsQuery {
 
     default SearchResponse doQuery(RestHighLevelClient client, SearchRequest request){
         try {
+            System.out.println(Arrays.toString(request.indices()));
             System.out.println(request.source().toString());
-            return client.search(request,RequestOptions.DEFAULT);
+            SearchResponse response = client.search(request, RequestOptions.DEFAULT);
+            System.out.println(response.getTook());
+            return response;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }finally {
