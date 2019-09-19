@@ -3,6 +3,7 @@ package com.sitech.paas.elk.dao.impl;
 import com.sitech.paas.elk.dao.EsQuery;
 import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
@@ -10,7 +11,9 @@ import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Map;
@@ -21,114 +24,111 @@ import java.util.Map;
  * @date 2019/9/17
  */
 public class BaseEsQuery implements EsQuery {
-    protected RestHighLevelClient client;
 
-    protected SearchRequest searchRequest;
+    private RestHighLevelClient client;
 
-    protected NecessaryQueryCondition necessaryQueryCondition ;
+    private String[] indices;
 
+    protected SearchSourceBuilder searchSourceBuilder ;
+
+    protected transient BoolQueryBuilder boolQuery;
 
     public BaseEsQuery(RestHighLevelClient client,String...indices){
+        this();
         this.client = client;
-        this.searchRequest = indices.length==0?new SearchRequest():new SearchRequest(indices);
-        this.necessaryQueryCondition = new NecessaryQueryCondition();
+        this.indices = indices;
+
+    }
+
+    public BaseEsQuery(){
+        this.searchSourceBuilder =  new SearchSourceBuilder();
+        boolQuery = QueryBuilders.boolQuery();
     }
 
     @Override
-    public Aggregation queryTermWithAggregations( Map<String, String> terms, List<String> aggKeys) {
+    public SearchHits queryAll() {
+        return doQuery().getHits();
+    }
+
+    @Override
+    public Aggregation queryAggregations( Map<String, String> terms, List<String> aggKeys) {
         //TODO
         return null;
     }
 
     @Override
     public SearchHits queryTerms(Map<String, String> terms) {
-        SearchSourceBuilder searchSourceBuilder = searchSourceBuilder();
-
-        BoolQueryBuilder boolQuery = (BoolQueryBuilder) searchSourceBuilder.query();
         for (String key : terms.keySet()){
             boolQuery.must(QueryBuilders.termQuery(key,terms.get(key)));
         }
-        searchSourceBuilder.query(boolQuery);
-        searchRequest.source(searchSourceBuilder);
-        SearchResponse response = doQuery(client, searchRequest);
+        SearchResponse response = doQuery();
         return response.getHits();
     }
 
-    protected SearchSourceBuilder searchSourceBuilder(){
-        SearchSourceBuilder searchSourceBuilder = new SearchSourceBuilder();
-        BoolQueryBuilder boolQuery = QueryBuilders.boolQuery();
-        String[] esbHostIp = necessaryQueryCondition.getEsbHostIp();
-        //指定查询esb池
-        if (esbHostIp!=null&&esbHostIp.length>0){
-            boolQuery.must(QueryBuilders.termsQuery("fields._clientip",esbHostIp));
+    protected SearchResponse doQuery(){
+        try {
+            searchSourceBuilder.query(boolQuery);
+            SearchRequest searchRequest = indices.length==0?new SearchRequest():new SearchRequest(indices);
+            searchRequest.source(searchSourceBuilder);
+            System.out.println(Arrays.toString(indices));
+            System.out.println(searchSourceBuilder.toString());
+            SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
+            System.out.println(response.getTook());
+            return response;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }finally {
+            try {
+                client.close();
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            }
         }
-        //时间范围
+    }
+
+
+    public BaseEsQuery addEsbHosts(String[] hosts) {
+        boolQuery.must(QueryBuilders.termsQuery("fields._clientip",hosts));
+        return this;
+    }
+
+    public BaseEsQuery addRangeTime(Date begin,Date end) {
         SimpleDateFormat dateFormat = new SimpleDateFormat(TIMESTAMP_DATE_FORMAT);
         RangeQueryBuilder rangeQuery = QueryBuilders.rangeQuery("@timestamp");
-        Date beginTime = necessaryQueryCondition.getBeginTime();
-        Date endTime = necessaryQueryCondition.getEndTime();
-        if (beginTime!=null){
-            rangeQuery.gte(dateFormat.format(beginTime));
-        }
-        if (endTime!=null){
-            rangeQuery.lt(dateFormat.format(endTime));
-        }
-        if (rangeQuery.includeLower() || rangeQuery.includeUpper()){
-            boolQuery.must(rangeQuery);
-        }
-        searchSourceBuilder.query(boolQuery);
-
-        return searchSourceBuilder;
-    }
-
-    public BaseEsQuery addNecessaryEsbHosts(String[] hosts) {
-        necessaryQueryCondition.setEsbHostIp(hosts);
+        rangeQuery.gte(dateFormat.format(begin));
+        rangeQuery.lte(dateFormat.format(end));
+        boolQuery.must(rangeQuery);
         return this;
     }
 
-    public BaseEsQuery addNecessaryBeginTime(Date begin) {
-        necessaryQueryCondition.setBeginTime(begin);
-        return this;
-    }
-    public BaseEsQuery addNecessaryEndTime(Date end) {
-        necessaryQueryCondition.setEndTime(end);
+    public BaseEsQuery addRangeTime(Date begin) {
+        addRangeTime(begin,new Date());
         return this;
     }
 
+    public BaseEsQuery addFromAndSize(int from,int size){
+        searchSourceBuilder.from(from);
+        searchSourceBuilder.size(size);
+        return this;
+    }
 
+    public BaseEsQuery addFromAndSize(int size){
+        return addFromAndSize(0,size);
+    }
 
-    /**
-     * 几个查询的必要条件
-     * esb的查询里面，一般来说，都得需要指定查询的esb的那个池、那个时间段
-     *
-     */
-    static class  NecessaryQueryCondition{
-        Date beginTime;
-        Date endTime;
-        String[] esbHostIp;
+    public RestHighLevelClient getClient() {
+        return client;
+    }
 
-        public Date getBeginTime() {
-            return beginTime;
-        }
+    public void setClient(RestHighLevelClient client) {
+        this.client = client;
+    }
 
-        public void setBeginTime(Date beginTime) {
-            this.beginTime = beginTime;
-        }
+    public String[] getIndices() {
+        return indices;
+    }
 
-        public Date getEndTime() {
-            return endTime;
-        }
-
-        public void setEndTime(Date endTime) {
-            this.endTime = endTime;
-        }
-
-        public String[] getEsbHostIp() {
-            return esbHostIp;
-        }
-
-        public void setEsbHostIp(String[] esbHostIp) {
-            this.esbHostIp = esbHostIp;
-        }
+    public void setIndices(String[] indices) {
+        this.indices = indices;
     }
 }

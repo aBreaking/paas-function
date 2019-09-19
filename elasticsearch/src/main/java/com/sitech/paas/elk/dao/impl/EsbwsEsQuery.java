@@ -2,10 +2,8 @@ package com.sitech.paas.elk.dao.impl;
 
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestHighLevelClient;
-import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHits;
-import org.elasticsearch.search.builder.SearchSourceBuilder;
 import java.util.List;
 
 /**
@@ -19,6 +17,10 @@ public class EsbwsEsQuery extends BaseEsQuery {
         super(client, indices);
     }
 
+    public EsbwsEsQuery() {
+        super();
+    }
+
     /**
      * 正则匹配 info
      * 注意的是：由于info得类型是text，es会将文本进行分词，
@@ -28,16 +30,12 @@ public class EsbwsEsQuery extends BaseEsQuery {
      * @return
      */
     public SearchHits queryInfoByRegexp(List<String> regexpValuesInInfo){
-        SearchSourceBuilder searchSourceBuilder = searchSourceBuilder();
-        BoolQueryBuilder boolQuery = (BoolQueryBuilder) searchSourceBuilder.query();
         for (String key : regexpValuesInInfo){
             //esbws的info算是个bug吧，必须得将字符串全部小写再匹配。
             String regexpKey = ".*"+key.toLowerCase()+".*";
             boolQuery.must(QueryBuilders.regexpQuery("info",regexpKey));
         }
-        searchSourceBuilder.query(boolQuery);
-        searchRequest.source(searchSourceBuilder);
-        SearchResponse response = doQuery(client, searchRequest);
+        SearchResponse response = doQuery();
         return response.getHits();
     }
 

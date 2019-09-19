@@ -1,14 +1,7 @@
 package com.sitech.paas.elk.dao;
 
-import org.elasticsearch.action.search.SearchRequest;
-import org.elasticsearch.action.search.SearchResponse;
-import org.elasticsearch.client.RequestOptions;
-import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.Aggregation;
-
-import java.io.IOException;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -24,25 +17,14 @@ public interface EsQuery {
      */
     String TIMESTAMP_DATE_FORMAT = "yyyy-MM-dd'T'HH:mm:ss.SSS'Z'";
 
-    Aggregation queryTermWithAggregations(Map<String,String> terms, List<String> aggKeys);
+    /**
+     * 空查询，类似不带条件查询的sql： select * from table
+     * @return
+     */
+    SearchHits queryAll();
+
+    Aggregation queryAggregations(Map<String,String> terms, List<String> aggKeys);
 
     SearchHits queryTerms(Map<String,String> terms);
 
-    default SearchResponse doQuery(RestHighLevelClient client, SearchRequest request){
-        try {
-            System.out.println(Arrays.toString(request.indices()));
-            System.out.println(request.source().toString());
-            SearchResponse response = client.search(request, RequestOptions.DEFAULT);
-            System.out.println(response.getTook());
-            return response;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }finally {
-            try {
-                client.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
-        }
-    }
 }

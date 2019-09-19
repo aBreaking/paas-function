@@ -48,7 +48,7 @@ public class EsQueryTest {
         String srvName = "sPubUserWordBrandInfo";
         list.add(srvName);
         list.add("040107");
-
+        esbwsEsQuery.addFromAndSize(5);
         SearchHits hits = esbwsEsQuery.queryInfoByRegexp(list);
 
 
@@ -57,6 +57,7 @@ public class EsQueryTest {
             String info = (String) source.get("info");
             System.out.println(EsbwsEsQuery.parseInfo2Summary(info,srvName));
         }
+        System.out.println(hits.getHits().length);
         System.out.println(hits.getTotalHits());
     }
 

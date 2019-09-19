@@ -42,21 +42,29 @@ public class EsQueryFactory {
      * @return
      */
     public BaseEsQuery build(Integer esbPoolId,String index,Date begin,Date end){
-        EsEsbConfig esEsbConfig = getEsEsbConfig(esbPoolId);
-        String[] esbHosts = getEsbHosts(esbPoolId);
-        RestHighLevelClient esClient = getEsClient(esEsbConfig);
-        BaseEsQuery baseEsQuery = new BaseEsQuery(esClient, indices(index,begin,end));
-        baseEsQuery.addNecessaryEsbHosts(esbHosts).addNecessaryBeginTime(begin).addNecessaryEndTime(end);
-        return baseEsQuery;
+        return buildQuery(BaseEsQuery.class,esbPoolId,index,begin,end);
     }
 
     public EsbwsEsQuery buildEsbwsQuery(Integer esbPoolId,Date begin,Date end){
+        return buildQuery(EsbwsEsQuery.class,esbPoolId,INDEX_ESB_ESBWS,begin,end);
+    }
+
+    private <T> T buildQuery(Class<? extends BaseEsQuery> clazz,Integer esbPoolId,String index,Date begin,Date end){
         EsEsbConfig esEsbConfig = getEsEsbConfig(esbPoolId);
         String[] esbHosts = getEsbHosts(esbPoolId);
         RestHighLevelClient esClient = getEsClient(esEsbConfig);
-        EsbwsEsQuery baseEsQuery = new EsbwsEsQuery(esClient, indices(INDEX_ESB_ESBWS,begin,end));
-        baseEsQuery.addNecessaryEsbHosts(esbHosts).addNecessaryBeginTime(begin).addNecessaryEndTime(end);
-        return baseEsQuery;
+        String[] indices = indices(index, begin, end);
+        BaseEsQuery baseEsQuery;
+        try {
+            baseEsQuery = clazz.newInstance();
+            baseEsQuery.setClient(esClient);
+            baseEsQuery.setIndices(indices);
+            baseEsQuery.addEsbHosts(esbHosts).addRangeTime(begin,end);
+            return (T) baseEsQuery;
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
     }
 
     private EsEsbConfig getEsEsbConfig(Integer esbPoolId){
