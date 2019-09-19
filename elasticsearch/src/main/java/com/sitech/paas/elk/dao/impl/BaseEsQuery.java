@@ -5,7 +5,6 @@ import org.elasticsearch.action.search.SearchRequest;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.index.query.BoolQueryBuilder;
-import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.SearchHits;
@@ -100,6 +99,8 @@ public class BaseEsQuery implements EsQuery {
 
     /**
      * 几个查询的必要条件
+     * esb的查询里面，一般来说，都得需要指定查询的esb的那个池、那个时间段
+     *
      */
     static class  NecessaryQueryCondition{
         Date beginTime;

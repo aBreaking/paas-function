@@ -6,9 +6,7 @@ import org.elasticsearch.index.query.BoolQueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
-
 import java.util.List;
-import java.util.Map;
 
 /**
  *
@@ -16,9 +14,6 @@ import java.util.Map;
  * @date 2019/9/17
  */
 public class EsbwsEsQuery extends BaseEsQuery {
-    public EsbwsEsQuery(RestHighLevelClient client) {
-        super(client);
-    }
 
     public EsbwsEsQuery(RestHighLevelClient client, String... indices) {
         super(client, indices);
@@ -44,6 +39,28 @@ public class EsbwsEsQuery extends BaseEsQuery {
         searchRequest.source(searchSourceBuilder);
         SearchResponse response = doQuery(client, searchRequest);
         return response.getHits();
+    }
+
+    /**
+     * 获取info里面的概要信息
+     * @return
+     */
+    public static String parseInfo2Summary(String info,String srvName){
+        if (!info.startsWith("ERROR")){
+            return info;
+        }
+        String summary = info.trim();
+        int indexOfDm = summary.indexOf("DETAIL_MSG");
+        if (indexOfDm==-1){
+            //直接取首行作为概要
+            summary = summary.substring(0, summary.indexOf("\t"));
+            summary = summary.substring(summary.indexOf(srvName));
+        }else{
+            summary = summary.substring(indexOfDm);
+            summary = summary.substring(summary.indexOf(srvName));
+            summary = summary.substring(0,summary.indexOf("\"}}"));
+        }
+        return summary;
     }
 
 }
