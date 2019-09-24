@@ -11,6 +11,9 @@ import org.elasticsearch.index.query.RangeQueryBuilder;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.Aggregation;
 import org.elasticsearch.search.builder.SearchSourceBuilder;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
@@ -24,6 +27,8 @@ import java.util.Map;
  * @date 2019/9/17
  */
 public class BaseEsQuery implements EsQuery {
+
+    private static Logger logger = LoggerFactory.getLogger(BaseEsQuery.class);
 
     private RestHighLevelClient client;
 
@@ -70,25 +75,34 @@ public class BaseEsQuery implements EsQuery {
             searchSourceBuilder.query(boolQuery);
             SearchRequest searchRequest = indices.length==0?new SearchRequest():new SearchRequest(indices);
             searchRequest.source(searchSourceBuilder);
-            System.out.println(Arrays.toString(indices));
-            System.out.println(searchSourceBuilder.toString());
+            logger.info("开始执行es查询，索引为:{},es语句为:{}",Arrays.toString(indices),searchSourceBuilder.toString());
             SearchResponse response = client.search(searchRequest, RequestOptions.DEFAULT);
-            System.out.println(response.getTook());
+            logger.info("es查询完毕，花费时间:{}",response.getTook());
             return response;
         } catch (IOException e) {
             throw new RuntimeException(e);
         }finally {
-            try {
-                client.close();
-            } catch (IOException e) {
-                throw new RuntimeException(e);
-            }
+            closeClient();
+        }
+    }
+
+    protected void closeClient(){
+        try {
+            client.close();
+        } catch (IOException e) {
+            logger.error("关闭es高级客户端出错",e);
         }
     }
 
 
     public BaseEsQuery addEsbHosts(String[] hosts) {
         boolQuery.must(QueryBuilders.termsQuery("fields._clientip",hosts));
+        return this;
+    }
+
+    public BaseEsQuery addFromAndSize(int from,int size){
+        searchSourceBuilder.from(from);
+        searchSourceBuilder.size(size);
         return this;
     }
 
@@ -103,12 +117,6 @@ public class BaseEsQuery implements EsQuery {
 
     public BaseEsQuery addRangeTime(Date begin) {
         addRangeTime(begin,new Date());
-        return this;
-    }
-
-    public BaseEsQuery addFromAndSize(int from,int size){
-        searchSourceBuilder.from(from);
-        searchSourceBuilder.size(size);
         return this;
     }
 

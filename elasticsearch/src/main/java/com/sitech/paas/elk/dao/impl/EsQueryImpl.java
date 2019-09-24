@@ -125,9 +125,6 @@ public class EsQueryImpl {
         return list;
     }
 
-
-
-
     private String matchValue(Map<String,String> map,String key){
         for (String s : map.keySet()){
             if (s.indexOf(key)!=-1){

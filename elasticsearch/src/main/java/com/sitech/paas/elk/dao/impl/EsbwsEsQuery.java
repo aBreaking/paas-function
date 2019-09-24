@@ -1,9 +1,19 @@
 package com.sitech.paas.elk.dao.impl;
 
-import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.action.search.*;
+import org.elasticsearch.client.RequestOptions;
 import org.elasticsearch.client.RestHighLevelClient;
+import org.elasticsearch.common.unit.TimeValue;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.Scroll;
+import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -12,6 +22,8 @@ import java.util.List;
  * @date 2019/9/17
  */
 public class EsbwsEsQuery extends BaseEsQuery {
+
+    private static Logger logger = LoggerFactory.getLogger(BaseEsQuery.class);
 
     public EsbwsEsQuery(RestHighLevelClient client, String... indices) {
         super(client, indices);
@@ -40,6 +52,73 @@ public class EsbwsEsQuery extends BaseEsQuery {
     }
 
     /**
+     * scroll查询，默认查询出所有的数据。
+     * 这个方法是非常耗时间的，所以，你应该考虑将其异步
+     * @param regexpValuesInInfo 匹配info里面的某些内容
+     * @param searchHitResolver 如何去解析每个SearchHit
+     */
+    public List statisInfo(List<String> regexpValuesInInfo,SearchHitResolver searchHitResolver){
+        final Scroll scroll = new Scroll(TimeValue.timeValueMinutes(1L));
+        SearchRequest searchRequest = getIndices().length==0?new SearchRequest():new SearchRequest(getIndices());
+
+        for (String key : regexpValuesInInfo){
+            //esbws的info算是个bug吧，必须得将字符串全部小写再匹配。
+            String regexpKey = ".*"+key.toLowerCase()+".*";
+            boolQuery.must(QueryBuilders.regexpQuery("info",regexpKey));
+        }
+        searchSourceBuilder.query(boolQuery);
+        searchSourceBuilder.size(100);
+        searchRequest.source(searchSourceBuilder);
+        searchRequest.scroll(scroll);
+
+        RestHighLevelClient client = getClient();
+        SearchResponse searchResponse = null;
+        try {
+            searchResponse = client.search(searchRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            logger.error("esb ws scroll查询错误",e);
+            closeClient();
+            return Collections.emptyList();
+        }
+        String scrollId = searchResponse.getScrollId();
+        SearchHit[] searchHits = searchResponse.getHits().getHits();
+
+        List hitsList = new ArrayList();
+        int i=0;
+        while (searchHits != null && searchHits.length > 0) {
+            SearchScrollRequest scrollRequest = new SearchScrollRequest(scrollId);
+
+            scrollRequest.scroll(scroll);
+            try{
+                searchResponse = client.scroll(scrollRequest, RequestOptions.DEFAULT);
+            }catch (IOException e){
+                logger.warn("scroll查询出现{}异常，解析到此为止！",e.getMessage());
+                break;
+            }
+            scrollId = searchResponse.getScrollId();
+            searchHits = searchResponse.getHits().getHits();
+            for (SearchHit searchHit : searchHits){
+                searchHitResolver.resolve(searchHit);
+                i++;
+            }
+        }
+
+        ClearScrollRequest clearScrollRequest = new ClearScrollRequest();
+        clearScrollRequest.addScrollId(scrollId);
+        ClearScrollResponse clearScrollResponse = null;
+        try {
+            clearScrollResponse = client.clearScroll(clearScrollRequest, RequestOptions.DEFAULT);
+        } catch (IOException e) {
+            logger.warn("clear scroll查询异常",e);
+        }
+        if (!clearScrollResponse.isSucceeded()){
+            logger.warn("Clear the scroll context once the scroll is NOT completed");
+        }
+        closeClient();
+        return hitsList;
+    }
+
+    /**
      * 获取info里面的概要信息
      * @return
      */
@@ -60,5 +139,7 @@ public class EsbwsEsQuery extends BaseEsQuery {
         }
         return summary;
     }
+
+
 
 }

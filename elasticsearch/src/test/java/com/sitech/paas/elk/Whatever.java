@@ -19,7 +19,7 @@ import org.elasticsearch.search.aggregations.bucket.terms.TermsAggregationBuilde
 import org.elasticsearch.search.builder.SearchSourceBuilder;
 import org.junit.Test;
 
-import java.io.IOException;
+import java.io.*;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -29,6 +29,17 @@ import java.util.*;
  * @{DATE}
  */
 public class Whatever {
+
+    @Test
+    public void test05(){
+        try (InputStream inputStream = new FileInputStream(new File(""))){
+
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     @Test
     public void test04() throws ParseException {

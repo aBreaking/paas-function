@@ -6,6 +6,8 @@ import com.sitech.paas.elk.dao.impl.EsbwsEsQuery;
 import org.elasticsearch.search.SearchHit;
 import org.elasticsearch.search.SearchHits;
 import org.junit.Test;
+
+import javax.lang.model.element.NestingKind;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -20,6 +22,24 @@ public class EsQueryTest {
 
 
     public EsQueryTest() throws ParseException {
+    }
+
+    @Test
+    public void testRoll(){
+        EsbwsEsQuery esbwsEsQuery = esQueryFactory.buildEsbwsQuery(11, begin, end);
+        ArrayList<String> list = new ArrayList<>();
+        String srvName = "sPubUserWordBrandInfo";
+        list.add(srvName);
+        final Map<String,Integer> map = new HashMap<>();
+        esbwsEsQuery.statisInfo(list, (searchHit) -> {
+            Map<String, Object> sourceMap = searchHit.getSourceAsMap();
+            String info = (String) sourceMap.get("info");
+            String summary = EsbwsEsQuery.parseInfo2Summary(info, srvName);
+            int size = map.containsKey(summary)?map.get(summary)+1:1;
+            map.put(summary,size);
+            return summary;
+        });
+        System.out.println(map);
     }
 
     @Test
