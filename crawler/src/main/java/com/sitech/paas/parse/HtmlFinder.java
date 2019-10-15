@@ -16,6 +16,10 @@ public class HtmlFinder {
         this.html = html;
     }
 
+    public static String findText(Selectable selectable){
+        return selectable.xpath("allText()").get();
+    }
+
     /**
      * 直接根据指定的选择器找到该元素下面的value
      * @param selector

@@ -1,5 +1,6 @@
 package com.sitech.paas.crawler;
 
+import com.sitech.paas.hadoop.HBaseRegionServerMonitor;
 import com.sitech.paas.parse.HtmlFinder;
 import org.jsoup.nodes.Element;
 import org.junit.Test;
@@ -9,9 +10,11 @@ import us.codecraft.webmagic.Site;
 import us.codecraft.webmagic.Task;
 import us.codecraft.webmagic.downloader.HttpClientDownloader;
 import us.codecraft.webmagic.selector.Html;
-import us.codecraft.webmagic.selector.HtmlNode;
 import us.codecraft.webmagic.selector.Selectable;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -26,16 +29,33 @@ public class WebmagicTest {
     private String pwd = "";
 
     @Test
+    public void test04(){
+        List<String> list = new ArrayList<>();
+        Collections.addAll(list,"172.21.11.66:14004","172.21.11.67:14004");
+        String usr = "e3base";
+        String pwd = "xbase";
+        HBaseRegionServerMonitor monitor = new HBaseRegionServerMonitor(list,usr,pwd);
+        Collection<HBaseRegionServerMonitor.RegionStat> collection = monitor.hear();
+        System.out.println(collection);
+    }
+
+
+    @Test
     public void test03(){
-        String url = "http://172.21.11.73:14002/master-status?filter=all";
+        String url = "http://172.21.11.67:14004/rs-status#regionRequestStats";
         String usr = "e3base";
         String pwd = "xbase";
         WebCrawler crawler = new WebCrawler(url,usr,pwd);
         Html html = crawler.html();
         HtmlFinder finder = new HtmlFinder(html);
-        String selector = "#tab_baseStats > table > tbody > tr:nth-child(2) > td:nth-child(1) > a";
-        String text = finder.findText(selector);
-        System.out.println(text);
+        String selector = "#tab_regionRequestStats > table > tbody > tr";
+        Selectable tr = finder.findSelectable(selector);
+        List<Selectable> nodes = tr.nodes();
+        Selectable td = nodes.get(1);
+        Selectable firstChild = td.xpath("//td");
+        String regionName = HtmlFinder.findText(firstChild.nodes().get(0));
+        Selectable readCount = firstChild.nodes().get(1);
+        System.out.println();
     }
 
 
