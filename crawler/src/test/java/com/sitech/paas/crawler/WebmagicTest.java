@@ -29,6 +29,29 @@ public class WebmagicTest {
     private String pwd = "";
 
     @Test
+    public void clawHbaseBackup(){
+        String url = "http://172.21.11.73:14002/master-status";
+        String usr = "e3base";
+        String pwd = "xbase";
+        WebCrawler crawler = new WebCrawler(url,usr,pwd);
+        Html html = crawler.html();
+
+        String selector ="body > div.container > div:nth-child(2) > section:nth-child(2) > table > tbody";
+        Selectable selectable = html.$(selector);
+        Selectable trs = selectable.xpath("//tr");
+        for (Selectable tr : trs.nodes()){
+            Selectable tds = tr.xpath("//td");
+            if (tds.nodes().isEmpty()){
+                continue;
+            }
+            String serverName = tds.nodes().get(0).xpath("allText()").get();
+            System.out.println(serverName);
+        }
+        System.out.println();
+
+    }
+
+    @Test
     public void test04(){
         List<String> list = new ArrayList<>();
         Collections.addAll(list,"172.21.11.66:14004","172.21.11.67:14004");
