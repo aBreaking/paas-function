@@ -4,9 +4,9 @@ import com.abreaking.easyjpa.constraint.DateTable;
 import com.abreaking.easyjpa.constraint.Table;
 import org.apache.commons.lang.StringUtils;
 
-import java.lang.annotation.Annotation;
+import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
-import java.util.Date;
+import java.util.*;
 
 /**
  * 反射工具
@@ -15,6 +15,11 @@ import java.util.Date;
  */
 public final class ReflectUtil {
 
+    /**
+     * 根据类名得到表名
+     * @param clazz
+     * @return
+     */
     public static String getTableName(Class clazz){
         if (clazz.isAnnotationPresent(Table.class)){
             Table table = (Table) clazz.getAnnotation(Table.class);
@@ -49,5 +54,34 @@ public final class ReflectUtil {
 
     }
 
-
+    /**
+     * 带有getter及setter的属性的getter方法。class中所有的
+     * @param clazz
+     * @return
+     */
+    public static List<Method> poGetterMethods(Class clazz){
+        List<Method> list= new ArrayList<>();
+        Method[] methods = clazz.getDeclaredMethods();
+        Set<String> methodNameSet = new HashSet(methods.length);
+        for (Method method : methods){
+            String methodName = method.getName();
+            if (methodName.startsWith("set")){
+                String getMethodName = "g"+methodName.substring(1);
+                if (methodNameSet.contains(getMethodName)){
+                    try{
+                        list.add(clazz.getDeclaredMethod(getMethodName));
+                        continue;
+                    }catch (Exception e){}
+                }
+            }
+            if (methodName.startsWith("get")){
+                String setMethodName = "s"+methodName.substring(1);
+                if (methodNameSet.contains(setMethodName)){
+                    list.add(method);
+                }
+            }
+            methodNameSet.add(methodName);
+        }
+        return list;
+    }
 }
