@@ -2,9 +2,7 @@ package com.abreaking.easyjpa.matrix.impl;
 
 
 import com.abreaking.easyjpa.matrix.ColumnMatrix;
-
 import java.sql.Types;
-
 
 /**
  * 用空间坐标轴的方式来描述ColumnMatrix，想象一下，空间上任意一点我们都可以用x y z三个坐标轴进行描述
@@ -131,6 +129,24 @@ public class AxisColumnMatrix implements ColumnMatrix {
             newNtv[i] = ntv[i];
         }
         this.ntv = newNtv;
+    }
+
+    @Override
+    public String toString() {
+        StringBuilder builder = new StringBuilder();
+        builder.append("AxisColumnMatrix:[");
+        for (int i = 0; i < currentSize; i++) {
+            Axis axis = ntv[i];
+            builder.append(axis.xAxis)
+                    .append(":").append(axis.yAxis).append(":").append(axis.zAxis);
+            builder.append(";");
+        }
+        String s = builder.toString();
+        if (s.endsWith(";")){
+            s = s.substring(0,s.length()-1);
+        }
+        s += "]";
+        return s;
     }
 
     /**
