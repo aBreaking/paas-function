@@ -62,7 +62,7 @@ public class EsbwsEsQuery extends BaseEsQuery {
         SearchRequest searchRequest = getIndices().length==0?new SearchRequest():new SearchRequest(getIndices());
 
         for (String key : regexpValuesInInfo){
-            //esbws的info算是个bug吧，必须得将字符串全部小写再匹配。
+            //esbws的info有进行分词，必须得将字符串全部小写再匹配。
             String regexpKey = ".*"+key.toLowerCase()+".*";
             boolQuery.must(QueryBuilders.regexpQuery("info",regexpKey));
         }

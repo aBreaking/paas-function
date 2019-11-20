@@ -1,7 +1,12 @@
 package com.sitech.paas.elk.dao;
 
+import org.elasticsearch.action.search.SearchRequest;
+import org.elasticsearch.action.search.SearchResponse;
+import org.elasticsearch.client.RequestOptions;
+import org.elasticsearch.client.RestHighLevelClient;
 import org.elasticsearch.search.SearchHits;
 import org.elasticsearch.search.aggregations.Aggregation;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 
@@ -26,5 +31,9 @@ public interface EsQuery {
     Aggregation queryAggregations(Map<String,String> terms, List<String> aggKeys);
 
     SearchHits queryTerms(Map<String,String> terms);
+
+    default SearchResponse query(RestHighLevelClient client, SearchRequest searchRequest) throws IOException {
+        return client.search(searchRequest, RequestOptions.DEFAULT);
+    }
 
 }
