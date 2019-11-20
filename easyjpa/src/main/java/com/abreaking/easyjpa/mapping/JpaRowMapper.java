@@ -1,4 +1,4 @@
-package com.abreaking.easyjpa;
+package com.abreaking.easyjpa.mapping;
 
 import com.abreaking.easyjpa.constraint.Column;
 import com.abreaking.easyjpa.constraint.Id;
@@ -7,16 +7,13 @@ import com.abreaking.easyjpa.matrix.Matrix;
 import com.abreaking.easyjpa.matrix.impl.AxisColumnMatrix;
 import com.abreaking.easyjpa.util.NameUtil;
 import com.abreaking.easyjpa.util.ReflectUtil;
-import org.springframework.jdbc.core.BeanPropertyRowMapper;
-import org.springframework.jdbc.core.RowMapper;
-import org.springframework.util.StringUtils;
-import java.io.Serializable;
+import org.apache.commons.lang.StringUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
-import java.sql.ResultSet;
-import java.sql.SQLException;
 import java.sql.Types;
-import java.util.*;
+import java.util.Date;
+import java.util.Map;
+
 
 /**
  * 通用的JPA 实体-表  映射类
@@ -29,20 +26,13 @@ import java.util.*;
  *
  * 而后，一些增删改查的通用方法，see {@CommonJpaService} or {@CommonJpaDao} 。 sql规范的数据库（比如oracle、mysql都支持）
  *
- * @author liwei_paas 
- * @date 2019/6/27
+ * @author liwei_paas
  */
-public abstract class AbstractJpaRowMapper  implements Serializable,RowMapper {
+public class JpaRowMapper {
 
-
-    @Override
-    public AbstractJpaRowMapper mapRow(ResultSet rs, int rowNumber) throws SQLException {
-        BeanPropertyRowMapper beanPropertyRowMapper = new BeanPropertyRowMapper(this.getClass());
-        return (AbstractJpaRowMapper) beanPropertyRowMapper.mapRow(rs,rowNumber);
-    }
 
     /**
-     * 表名
+     * 默认表名
      * @return
      */
     public String tableName(){
@@ -52,16 +42,17 @@ public abstract class AbstractJpaRowMapper  implements Serializable,RowMapper {
     public Matrix emptyMatrix(){
         return matrix(false);
     }
+
     public Matrix matrix(){
         return matrix(true);
     }
 
     /**
      * 将对象有值的属性作为matrix
-     * @param isNeedFieldValue
+     * @param isNeedFieldValue 是否需要值为空的字段
      * @return
      */
-    private Matrix matrix(boolean isNeedFieldValue){
+    protected Matrix matrix(boolean isNeedFieldValue){
         Field[] fields = this.getClass().getDeclaredFields();
         Map<String, Method> methodMap = ReflectUtil.poGetterMethodsMap(this.getClass());
         ColumnMatrix colMatrix = new AxisColumnMatrix(methodMap.size());
@@ -113,23 +104,21 @@ public abstract class AbstractJpaRowMapper  implements Serializable,RowMapper {
         return colMatrix;
     }
 
-
+    /**
+     * 根据javad的字段类型得到sql的字段类型
+     * @param field
+     * @return
+     */
     private int getType(Field field){
         Class<?> fieldType = field.getType();
-        int type;
         //字段类型处理，这里处理三种：String,Number,Date
-        if (String.class.isAssignableFrom(fieldType)){
-            type = Types.VARCHAR;
-        }else if (Date.class.isAssignableFrom(fieldType)){
-            type = Types.TIMESTAMP;
-        }else if (Number.class.isAssignableFrom(fieldType)){
-            type = Types.NUMERIC;
-        }else{
-            //其他类型的，默认按照字符串进行处理
-            type = Types.VARCHAR;
-        }
-        return type;
+        return String.class.isAssignableFrom(fieldType)?Types.VARCHAR:
+                Integer.class.isAssignableFrom(fieldType)?Types.INTEGER:
+                Long.class.isAssignableFrom(fieldType)?Types.NUMERIC:
+                Float.class.isAssignableFrom(fieldType)?Types.FLOAT:
+                Double.class.isAssignableFrom(fieldType)?Types.DOUBLE:
+                Date.class.isAssignableFrom(fieldType)?Types.TIMESTAMP:
+                        Types.VARCHAR;
     }
-
 
 }
