@@ -3,7 +3,6 @@ package com.abreaking.easyjpa.util;
 import com.abreaking.easyjpa.constraint.DateTable;
 import com.abreaking.easyjpa.constraint.Table;
 import org.apache.commons.lang.StringUtils;
-
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -84,4 +83,41 @@ public final class ReflectUtil {
         }
         return list;
     }
+
+    public static Map<String,Method> poGetterMethodsMap(Class clazz){
+        Map<String,Method> map = new HashMap<>();
+        Method[] methods = clazz.getDeclaredMethods();
+        Set<String> methodNameSet = new HashSet(methods.length);
+        for (Method method : methods){
+            String methodName = method.getName();
+            if (methodName.startsWith("set")){
+                //get方法名
+                String getMethodName = "g"+methodName.substring(1);
+                //get方法对应的字段名
+                String filedName = filedName(methodName);
+                if (methodNameSet.contains(getMethodName)){
+                    try{
+                        map.put(filedName,clazz.getDeclaredMethod(getMethodName));
+                        continue;
+                    }catch (Exception e){}
+                }
+            }
+            if (methodName.startsWith("get")){
+                String setMethodName = "s"+methodName.substring(1);
+                if (methodNameSet.contains(setMethodName)){
+                    map.put(filedName(methodName),method);
+                }
+            }
+            methodNameSet.add(methodName);
+        }
+        return map;
+    }
+
+    private static String filedName(String getterOrSetterMethodName){
+        String fieldName = getterOrSetterMethodName.substring(3);
+        String firstWord = fieldName.substring(0, 1);
+        String suffix = fieldName.substring(1);
+        return firstWord.toLowerCase()+suffix;
+    }
+
 }
