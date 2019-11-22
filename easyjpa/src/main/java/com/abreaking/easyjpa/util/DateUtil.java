@@ -7,7 +7,7 @@ import java.util.Date;
  * 一些日期的工具
  * @author liwei
  */
-public class DateUtils {
+public class DateUtil {
     /**
      * 获取上一个时刻的日期
      * @param date 当前日期

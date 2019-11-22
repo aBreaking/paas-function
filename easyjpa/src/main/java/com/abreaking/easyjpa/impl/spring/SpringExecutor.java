@@ -1,10 +1,9 @@
-package com.abreaking.easyjpa.exec;
+package com.abreaking.easyjpa.impl.spring;
 
+import com.abreaking.easyjpa.exec.Executor;
 import com.abreaking.easyjpa.mapping.JpaRowMapper;
-import com.abreaking.easyjpa.mapping.SpringJdbcJpaRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Component;
-
 import javax.annotation.Resource;
 import java.util.List;
 
@@ -14,7 +13,7 @@ import java.util.List;
  * @date 2019/11/21
  */
 @Component
-public class SpringExecutor implements Executor{
+public class SpringExecutor implements Executor {
 
     @Resource
     JdbcTemplate jdbcTemplate;

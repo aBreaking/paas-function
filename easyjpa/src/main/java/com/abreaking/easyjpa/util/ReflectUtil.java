@@ -84,6 +84,11 @@ public final class ReflectUtil {
         return list;
     }
 
+    /**
+     * po类所有的带有getter setter字段的getter方法
+     * @param clazz
+     * @return
+     */
     public static Map<String,Method> poGetterMethodsMap(Class clazz){
         Map<String,Method> map = new HashMap<>();
         Method[] methods = clazz.getDeclaredMethods();
@@ -112,6 +117,8 @@ public final class ReflectUtil {
         }
         return map;
     }
+
+
 
     private static String filedName(String getterOrSetterMethodName){
         String fieldName = getterOrSetterMethodName.substring(3);

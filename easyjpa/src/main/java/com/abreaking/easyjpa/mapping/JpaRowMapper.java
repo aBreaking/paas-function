@@ -7,11 +7,11 @@ import com.abreaking.easyjpa.matrix.Matrix;
 import com.abreaking.easyjpa.matrix.impl.AxisColumnMatrix;
 import com.abreaking.easyjpa.util.NameUtil;
 import com.abreaking.easyjpa.util.ReflectUtil;
+import com.abreaking.easyjpa.util.SqlUtil;
 import org.apache.commons.lang.StringUtils;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.sql.Types;
-import java.util.Date;
 import java.util.Map;
 
 
@@ -97,28 +97,13 @@ public class JpaRowMapper {
                 columnName = NameUtil.underscoreName(fieldName);
             }
             if (type == Types.NULL){
-                type = getType(field);
+                type = SqlUtil.getSqlType(field.getType());
             }
             colMatrix.put(columnName,type,value);
         }
         return colMatrix;
     }
 
-    /**
-     * 根据javad的字段类型得到sql的字段类型
-     * @param field
-     * @return
-     */
-    private int getType(Field field){
-        Class<?> fieldType = field.getType();
-        //字段类型处理，这里处理三种：String,Number,Date
-        return String.class.isAssignableFrom(fieldType)?Types.VARCHAR:
-                Integer.class.isAssignableFrom(fieldType)?Types.INTEGER:
-                Long.class.isAssignableFrom(fieldType)?Types.NUMERIC:
-                Float.class.isAssignableFrom(fieldType)?Types.FLOAT:
-                Double.class.isAssignableFrom(fieldType)?Types.DOUBLE:
-                Date.class.isAssignableFrom(fieldType)?Types.TIMESTAMP:
-                        Types.VARCHAR;
-    }
+
 
 }

@@ -1,5 +1,6 @@
-package com.abreaking.easyjpa.mapping;
+package com.abreaking.easyjpa.impl.spring;
 
+import com.abreaking.easyjpa.mapping.JpaRowMapper;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.RowMapper;
 import java.io.Serializable;
@@ -17,7 +18,6 @@ public class SpringJdbcJpaRowMapper extends JpaRowMapper implements Serializable
     public SpringJdbcJpaRowMapper(JpaRowMapper jpaRowMapper){
         this.rowMapper = jpaRowMapper;
     }
-
 
     @Override
     public RowMapper mapRow(ResultSet rs, int rowNumber) throws SQLException {
