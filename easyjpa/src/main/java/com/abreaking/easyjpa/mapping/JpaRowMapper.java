@@ -26,6 +26,8 @@ import java.util.Map;
  *
  * 而后，一些增删改查的通用方法，see {@CommonJpaService} or {@CommonJpaDao} 。 sql规范的数据库（比如oracle、mysql都支持）
  *
+ * //FIXME 应该加入缓存机制，根据一个对象set过哪些属性。下次同样还是有set这些的属性，应该直接就能得到sql。
+ *
  * @author liwei_paas
  */
 public class JpaRowMapper {
@@ -49,7 +51,7 @@ public class JpaRowMapper {
 
     /**
      * 将对象有值的属性作为matrix
-     * @param isNeedFieldValue 是否需要值为空的字段
+     * @param isNeedFieldValue 是要该字段的值，还是直接就空值
      * @return
      */
     protected Matrix matrix(boolean isNeedFieldValue){
@@ -103,7 +105,5 @@ public class JpaRowMapper {
         }
         return colMatrix;
     }
-
-
 
 }

@@ -1,5 +1,6 @@
 package com.abreaking.easyjpa;
 
+import com.abreaking.easyjpa.mapping.JpaRowMapper;
 import com.abreaking.easyjpa.matrix.Matrix;
 import org.junit.Test;
 
@@ -25,7 +26,7 @@ public class AbstractJpaRowMapperTest {
         System.out.println(matrix);
     }
 
-    class User extends AbstractJpaRowMapper{
+    class User extends JpaRowMapper {
         String userName;
         Integer age;
         Date birthday;

@@ -6,10 +6,9 @@ import com.abreaking.easyjpa.exec.Executor;
 import com.abreaking.easyjpa.mapping.JpaRowMapper;
 import com.abreaking.easyjpa.matrix.Matrix;
 import com.abreaking.easyjpa.util.Pagination;
+import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-
 import java.util.List;
-import java.util.logging.Logger;
 
 /**
  * 基本的实现
@@ -18,7 +17,7 @@ import java.util.logging.Logger;
  */
 public class CurdDaoImpl implements CurdDao{
 
-    private static final org.slf4j.Logger logger = LoggerFactory.getLogger(CurdDaoImpl.class);
+    private static final Logger logger = LoggerFactory.getLogger(CurdDaoImpl.class);
 
     /**
      * 数据库方言，目前仅支持mysql及oracle两种

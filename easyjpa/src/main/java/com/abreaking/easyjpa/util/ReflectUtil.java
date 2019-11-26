@@ -87,7 +87,7 @@ public final class ReflectUtil {
     /**
      * po类所有的带有getter setter字段的getter方法
      * @param clazz
-     * @return
+     * @return map: key:字段名，value:getter 方法
      */
     public static Map<String,Method> poGetterMethodsMap(Class clazz){
         Map<String,Method> map = new HashMap<>();
