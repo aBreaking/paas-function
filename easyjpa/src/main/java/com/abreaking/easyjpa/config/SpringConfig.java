@@ -4,12 +4,12 @@ import com.alibaba.druid.pool.DruidDataSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
-
 import javax.annotation.Resource;
 
 /**
- * @{USER}
- * @{DATE}
+ * 整合spring配置
+ * @author liwei_paas 
+ * @date 2019/12/23
  */
 @Configuration
 public class SpringConfig {
