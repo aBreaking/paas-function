@@ -3,7 +3,6 @@ package com.sitech.paas.javagen.demo;
 import com.alibaba.fastjson.JSONObject;
 import com.sitech.paas.javagen.demo.util.CommonUtil;
 import com.sitech.paas.javagen.demo.util.ServiceCaller;
-
 import java.util.concurrent.*;
 
 
@@ -17,12 +16,12 @@ public class FutureMain {
     static ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     public static void main(String[] args) throws TimeoutException {
-        final String $s1 = submitTask(() -> ServiceCaller.callRest("http://ip:port/my/rest/uri" , "{\"mypin\":\"something\"}"), 1000);
+        final String $s1 = submitTask(() -> ServiceCaller.callRest("http://ip:port/my/rest/uri" , "{\"mypin\":\"something\"}"),1000);
         final JSONObject $s2 = submitTask(() -> {
             int start = $s1.indexOf(":");
             JSONObject json = CommonUtil.parseJson($s1.substring(start+1));
             return  json;
-        });
+        },1234);
         final int $s3 = submitTask(()->CommonUtil.sum($s2.getString("first"), $s2.getString("second")));
         System.out.println($s3);
     }

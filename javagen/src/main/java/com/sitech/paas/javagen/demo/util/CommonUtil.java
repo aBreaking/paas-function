@@ -2,7 +2,6 @@ package com.sitech.paas.javagen.demo.util;
 
 import com.alibaba.fastjson.JSONObject;
 
-import java.util.List;
 
 /**
  * 通用工具，页面上可选择的

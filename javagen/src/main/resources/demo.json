@@ -1,5 +1,5 @@
 {
-  "name":"mytest", 
+  "name":"mytest",
   "desc":"调用远程服务然后再求个和",
   "tasks":[
     {
@@ -14,34 +14,31 @@
       "inputsExtra":{
         "restUrl":"java.lang.String",
         "pin":"java.lang.String"
-      }
+      },
+      "returnType":"java.lang.String"
     },
     {
       "type":"1",
-      "method":"myParser",
       "alias":"s2",
       "imports":"com.sitech.foo.CommonUtil;com.alibaba.fastjson.JsonObject",
-      "inputs":{
-        "param1":"$s1"
-      },
-      "inputsExtra":{
-        "param1":"java.lang.String"
-      },
-      "outputExtra":{
-        "return":"com.alibaba.fastjson.JsonObject"
-      },
+      "returnType":"com.alibaba.fastjson.JsonObject",
       "body":{
-        "java":"String[] split = s.split(\":\");JsonObject = CommonUtil.parseJson(split[2]);return  JsonObject;";
+        "java":"String[] split = s1.split(\":\");JsonObject = CommonUtil.parseJson(split[2]);return  JsonObject;"
       }
     },
     {
       "type":"0",
       "method":"sum",
       "alias":"s3",
-      "input":{
-        "a":"$s2.first",
-        "b":"$s2.second"
-      }
+      "inputs":{
+        "a":"s2.first",
+        "b":"s2.second"
+      },
+      "inputsExtra":{
+        "a":"java.lang.Integer",
+        "b":"java.lang.Integer"
+      },
+      "returnType":"java.lang.Integer"
     }
   ],
   "output":"$s3"
