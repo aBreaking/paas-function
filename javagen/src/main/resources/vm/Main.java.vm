@@ -1,0 +1,36 @@
+package com.sitech.paas.javagen.demo;
+
+import java.util.concurrent.*;
+#foreach($imp in $imports)
+    import $imp
+#end
+
+
+/**
+ * 使用future来提交任务，设置任务超时时间
+ * @author liwei_paas
+ * @date 2020/3/3
+ */
+public class FutureMain {
+
+    static ExecutorService executorService = Executors.newSingleThreadExecutor();
+
+    public static void main(String[] args) throws TimeoutException {
+        #foreach($code in $codes)
+            $code
+        #end
+    }
+
+    public static <T> T submitTask(Callable<T> task) throws TimeoutException{
+        return submitTask(task,Integer.MAX_VALUE);
+    }
+
+    public static <T> T submitTask(Callable<T> task,int timeout) throws TimeoutException{
+        Future<T> future = executorService.submit(task);
+        try {
+            return future.get(timeout,TimeUnit.MICROSECONDS);
+        } catch (InterruptedException |ExecutionException  e) {
+            throw new RuntimeException(e);
+        }
+    }
+}
