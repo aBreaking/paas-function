@@ -14,8 +14,9 @@ public class CommonUtil {
         return JSONObject.parseObject(pin);
     }
 
-    public static int sum(String a,String b){
-        return Integer.parseInt(a)+Integer.parseInt(b);
+    public static int sum(Integer a,Integer b){
+        return a+b;
     }
+
 
 }

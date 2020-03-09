@@ -1,5 +1,7 @@
 package com.sitech.paas.javagen.json;
 
+import java.util.Set;
+import java.util.TreeSet;
 
 /**
  * 还是应该采用自定向下对json分析，效率更高。 解析到json哪部分就用那个工具去进行解析。考虑这个实现方案。
@@ -13,9 +15,11 @@ package com.sitech.paas.javagen.json;
  */
 public class ImportsGen implements GenAccepter{
 
-    public String gen(String imports) {
+    Set<String> importSet = new TreeSet<>();
+
+    public void add(String imports) {
         String[] split = imports.split(";");
-        return null;
+        for (String s : split) importSet.add(s);
     }
 
     @Override

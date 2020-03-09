@@ -2,9 +2,9 @@ package com.sitech.paas.javagen.json;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
+import com.sitech.paas.javagen.generator.Express;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.*;
 
 /**
  * @{USER}
@@ -12,45 +12,70 @@ import java.util.List;
  */
 public class TasksGen implements GenAccepter{
 
-    public List<String> gen(JSONArray tasks){
-        List<String> list = new ArrayList<>();
-        tasks.forEach(o -> {
-            JSONObject task = (JSONObject) o;
-            //别名，也作为变量名
-            String alias = task.getString("alias");
-            String returnType = task.getString("returnType");
-            String left = "final "+returnType+" "+alias;
+    private List<Express> expressList = new ArrayList<>();
+    private Set<String> importSet = new TreeSet<>();
 
-            TaskGen taskGen = new TaskGen();
-            String methodOrCode = taskGen.gen(task);
-            //对methodOrCode 里面依赖的占位符；目前一个是变量先不考虑重复的情况
-            methodOrCode = placeholder(methodOrCode,null);
-
-            if (task.containsKey("timeout")){
-                int timeout = task.getInteger("timeout");
-                methodOrCode = methodOrCode + ","+timeout;
-            }
-            String right = "submitTask(() -> "+methodOrCode+");";
-
-            String express = left + "=" + right;
-           list.add(express);
-        });
-        return list;
-    }
+    private JSONArray tasks;
 
     /**
-     * 占位符的处理，先暂时最简单的考虑，字符串 与 json
-     * @param statement
-     * @param type 占位符的类型
-     * @return
+     * 存放json里面的tasks解析后的内容
+     * key : alias , values: express
      */
-    public String placeholder(String statement, String type){
-        //TODO 待会考虑怎么去实现
-        return statement;
+    protected final Map<String,String> aliasVarnameMap = new HashMap<>();
+
+    public TasksGen(JSONArray tasks) {
+        this.tasks = tasks;
+    }
+
+    public void gen(){
+        tasks.forEach(o -> {
+            Express express = new Express();
+            JSONObject task = (JSONObject) o;
+            //需要的包
+            if (task.containsKey("imports"))
+                addImport(task.getString("imports"));
+            Integer expressType  = Express.METHOD_TYPE;
+            String type = task.getString("type");
+            if (type.equals("1")){
+                expressType = Express.CODE_TYPE;
+            }else{
+                addImport(type);
+            }
+            //表达式基本信息
+            express.setType(expressType);
+            express.setVarname(task.getString("alias"));
+            express.setVartype(type(task.getString("returnType")));
+            express.setTimeout(task.getInteger("timeout"));
+
+            //表达式的代码块
+            TaskGen taskGen = new TaskGen(task);
+            express.setCode(taskGen.gen());
+            expressList.add(express);
+        });
+    }
+
+    public void addImport(String imports) {
+        String[] split = imports.split(";");
+        for (String s : split) importSet.add(s);
+    }
+
+    public String type(String returnType){
+        if (returnType.matches("java.lang.\\w+") || importSet.contains(returnType)){
+            return returnType.substring(returnType.lastIndexOf(".") + 1);
+        }
+        return returnType;
     }
 
     @Override
     public void accept(JsonVisitor visitor) {
         visitor.visit(this);
+    }
+
+    public List<Express> getExpressList() {
+        return expressList;
+    }
+
+    public Set<String> getImportSet() {
+        return importSet;
     }
 }

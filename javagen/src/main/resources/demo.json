@@ -20,19 +20,19 @@
     {
       "type":"1",
       "alias":"s2",
-      "imports":"com.sitech.foo.CommonUtil;com.alibaba.fastjson.JsonObject",
-      "returnType":"com.alibaba.fastjson.JsonObject",
+      "imports":"com.sitech.paas.javagen.demo.util.CommonUtil;com.alibaba.fastjson.JSONObject",
+      "returnType":"JSONObject",
       "body":{
-        "java":"String[] split = s1.split(\":\");JsonObject = CommonUtil.parseJson(split[2]);return  JsonObject;"
+        "java":"String parse = ${s1}.substring(${s1}.indexOf(\":\")+1);JSONObject retJson= CommonUtil.parseJson(parse);return  retJson;"
       }
     },
     {
-      "type":"0",
+      "type":"com.sitech.paas.javagen.demo.util.CommonUtil",
       "method":"sum",
       "alias":"s3",
       "inputs":{
-        "a":"s2.first",
-        "b":"s2.second"
+        "a":"${s2.first}",
+        "b":"${s2.second}"
       },
       "inputsExtra":{
         "a":"java.lang.Integer",
@@ -41,5 +41,7 @@
       "returnType":"java.lang.Integer"
     }
   ],
-  "output":"$s3"
+  "output":{
+    "age":"${s3}"
+  }
 }

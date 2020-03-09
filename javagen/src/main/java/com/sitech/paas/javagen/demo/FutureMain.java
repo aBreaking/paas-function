@@ -22,7 +22,7 @@ public class FutureMain {
             JSONObject json = CommonUtil.parseJson($s1.substring(start+1));
             return  json;
         },1234);
-        final int $s3 = submitTask(()->CommonUtil.sum($s2.getString("first"), $s2.getString("second")));
+        final int $s3 = submitTask(()->CommonUtil.sum($s2.getInteger("first"), $s2.getInteger("second")));
         System.out.println($s3);
     }
 

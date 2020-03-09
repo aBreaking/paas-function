@@ -1,8 +1,8 @@
 package com.sitech.paas.javagen.demo;
 
 import java.util.concurrent.*;
-#foreach($imp in $imports)
-    import $imp
+#foreach($imp in $importSet)
+import $imp;
 #end
 
 
@@ -11,14 +11,29 @@ import java.util.concurrent.*;
  * @author liwei_paas
  * @date 2020/3/3
  */
-public class FutureMain {
+public class Main {
 
     static ExecutorService executorService = Executors.newSingleThreadExecutor();
 
-    public static void main(String[] args) throws TimeoutException {
-        #foreach($code in $codes)
-            $code
+    public static void main(String[] args)  {
+        try{
+        #foreach($e in $expressList)
+        #if($e.type==1)
+            final $e.vartype $e.varname = submitTask(()->{$e.code});
         #end
+        #if($e.type==0)
+            final $e.vartype $e.varname = submitTask(()->$e.code);
+        #end
+        #end
+        #foreach($o in $outList)
+            System.out.println("result is :" + $o);
+        #end
+        }catch (Exception e){
+            e.printStackTrace();
+        }finally {
+            executorService.shutdown();
+        }
+
     }
 
     public static <T> T submitTask(Callable<T> task) throws TimeoutException{

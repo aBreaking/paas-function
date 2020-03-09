@@ -2,7 +2,6 @@ package com.sitech.paas.javagen.demo;
 
 import com.alibaba.fastjson.JSONObject;
 import com.sitech.paas.javagen.demo.util.ServiceCaller;
-import com.sitech.paas.javagen.generator.GenUtil;
 import com.sitech.paas.javagen.json.TasksGen;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.IOUtils;
@@ -33,7 +32,7 @@ public class MyTest {
         String o = jsonObject.getJSONArray("tasks").getJSONObject(0).getJSONObject("inputs").getString("pin");
 
         //After
-        TasksGen tasksGen = new TasksGen();
+        //TasksGen tasksGen = new TasksGen();
     }
 
 

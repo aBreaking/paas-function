@@ -15,7 +15,8 @@ public class ServiceCaller {
      * @throws Exception
      */
     public static String callRest(String restUrl,String pin) throws Exception {
-        System.out.println("rest serivce call begin");
+        System.out.println("call "+restUrl);
+        System.out.println("pin is : "+pin);
         Thread.sleep(1000);
         System.out.println("rest serivce call end");
         return "result is : {\"first\":1,\"second\":2,\"third\":3,\"fourth\":4}";
