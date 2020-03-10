@@ -11,7 +11,7 @@ import java.util.regex.Pattern;
  */
 public class TaskGen implements GenAccepter{
 
-    public static final String REGEX_PLACEHOLDER = "\\$\\{[a-zA-Z0-9]+\\.?[{[a-zA-Z0-9]]*\\}";
+    public static final String REGEX_PLACEHOLDER = "\\$\\{[^}]+\\}";
     public static final Pattern PATTERN = Pattern.compile(REGEX_PLACEHOLDER);
 
     JSONObject jsonTask;
@@ -59,7 +59,7 @@ public class TaskGen implements GenAccepter{
     }
 
     public static String strPlaceholder(String statement, String inputType){
-        if (inputType!=null && inputType.equals("java.lang.String")){
+        if (inputType!=null && inputType.equals("java.lang.String") && !statement.matches(".*"+REGEX_PLACEHOLDER+".*")){
             //对字符串中可能 有的 “ 符号进行转义
             statement = statement.replaceAll("\"","\\\\\"");
             //然后字符串需要加上 “

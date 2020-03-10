@@ -25,18 +25,18 @@ public class GenUtil {
      *
      * @return 数据
      */
-    public static void generatorCode(OutputStream outputStream, Map<String,Object> map)
+    public static void generatorCode(OutputStream outputStream, Map<String,Object> map,List<String> templates)
     {
         ZipOutputStream zip = new ZipOutputStream(outputStream);
         // 生成代码
-        generator(zip,map);
+        generator(zip,map,templates);
         IOUtils.closeQuietly(zip);
     }
 
     /**
      * 生成代码
      */
-    public static void generator(ZipOutputStream zip,Map<String,Object> map){
+    public static void generator(ZipOutputStream zip,Map<String,Object> map,List<String> templates){
 
         VelocityInitializer.initVelocity();
 
@@ -47,7 +47,7 @@ public class GenUtil {
         map.forEach((k,v)->context.put(k,v));
 
         // 获取模板列表
-        List<String> templates = getTemplates();
+        //List<String> templates = getTemplates();
         String filePrefix = "main/java/com/sitech/paas/javagen/demo/";
         for (String template : templates){
             // 渲染模板
