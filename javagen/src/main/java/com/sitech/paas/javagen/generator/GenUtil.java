@@ -15,8 +15,7 @@ import java.util.zip.ZipOutputStream;
 
 /**
  * 代码生成
- * 
- * @author ruoyi
+ *
  */
 public class GenUtil {
 

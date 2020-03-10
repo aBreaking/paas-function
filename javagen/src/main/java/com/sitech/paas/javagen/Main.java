@@ -22,8 +22,12 @@ import java.util.Map;
  */
 public class Main {
 
-    @Test
-    public void testService() throws IOException {
+    /**
+     * 订单管理服务编排
+     * @author liwei_paas
+     * @date 2020/3/10
+     */
+    public static void main(String args[]) throws IOException {
         //生成的代码list
         String JSON_PATH = "D:\\workspace\\paas-function\\javagen\\src\\main\\resources\\other-demo.json";
 
@@ -41,7 +45,7 @@ public class Main {
         gen(JSON_PATH,templates);
     }
 
-    public static void main(String[] args) throws Exception {
+    public void testSimpleDemo() throws Exception {
         //生成的代码list
         String JSON_PATH = "D:\\workspace\\paas-function\\javagen\\src\\main\\resources\\demo.json";
 
