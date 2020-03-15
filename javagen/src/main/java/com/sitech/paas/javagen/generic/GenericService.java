@@ -5,6 +5,8 @@ import java.lang.reflect.Method;
 
 /**
  * 接口泛化处理
+ * 方法全部通过反射的方式进行调用，返回类型统一泛化成json字符串，必须要有这个泛化调用的前提。
+ * 这里需要考虑几个问题：1、如何将方法泛化处理，
  * @author liwei_paas
  * @date 2020/3/15
  */
