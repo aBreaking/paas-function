@@ -15,9 +15,6 @@ public class ConvertUtils {
 
   /*
   * 将字符串转成基本类型
-  *
+  * //考虑实现方案
   */
-  public <T> T castType(String input,Class<T> type){
-
-  }
 }
