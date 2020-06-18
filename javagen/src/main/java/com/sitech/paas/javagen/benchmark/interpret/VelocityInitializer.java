@@ -1,4 +1,4 @@
-package com.sitech.paas.javagen.generator;
+package com.sitech.paas.javagen.benchmark.interpret;
 
 import org.apache.velocity.app.Velocity;
 

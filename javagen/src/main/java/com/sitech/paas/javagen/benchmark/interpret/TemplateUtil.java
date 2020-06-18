@@ -1,4 +1,4 @@
-package com.sitech.paas.javagen.generator;
+package com.sitech.paas.javagen.benchmark.interpret;
 
 import org.apache.commons.io.IOUtils;
 import org.apache.velocity.Template;
@@ -7,17 +7,17 @@ import org.apache.velocity.app.Velocity;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.io.StringWriter;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipOutputStream;
 
 /**
- * 代码生成
- *
+ * 生成对应模板的代码
+ * @author liwei_paas
+ * @date 2020/3/24
  */
-public class GenUtil {
+public class TemplateUtil {
 
     /**
      * 生成代码
@@ -38,15 +38,9 @@ public class GenUtil {
     public static void generator(ZipOutputStream zip,Map<String,Object> map,List<String> templates){
 
         VelocityInitializer.initVelocity();
-
-        //VelocityContext context = GenUtils.getVelocityContext(table); ->
-        // java对象数据传递到模板文件vm
         VelocityContext context = new VelocityContext();
         context.put("author", "liwei_paas");
         map.forEach((k,v)->context.put(k,v));
-
-        // 获取模板列表
-        //List<String> templates = getTemplates();
         String filePrefix = "main/java/com/sitech/paas/javagen/demo/";
         for (String template : templates){
             // 渲染模板
@@ -70,14 +64,5 @@ public class GenUtil {
                 e.printStackTrace();
             }
         }
-    }
-
-    public static List<String> getTemplates()
-    {
-        List<String> templates = new ArrayList<String>();
-        templates.add("vm/Main.java.vm");
-        templates.add("vm/util/CommonUtil.java.vm");
-        templates.add("vm/util/ServiceCaller.java.vm");
-        return templates;
     }
 }

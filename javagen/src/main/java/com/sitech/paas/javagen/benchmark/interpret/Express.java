@@ -1,4 +1,4 @@
-package com.sitech.paas.javagen.generator;
+package com.sitech.paas.javagen.benchmark.interpret;
 
 /**
  * 抽象的表达式

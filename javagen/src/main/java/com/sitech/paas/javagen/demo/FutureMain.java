@@ -1,6 +1,7 @@
 package com.sitech.paas.javagen.demo;
 
 import com.alibaba.fastjson.JSONObject;
+import com.sitech.paas.javagen.brm.BreCaller;
 import com.sitech.paas.javagen.demo.util.CommonUtil;
 import com.sitech.paas.javagen.demo.util.ServiceCaller;
 import java.util.concurrent.*;
@@ -16,6 +17,13 @@ public class FutureMain {
     static ExecutorService executorService = Executors.newSingleThreadExecutor();
 
     public static void main(String[] args) throws TimeoutException {
+
+        String s0 = submitTask(()->{
+            BreCaller caller = BreCaller.getInstance();
+            return caller.call("param1","pin");
+        });
+
+
         final String $s1 = submitTask(() -> ServiceCaller.callRest("http://ip:port/my/rest/uri" , "{\"mypin\":\"something\"}"),1000);
         final JSONObject $s2 = submitTask(() -> {
             int start = $s1.indexOf(":");

@@ -1,0 +1,37 @@
+[
+  {
+    "type":"com.sitech.foo.UserService", //指定是哪个接口或服务
+    "method":"getUser", //调那个方法
+    "alias":"s1", //别名，用于标识这个task
+    "input":{ //入参 ,这个userid应该是前端传过来的
+      "userid":"${userid}"
+    },
+    "inputExtra":{ //方法参数的补充
+      "userid":"java.lang.Integer"
+    }
+  },
+  {
+    "type":"com.sitech.other.ProductService",
+    "method":"getProductName",
+    "alias":"s2",
+    "input":{ //入参 ,这个productid也是前端传过来的
+      "userid":"${productid}"
+    },
+    "inputExtra":{ //方法参数的补充
+      "userid":"java.lang.String"
+    }
+  },
+  { //这里就是一个问题的主要地方
+    "type":"com.sitech.here.OrderService",
+    "method":"doOrder",
+    "alias":"s3",
+    "input":{
+      "userName":"${s1.userName}",//userName需要引用s1返回的user对象里面的 userName属性
+      "productName":"${s2}" //productName 直接引用s1返回的字符串即可
+    },
+    "inputExtra":{ //方法参数的补充
+      "userName":"java.lang.String",
+      "productName":"java.lang.String"
+    }
+  }
+]

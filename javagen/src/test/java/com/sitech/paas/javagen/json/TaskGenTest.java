@@ -27,8 +27,6 @@ public class TaskGenTest {
 
     @Test
     public void test01(){
-        TaskGen taskGen = new TaskGen(JSONObject.parseObject(json1));
-        String gen = taskGen.gen();
-        System.out.println(gen);
+
     }
 }

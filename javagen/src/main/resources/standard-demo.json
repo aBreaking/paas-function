@@ -1,49 +1,51 @@
 {
-  "name":"mytest",
-  "desc":"调用远程服务然后再求个和",
+  "name":"order",
+  "desc":"订单服务",
   "tasks":[
     {
-      "type":"com.sitech.paas.javagen.demo.util.ServiceCaller",
-      "method":"callRest",
+      "type":"com.sitech.paas.javagen.demo.service.UserService",
+      "method":"getUser",
       "alias":"s1",
       "timeout":10000,
       "inputs":{
-        "restUrl":"http://ip:port/my/rest/uri",
-        "pin":"{\"mypin\":\"something\"}"
+        "userid":"${userId}"
       },
       "inputsExtra":{
-        "restUrl":"java.lang.String",
-        "pin":"java.lang.String"
-      },
-      "returnType":"java.lang.String"
+        "userid":"java.lang.Integer"
+      }
     },
     {
-      "type":"1",
-      "method":"myParser",
+      "type":"com.sitech.paas.javagen.demo.service.ProductService",
+      "method":"hasMore",
       "alias":"s2",
-      "imports":"com.sitech.foo.CommonUtil;com.alibaba.fastjson.JsonObject",
+      "timeout":10000,
       "inputs":{
-        "param1":"$s1"
+        "user":{
+          "name":"zhangsan",
+          "userId":"${s1.userId}"
+        }
       },
       "inputsExtra":{
-        "param1":"java.lang.String"
-      },
-      "outputExtra":{
-        "return":"com.alibaba.fastjson.JsonObject"
-      },
-      "body":{
-        "java":"String[] split = s.split(\":\");JsonObject = CommonUtil.parseJson(split[2]);return  JsonObject;"
+        "user":"com.sitech.foo.User"
       }
     },
     {
-      "type":"0",
-      "method":"sum",
-      "alias":"s3",
+      "type":"com.sitech.paas.javagen.demo.service.OrderService",
+      "method":"createOrder",
+      "alias":"s4",
       "inputs":{
-        "a":"$s2.first",
-        "b":"$s2.second"
-      }
+        "a":"${s1}",
+        "b":"${s3}"
+      },
+      "inputsExtra":{
+        "a":"com.sitech.paas.javagen.demo.dto.User",
+        "b":"java.lang.String"
+      },
+      "returnType":"com.sitech.paas.javagen.demo.dto.Order"
     }
   ],
-  "output":"$s3"
+  "output":{
+    "userId":"${s1.userId}",
+    "orderId":"${s4.orderId}"
+  }
 }

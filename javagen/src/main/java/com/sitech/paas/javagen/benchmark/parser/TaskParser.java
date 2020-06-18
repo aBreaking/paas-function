@@ -1,44 +1,45 @@
-package com.sitech.paas.javagen.json;
+package com.sitech.paas.javagen.benchmark.parser;
 
 import com.alibaba.fastjson.JSONObject;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 /**
- * 每个任务
+ *
  * @author liwei_paas
- * @date 2020/3/3
+ * @date 2020/3/17
  */
-public class TaskGen implements GenAccepter{
+public class TaskParser {
 
     public static final String REGEX_PLACEHOLDER = "\\$\\{[^}]+\\}";
     public static final Pattern PATTERN = Pattern.compile(REGEX_PLACEHOLDER);
 
-    JSONObject jsonTask;
+    private JSONObject task;
+    private ImportCollector importCollector;
 
-    public TaskGen(JSONObject jsonTask) {
-        this.jsonTask = jsonTask;
+    public TaskParser(JSONObject task, ImportCollector importCollector) {
+        this.task = task;
+        this.importCollector = importCollector;
     }
 
-    public String gen(){
-        String type = jsonTask.getString("type");
-        return type.equals("1")?genCode(jsonTask):genMethod(jsonTask);
+    public TaskParser(JSONObject task) {
+        this.task = task;
+        importCollector = new ImportCollector();
     }
 
-    /**
-     * 类.方法(arg1,arg2)
-     * @param jsonTask
-     * @return
-     */
-    public String genMethod(JSONObject jsonTask)  {
+    public String parseMethod()  {
         StringBuilder builder = new StringBuilder();
-        String type = jsonTask.getString("type");
-        String method = jsonTask.getString("method");
+        String type = task.getString("type");
+        //这里获取到是哪个类，需要先将其进行实例化，然后才能调用其方法
+        importCollector.addClass(type);
+
+
+        String method = task.getString("method");
         String simpleClassName = type.substring(type.lastIndexOf(".")+1);
         builder.append(simpleClassName+"."+method);
         builder.append("(");
-        JSONObject inputs = jsonTask.getJSONObject("inputs");
-        JSONObject inputsExtra = jsonTask.getJSONObject("inputsExtra");
+        JSONObject inputs = task.getJSONObject("inputs");
+        JSONObject inputsExtra = task.getJSONObject("inputsExtra");
         inputs.forEach((p,v)->{
             String statement = ((String) v);
             String inputType = inputsExtra.getString(p);
@@ -50,12 +51,6 @@ public class TaskGen implements GenAccepter{
             express = express.substring(0,express.length()-1);
         }
         return express+")";
-    }
-
-    public String genCode(JSONObject jsonTask){
-        String statement = jsonTask.getJSONObject("body").getString("java");
-        statement = placeholder(statement, null);
-        return "{\n"+statement.replaceAll(";" , ";\\\n")+"}";
     }
 
     public static String strPlaceholder(String statement, String inputType){
@@ -111,10 +106,5 @@ public class TaskGen implements GenAccepter{
         }
         sb.append(statement);
         return sb.toString();
-    }
-
-    @Override
-    public void accept(JsonVisitor visitor) {
-        visitor.visit(this);
     }
 }
