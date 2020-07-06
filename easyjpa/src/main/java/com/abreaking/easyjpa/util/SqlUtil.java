@@ -1,6 +1,5 @@
 package com.abreaking.easyjpa.util;
 
-import java.lang.reflect.Field;
 import java.sql.Types;
 import java.util.Date;
 
@@ -12,7 +11,7 @@ import java.util.Date;
 public class SqlUtil {
 
     /**
-     * 根据javad=的字段类型得到对应sql的字段类型
+     * 根据java的字段类型转sql的字段类型
      * @param fieldType
      * @return
      */

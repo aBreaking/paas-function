@@ -118,8 +118,6 @@ public final class ReflectUtil {
         return map;
     }
 
-
-
     private static String filedName(String getterOrSetterMethodName){
         String fieldName = getterOrSetterMethodName.substring(3);
         String firstWord = fieldName.substring(0, 1);
