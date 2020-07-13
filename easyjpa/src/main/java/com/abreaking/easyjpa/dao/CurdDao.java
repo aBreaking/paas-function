@@ -1,8 +1,8 @@
 package com.abreaking.easyjpa.dao;
 
 import com.abreaking.easyjpa.constraint.NoIdOrPkSpecifiedException;
-import com.abreaking.easyjpa.mapping.JpaRowMapper;
-import com.abreaking.easyjpa.matrix.ColumnMatrix;
+import com.abreaking.easyjpa.mapper.JpaRowMapper;
+import com.abreaking.easyjpa.mapper.ObjectMapper;
 import com.abreaking.easyjpa.matrix.Matrix;
 import com.abreaking.easyjpa.util.Pagination;
 
@@ -14,38 +14,22 @@ import java.util.List;
  * @author liwei_paas
  * @date 2019/11/22
  */
-public interface CurdDao<T extends JpaRowMapper> {
+public interface CurdDao<T extends ObjectMapper> {
 
     /**
      * 正常的条件查询，将对象本身作为条件
-     * @param condition
+     * @param t
      * @return
      */
-    List<T> find(T condition);
-
-    /**
-     * 带分页的条件查询。
-     * @param condition
-     * @param pagination
-     * @return
-     */
-    List<T> findByPagination(T condition, Pagination pagination);
-
-    /**
-     * 根据主键获取实际的对象
-     * @param idOrPkCondition 有指定id或者pk的条件
-     * @return
-     * @throws com.abreaking.easyjpa.constraint.NoIdOrPkSpecifiedException 没有指定主键时
-     */
-    T get(T idOrPkCondition) throws NoIdOrPkSpecifiedException;
+    List<T> select(T t);
 
     /**
      * 针对指定的id或者pk,update对应的数据
-     * @param idOrPkObject
+     * @param t
      * @throws NoIdOrPkSpecifiedException idOrPkObject没有指定id或者pk
      * @return 如果是根据id修改，返回id。否则返回null
      */
-    Object update(T idOrPkObject) throws NoIdOrPkSpecifiedException;
+    Object update(T t) throws NoIdOrPkSpecifiedException;
 
     /**
      * 直接insert对象
@@ -62,13 +46,4 @@ public interface CurdDao<T extends JpaRowMapper> {
      */
     Object delete(T idOrPkCondition) throws NoIdOrPkSpecifiedException;
 
-    default StringBuilder conditionSql(Matrix matrix){
-        StringBuilder builder = new StringBuilder(" where 1=1 ");
-        for (String colName : matrix.columns()) {
-            builder.append(" and ");
-            builder.append(colName);
-            builder.append("= ? ");
-        }
-        return builder;
-    }
 }

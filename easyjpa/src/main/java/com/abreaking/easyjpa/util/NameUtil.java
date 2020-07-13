@@ -18,7 +18,7 @@ public final class NameUtil {
      */
     public static String underscoreName(String name) {
         if (StringUtils.isEmpty(name)) {
-            return "";
+            return name;
         }
         //如果没得大写字母，直接返回了
         if (!name.matches(".*[A-Z].*")){
@@ -35,6 +35,34 @@ public final class NameUtil {
             else {
                 result.append(s);
             }
+        }
+        return result.toString();
+    }
+
+    /**
+     * underscoreName方法的反操作，即将xxx_yyy_zzz -> XxxYyyZzz
+     * @author liwei_paas
+     * @date 2020/7/13
+     */
+    public static String deunderscoreName(String name){
+        if (StringUtils.isEmpty(name)) {
+            return name;
+        }
+        //如果没得下划线，直接返回了
+        if (!name.matches(".*\\_.*")){
+            return name;
+        }
+        StringBuilder result = new StringBuilder();
+
+        char[] chars = name.toCharArray();
+        for (int i = 0; i < chars.length; i++) {
+            Character c = chars[i];
+            Character r  = c;
+            if (c.equals("_")){
+                Character next = chars[++i]; //把下一个字母大写
+                r = Character.toUpperCase(next);
+            }
+            result.append(r);
         }
         return result.toString();
     }

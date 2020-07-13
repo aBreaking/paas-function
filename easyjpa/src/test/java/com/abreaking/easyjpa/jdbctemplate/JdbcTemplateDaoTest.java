@@ -22,6 +22,10 @@ public class JdbcTemplateDaoTest {
     DruidDataSource druidDataSource;
 
     @Test
+    public void test01(){
+    }
+
+    @Test
     public void test(){
         Object[] values = new Object[]{1};
         int[] types = new int[]{Types.INTEGER};

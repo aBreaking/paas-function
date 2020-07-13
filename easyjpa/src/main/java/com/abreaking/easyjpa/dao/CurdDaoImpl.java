@@ -3,11 +3,11 @@ package com.abreaking.easyjpa.dao;
 
 import com.abreaking.easyjpa.constraint.NoIdOrPkSpecifiedException;
 import com.abreaking.easyjpa.exec.Executor;
-import com.abreaking.easyjpa.mapping.JpaRowMapper;
+import com.abreaking.easyjpa.mapper.ObjectMapper;
 import com.abreaking.easyjpa.matrix.Matrix;
-import com.abreaking.easyjpa.util.Pagination;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
 import java.util.List;
 
 /**
@@ -15,7 +15,7 @@ import java.util.List;
  * @author liwei_paas
  * @date 2019/11/22
  */
-public class CurdDaoImpl implements CurdDao{
+public class CurdDaoImpl<T extends ObjectMapper> implements CurdDao{
 
     private static final Logger logger = LoggerFactory.getLogger(CurdDaoImpl.class);
 
@@ -29,44 +29,33 @@ public class CurdDaoImpl implements CurdDao{
      */
     private Executor executor;
 
+    @Override
+    public List select(ObjectMapper objectMapper) {
+        return null;
+    }
 
     @Override
-    public List find(JpaRowMapper condition) {
-        StringBuilder builder = new StringBuilder("select * from ");
-        builder.append(condition.tableName());
-        //將matrix直接
-        Matrix matrix = condition.matrix();
-        builder.append(conditionSql(matrix));
-        String prepareSql = builder.toString();
-        if (logger.isDebugEnabled()){
-            logger.debug(prepareSql);
+    public Object update(ObjectMapper objectMapper) throws NoIdOrPkSpecifiedException {
+        return null;
+    }
+
+    @Override
+    public Object insert(ObjectMapper objectMapper) {
+        return null;
+    }
+
+    @Override
+    public Object delete(ObjectMapper idOrPkCondition) throws NoIdOrPkSpecifiedException {
+        return null;
+    }
+
+    private StringBuilder conditionSql(Matrix matrix){
+        StringBuilder builder = new StringBuilder(" where 1=1 ");
+        for (String colName : matrix.columns()) {
+            builder.append(" and ");
+            builder.append(colName);
+            builder.append("= ? ");
         }
-        executor.queryForList(prepareSql,matrix.values(),matrix.types(),condition);
-        return null;
-    }
-
-    @Override
-    public List findByPagination(JpaRowMapper condition, Pagination pagination) {
-        return null;
-    }
-
-    @Override
-    public JpaRowMapper get(JpaRowMapper idOrPkCondition) throws NoIdOrPkSpecifiedException {
-        return null;
-    }
-
-    @Override
-    public Object update(JpaRowMapper idOrPkObject) throws NoIdOrPkSpecifiedException {
-        return null;
-    }
-
-    @Override
-    public Object insert(JpaRowMapper mapper) {
-        return null;
-    }
-
-    @Override
-    public Object delete(JpaRowMapper idOrPkCondition) throws NoIdOrPkSpecifiedException {
-        return null;
+        return builder;
     }
 }
