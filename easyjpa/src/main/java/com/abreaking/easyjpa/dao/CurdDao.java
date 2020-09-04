@@ -2,10 +2,8 @@ package com.abreaking.easyjpa.dao;
 
 import com.abreaking.easyjpa.constraint.NoIdOrPkSpecifiedException;
 import com.abreaking.easyjpa.mapper.JpaRowMapper;
-import com.abreaking.easyjpa.mapper.ObjectMapper;
-import com.abreaking.easyjpa.matrix.Matrix;
-import com.abreaking.easyjpa.util.Pagination;
 
+import java.sql.SQLException;
 import java.util.List;
 
 /**
@@ -14,14 +12,14 @@ import java.util.List;
  * @author liwei_paas
  * @date 2019/11/22
  */
-public interface CurdDao<T extends ObjectMapper> {
+public interface CurdDao<T extends JpaRowMapper> {
 
     /**
      * 正常的条件查询，将对象本身作为条件
      * @param t
      * @return
      */
-    List<T> select(T t);
+    List<T> select(T t) throws SQLException;
 
     /**
      * 针对指定的id或者pk,update对应的数据

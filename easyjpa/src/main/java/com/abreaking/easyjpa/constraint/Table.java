@@ -18,4 +18,13 @@ public @interface Table {
      * @return
      */
     String value() default "";
+
+    /**
+     * 前后缀，针对某些动态表名，比如日期表。
+     * 可指定表名前后缀的格式，比如yyyyMM，程序自动拼接到表名前后。
+     *
+     * @return
+     */
+    String prefix() default "";
+    String suffix() default "";
 }

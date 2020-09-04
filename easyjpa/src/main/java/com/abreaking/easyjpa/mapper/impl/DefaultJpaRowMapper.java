@@ -1,6 +1,6 @@
 package com.abreaking.easyjpa.mapper.impl;
 
-import com.abreaking.easyjpa.mapper.RowMapper;
+import com.abreaking.easyjpa.mapper.JpaRowMapper;
 import com.abreaking.easyjpa.util.NameUtil;
 
 import java.lang.reflect.Field;
@@ -12,22 +12,30 @@ import java.sql.*;
  * @author liwei_paas
  * @date 2020/7/13
  */
-public class BaseRowMapper implements RowMapper {
-    public Class obj;
+public class DefaultJpaRowMapper extends JpaRowMapper {
+
+    Class obj ;
+
+    public DefaultJpaRowMapper(Class obj) {
+        this.obj = obj;
+    }
+
+    public DefaultJpaRowMapper() {
+        this.obj = this.getClass();
+    }
 
     @Override
     public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
-        Object t;
+        Object t = null;
         try {
             t = obj.newInstance();
-        } catch (InstantiationException|IllegalAccessException e) {
-            return null;
+        } catch (InstantiationException | IllegalAccessException e) {
+            throw new RuntimeException("obj can not be newInstance",e);
         }
         ResultSetMetaData metaData = rs.getMetaData();
         int columnCount = metaData.getColumnCount();
         for (int i = 1; i <= columnCount; i++) {
             String columnName = metaData.getColumnName(i);
-            //columnName -> fieldName
             String fieldName = NameUtil.deunderscoreName(columnName);
             try {
                 Field field = obj.getDeclaredField(fieldName);

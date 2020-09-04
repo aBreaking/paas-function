@@ -1,6 +1,6 @@
-package com.abreaking.easyjpa.impl.spring;
+package com.abreaking.easyjpa.spring;
 
-import com.abreaking.easyjpa.mapping.JpaRowMapper;
+import com.abreaking.easyjpa.mapper.JpaRowMapper;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.RowMapper;
 import java.io.Serializable;
@@ -11,7 +11,7 @@ import java.sql.SQLException;
  * 拿来主义，这里直接使用spring jdbc的那一套映射操作
  * @author liwei
  */
-public class SpringJdbcJpaRowMapper extends JpaRowMapper implements Serializable,RowMapper {
+public class SpringJdbcJpaRowMapper implements Serializable,RowMapper {
 
     private JpaRowMapper rowMapper;
 

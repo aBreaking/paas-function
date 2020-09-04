@@ -31,25 +31,28 @@ import java.util.Map;
  *
  * @author liwei_paas
  */
-public abstract class JpaRowMapper {
-
-    Class obj;
+public abstract class JpaRowMapper implements RowMapper{
 
     /**
-     * 默认表名
+     * 表名
      * @return
      */
     public String tableName(){
-        return ReflectUtil.getTableName(obj);
+        return ReflectUtil.getTableName(this.getClass());
     }
 
-    public Matrix matrix(){
+    public Matrix matrixWithNullValue(){
         return matrix(null);
     }
 
-     public Matrix matrix(Object o){
-        Field[] fields = this.getClass().getDeclaredFields();
-        Map<String, Method> methodMap = ReflectUtil.poGetterMethodsMap(obj);
+    public Matrix matrix(){
+        return matrix(this);
+    }
+
+    protected Matrix matrix(Object o){
+        Class clazz = o.getClass();
+        Field[] fields = clazz.getDeclaredFields();
+        Map<String, Method> methodMap = ReflectUtil.poGetterMethodsMap(clazz);
         ColumnMatrix colMatrix = new AxisColumnMatrix(methodMap.size());
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];

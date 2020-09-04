@@ -58,7 +58,7 @@ public final class NameUtil {
         for (int i = 0; i < chars.length; i++) {
             Character c = chars[i];
             Character r  = c;
-            if (c.equals("_")){
+            if (c == '_'){
                 Character next = chars[++i]; //把下一个字母大写
                 r = Character.toUpperCase(next);
             }

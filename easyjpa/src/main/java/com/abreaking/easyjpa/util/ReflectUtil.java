@@ -1,8 +1,8 @@
 package com.abreaking.easyjpa.util;
 
-import com.abreaking.easyjpa.constraint.DateTable;
 import com.abreaking.easyjpa.constraint.Table;
 import org.apache.commons.lang.StringUtils;
+
 import java.lang.reflect.Method;
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -16,38 +16,46 @@ public final class ReflectUtil {
 
     /**
      * 根据类名得到表名
+     * 目前只对日期表格式做了处理
      * @param clazz
      * @return
      */
     public static String getTableName(Class clazz){
-        if (clazz.isAnnotationPresent(Table.class)){
+        if(clazz.isAnnotationPresent(Table.class)){
             Table table = (Table) clazz.getAnnotation(Table.class);
             String tableName = table.value();
             if (StringUtils.isNotEmpty(tableName)){
+                String prefix = table.prefix();
+                String suffix = table.suffix();
+                if (StringUtils.isNotEmpty(prefix)){
+                    String format;
+                    try{
+                        SimpleDateFormat p = new SimpleDateFormat(prefix);
+                        format = p.format(new Date());
+                    }catch (Exception e){
+                        format = prefix;
+                    }
+
+                    if (!tableName.startsWith("_") && !format.endsWith("_")){
+                        tableName = "_"+tableName;
+                    }
+                    tableName = format+tableName;
+                }
+                if (StringUtils.isNotEmpty(suffix)){
+                    String format;
+                    try{
+                        SimpleDateFormat p = new SimpleDateFormat(suffix);
+                        format = p.format(new Date());
+                    }catch (Exception e){
+                        format = suffix;
+                    }
+                    if (!tableName.endsWith("_") && !suffix.startsWith("_")){
+                        tableName = tableName+"_";
+                    }
+                    tableName = tableName+format;
+                }
                 return tableName;
             }
-        }
-        if(clazz.isAnnotationPresent(DateTable.class)){
-            DateTable dateTable = (DateTable) clazz.getAnnotation(DateTable.class);
-            String prefix = dateTable.prefix();
-            String format = dateTable.format();
-
-            //表前缀，没有指定的话默认类名转换
-            String tablePrefix = StringUtils.isEmpty(prefix)?
-                    NameUtil.underscoreName(clazz.getSimpleName()):prefix;
-            if (StringUtils.isNotEmpty(format)){
-                try{
-                    SimpleDateFormat simpleDateFormat = new SimpleDateFormat(format);
-                    String nowDate = simpleDateFormat.format(new Date());
-                    if (!tablePrefix.endsWith("_")){
-                        tablePrefix += "_";
-                    }
-                    return tablePrefix+nowDate;
-                }catch (Exception e){
-                    //如果这里指定的format格式有误，还是返回tablePrefix
-                }
-            }
-            return tablePrefix;
         }
         return NameUtil.underscoreName(clazz.getSimpleName());
 

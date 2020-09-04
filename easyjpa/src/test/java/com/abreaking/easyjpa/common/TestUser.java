@@ -1,4 +1,7 @@
-package com.abreaking.easyjpa;
+package com.abreaking.easyjpa.common;
+
+import com.abreaking.easyjpa.constraint.Table;
+import com.abreaking.easyjpa.mapper.impl.DefaultJpaRowMapper;
 
 import java.util.Date;
 
@@ -7,12 +10,10 @@ import java.util.Date;
  * @author liwei_paas
  * @date 2020/7/1
  */
-public class TestUser {
+@Table("user")
+public class TestUser extends DefaultJpaRowMapper {
     private Integer userId;
     private String userName;
-    private Integer age;
-    private Float height;
-    private Long phoneNo;
     private Date birthday;
 
     public Integer getUserId() {
@@ -31,29 +32,6 @@ public class TestUser {
         this.userName = userName;
     }
 
-    public Integer getAge() {
-        return age;
-    }
-
-    public void setAge(Integer age) {
-        this.age = age;
-    }
-
-    public Float getHeight() {
-        return height;
-    }
-
-    public void setHeight(Float height) {
-        this.height = height;
-    }
-
-    public Long getPhoneNo() {
-        return phoneNo;
-    }
-
-    public void setPhoneNo(Long phoneNo) {
-        this.phoneNo = phoneNo;
-    }
 
     public Date getBirthday() {
         return birthday;
@@ -61,5 +39,14 @@ public class TestUser {
 
     public void setBirthday(Date birthday) {
         this.birthday = birthday;
+    }
+
+    @Override
+    public String toString() {
+        return "TestUser{" +
+                "userId=" + userId +
+                ", userName='" + userName + '\'' +
+                ", birthday=" + birthday +
+                '}';
     }
 }

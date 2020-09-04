@@ -1,6 +1,7 @@
 package com.abreaking.easyjpa.exec;
 
 import com.abreaking.easyjpa.mapper.RowMapper;
+import com.abreaking.easyjpa.mapper.impl.DefaultJpaRowMapper;
 
 import java.sql.*;
 import java.util.ArrayList;
@@ -8,7 +9,6 @@ import java.util.Calendar;
 import java.util.List;
 
 /**
- *
  * @author liwei_paas
  * @date 2020/7/6
  */
@@ -16,10 +16,13 @@ public class JdbcExecutor implements Executor{
 
     private Connection connection;
 
-    private RowMapper rowMapper;
+
+    public JdbcExecutor(Connection connection){
+        this.connection = connection;
+    }
 
     @Override
-    public <T> T queryForObject(String preparedSql, Object[] values, int[] types, Class<T> obj) throws SQLException {
+    public <T> List<T> queryForList(String preparedSql, Object[] values, int[] types,RowMapper rowMapper) throws SQLException {
         PreparedStatement ps = connection.prepareStatement(preparedSql);
         for (int i = 0; i < values.length; i++) {
             setValue(ps,i+1,types[i],values[i]);
@@ -32,7 +35,7 @@ public class JdbcExecutor implements Executor{
             i++;
             list.add((T) o);
         }
-        return list.get(0);
+        return list;
     }
 
     @Override

@@ -2,8 +2,7 @@ package com.abreaking.easyjpa.jdbc;
 
 import com.abreaking.easyjpa.config.DruidDataSourceConfiguration;
 import com.abreaking.easyjpa.mapper.ClassMapper;
-import com.abreaking.easyjpa.mapper.ObjectMapper;
-import com.abreaking.easyjpa.mapper.RowMapper;
+import com.abreaking.easyjpa.mapper.JpaRowMapper;
 import com.abreaking.easyjpa.matrix.Matrix;
 import com.abreaking.easyjpa.matrix.impl.AxisColumnMatrix;
 import com.abreaking.easyjpa.util.SqlUtil;
@@ -58,7 +57,7 @@ public class JdbcTest {
     public void selectMapper() throws Exception{
         final User user = new User();
         user.setId(1001);
-        RowMapper rowMapper = new RowMapper() {
+        JpaRowMapper rowMapper = new JpaRowMapper() {
             @Override
             public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
                 User user = new User();
@@ -79,7 +78,12 @@ public class JdbcTest {
                 return user;
             }
         };
-        ObjectMapper objectMapper = new ObjectMapper() {
+        JpaRowMapper objectMapper = new JpaRowMapper() {
+            @Override
+            public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
+                return null;
+            }
+
             @Override
             public Matrix matrix() {
                 AxisColumnMatrix matrix = new AxisColumnMatrix();
