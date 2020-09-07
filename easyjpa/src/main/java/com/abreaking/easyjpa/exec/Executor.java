@@ -13,5 +13,5 @@ public interface Executor {
 
     <T> List<T> queryForList(String preparedSql, Object[] values, int[] types,RowMapper rowMapper) throws SQLException;
 
-    void update(String preparedSql, String[] args);
+    int update(String preparedSql, Object[] values,int[] types) throws SQLException;
 }

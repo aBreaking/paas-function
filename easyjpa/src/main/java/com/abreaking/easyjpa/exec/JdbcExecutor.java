@@ -39,9 +39,14 @@ public class JdbcExecutor implements Executor{
     }
 
     @Override
-    public void update(String preparedSql, String[] args) {
-
+    public int update(String preparedSql, Object[] values, int[] types) throws SQLException {
+        PreparedStatement ps = connection.prepareStatement(preparedSql);
+        for (int i = 0; i < values.length; i++) {
+            setValue(ps,i+1,types[i],values[i]);
+        }
+        return ps.executeUpdate();
     }
+
 
     private static void setValue(PreparedStatement ps, int paramIndex, int sqlType,Object inValue) throws SQLException {
 

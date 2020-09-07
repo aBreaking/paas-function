@@ -62,7 +62,7 @@ public abstract class JpaRowMapper implements RowMapper{
             Field field = fields[0];
             if (field.isAnnotationPresent(Id.class)){
                 ColumnMatrix colMatrix = new AxisColumnMatrix(1);
-                addMatrix(field,obj,colMatrix);
+                addMatrix(field,entity,colMatrix);
                 return colMatrix;
             }
         }
@@ -95,7 +95,6 @@ public abstract class JpaRowMapper implements RowMapper{
         ColumnMatrix colMatrix = new AxisColumnMatrix(methodMap.size());
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[i];
-            field.setAccessible(true);
             String fieldName = field.getName();
             if (!methodMap.containsKey(fieldName)){
                 //如果该字段不是 getter setter字段，就不用再继续了
@@ -107,6 +106,7 @@ public abstract class JpaRowMapper implements RowMapper{
     }
 
     protected void addMatrix(Field field,Object o,ColumnMatrix colMatrix){
+        field.setAccessible(true);
         String columnName = null;
         int type = Types.NULL;
         Object value = null;

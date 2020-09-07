@@ -27,7 +27,7 @@ public interface CurdDao<T> {
      * @throws NoIdOrPkSpecifiedException idOrPkObject没有指定id或者pk
      * @return 如果是根据id修改，返回id。否则返回null
      */
-    Object update(T t) throws NoIdOrPkSpecifiedException;
+    Object update(T t) throws NoIdOrPkSpecifiedException, SQLException;
 
     /**
      * 直接insert对象

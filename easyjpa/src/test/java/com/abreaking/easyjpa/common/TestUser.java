@@ -1,5 +1,6 @@
 package com.abreaking.easyjpa.common;
 
+import com.abreaking.easyjpa.constraint.Id;
 import com.abreaking.easyjpa.constraint.Table;
 import com.abreaking.easyjpa.mapper.impl.DefaultJpaRowMapper;
 
@@ -12,6 +13,7 @@ import java.util.Date;
  */
 @Table("user")
 public class TestUser {
+    @Id
     private Integer userId;
     private String userName;
     private Date birthday;
