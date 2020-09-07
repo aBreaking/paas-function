@@ -14,14 +14,13 @@ import java.sql.*;
  */
 public class DefaultJpaRowMapper extends JpaRowMapper {
 
-    Class obj ;
 
-    public DefaultJpaRowMapper(Class obj) {
-        this.obj = obj;
+    public DefaultJpaRowMapper(Object entity) {
+        super(entity);
     }
 
-    public DefaultJpaRowMapper() {
-        this.obj = this.getClass();
+    public DefaultJpaRowMapper(Object entity, Class obj) {
+        super(entity, obj);
     }
 
     @Override

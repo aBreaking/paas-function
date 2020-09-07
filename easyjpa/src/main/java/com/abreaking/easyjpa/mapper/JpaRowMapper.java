@@ -2,6 +2,8 @@ package com.abreaking.easyjpa.mapper;
 
 import com.abreaking.easyjpa.constraint.Column;
 import com.abreaking.easyjpa.constraint.Id;
+import com.abreaking.easyjpa.constraint.NoIdOrPkSpecifiedException;
+import com.abreaking.easyjpa.constraint.Pk;
 import com.abreaking.easyjpa.matrix.ColumnMatrix;
 import com.abreaking.easyjpa.matrix.Matrix;
 import com.abreaking.easyjpa.matrix.impl.AxisColumnMatrix;
@@ -33,24 +35,61 @@ import java.util.Map;
  */
 public abstract class JpaRowMapper implements RowMapper{
 
+    protected Object entity;
+    protected Class obj;
+
+    public JpaRowMapper(Object entity) {
+        this.entity = entity;
+        this.obj = entity.getClass();
+    }
+
+    public JpaRowMapper(Object entity, Class obj) {
+        this.entity = entity;
+        this.obj = obj;
+    }
+
     /**
      * 表名
      * @return
      */
     public String tableName(){
-        return ReflectUtil.getTableName(this.getClass());
+        return ReflectUtil.getTableName(obj);
+    }
+
+    public Matrix id(){
+        Field[] fields = obj.getDeclaredFields();
+        for (int i = 0; i < fields.length; i++) {
+            Field field = fields[0];
+            if (field.isAnnotationPresent(Id.class)){
+                ColumnMatrix colMatrix = new AxisColumnMatrix(1);
+                addMatrix(field,obj,colMatrix);
+                return colMatrix;
+            }
+        }
+        throw new NoIdOrPkSpecifiedException("no id specified!you should use @Id annotation upon your id field");
+    }
+    public Matrix pk(){
+        Field[] fields = obj.getDeclaredFields();
+        for (int i = 0; i < fields.length; i++) {
+            Field field = fields[0];
+            if (field.isAnnotationPresent(Pk.class)){
+                ColumnMatrix colMatrix = new AxisColumnMatrix(1);
+                addMatrix(field,obj,colMatrix);
+                return colMatrix;
+            }
+        }
+        throw new NoIdOrPkSpecifiedException("no primary key specified!you should use @Pk annotation upon your business primary key");
     }
 
     public Matrix matrixWithNullValue(){
-        return matrix(null);
+        return matrix(obj,null);
     }
 
     public Matrix matrix(){
-        return matrix(this);
+        return matrix(obj,entity);
     }
 
-    protected Matrix matrix(Object o){
-        Class clazz = o.getClass();
+    private Matrix matrix(Class clazz,Object o){
         Field[] fields = clazz.getDeclaredFields();
         Map<String, Method> methodMap = ReflectUtil.poGetterMethodsMap(clazz);
         ColumnMatrix colMatrix = new AxisColumnMatrix(methodMap.size());
@@ -62,44 +101,49 @@ public abstract class JpaRowMapper implements RowMapper{
                 //如果该字段不是 getter setter字段，就不用再继续了
                 continue;
             }
-
-            String columnName = null;
-            int type = Types.NULL;
-            Object value = null;
-            //如果是需要字段的值
-            if (o!=null){
-                //先看字段的值是否为空,如果该字段值为空，就不用继续了
-                try {
-                    value = field.get(o);
-                    if (value == null){
-                        continue;
-                    }
-                } catch (IllegalAccessException e) {
-                    continue;
-                }
-            }
-
-            //判断是否主键注解
-            if (field.isAnnotationPresent(Id.class)) {
-                Id id = field.getAnnotation(Id.class);
-                columnName = id.value();
-                type = id.type();
-            }
-            if (field.isAnnotationPresent(Column.class)){
-                Column column = field.getAnnotation(Column.class);
-                columnName = column.value();
-                type = column.type();
-            }
-            //列名及为空的话就采用，默认操作
-            if (StringUtils.isEmpty(columnName)){
-                columnName = NameUtil.underscoreName(fieldName);
-            }
-            if (type == Types.NULL){
-                type = SqlUtil.getSqlType(field.getType());
-            }
-            colMatrix.put(columnName,type,value);
+            addMatrix(field,o,colMatrix);
         }
         return colMatrix;
+    }
+
+    protected void addMatrix(Field field,Object o,ColumnMatrix colMatrix){
+        String columnName = null;
+        int type = Types.NULL;
+        Object value = null;
+        //如果是需要字段的值
+        if (o!=null){
+            //先看字段的值是否为空,如果该字段值为空，就不用继续了
+            try {
+                value = field.get(o);
+                if (value == null){
+                    return;
+                }
+            } catch (IllegalAccessException e) {
+                return;
+            }
+        }
+        //字段上的注解处理
+        if (field.isAnnotationPresent(Id.class)) {
+            Id id = field.getAnnotation(Id.class);
+            columnName = id.value();
+            type = id.type();
+        }else if (field.isAnnotationPresent(Pk.class)) {
+            Pk pk = field.getAnnotation(Pk.class);
+            columnName = pk.value();
+            type = pk.type();
+        }else if (field.isAnnotationPresent(Column.class)){
+            Column column = field.getAnnotation(Column.class);
+            columnName = column.value();
+            type = column.type();
+        }
+        //列名及为空的话就采用，默认操作
+        if (StringUtils.isEmpty(columnName)){
+            columnName = NameUtil.underscoreName(field.getName());
+        }
+        if (type == Types.NULL){
+            type = SqlUtil.getSqlType(field.getType());
+        }
+        colMatrix.put(columnName,type,value);
     }
 
 }

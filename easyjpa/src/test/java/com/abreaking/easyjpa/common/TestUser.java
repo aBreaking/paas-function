@@ -11,7 +11,7 @@ import java.util.Date;
  * @date 2020/7/1
  */
 @Table("user")
-public class TestUser extends DefaultJpaRowMapper {
+public class TestUser {
     private Integer userId;
     private String userName;
     private Date birthday;

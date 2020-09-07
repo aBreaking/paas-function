@@ -57,7 +57,7 @@ public class JdbcTest {
     public void selectMapper() throws Exception{
         final User user = new User();
         user.setId(1001);
-        JpaRowMapper rowMapper = new JpaRowMapper() {
+        JpaRowMapper rowMapper = new JpaRowMapper(user) {
             @Override
             public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
                 User user = new User();
@@ -78,7 +78,7 @@ public class JdbcTest {
                 return user;
             }
         };
-        JpaRowMapper objectMapper = new JpaRowMapper() {
+        JpaRowMapper objectMapper = new JpaRowMapper(user) {
             @Override
             public Object mapRow(ResultSet rs, int rowNum) throws SQLException {
                 return null;

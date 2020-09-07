@@ -22,9 +22,9 @@ public class CurdDaoTest {
         DruidPooledConnection connection = new DruidDataSourceConfiguration().druidDataSource().getConnection();
         Executor executor = new JdbcExecutor(connection);
 
-        CurdDaoImpl dao = new CurdDaoImpl<>(executor);
+        CurdDaoImpl dao = new CurdDaoImpl(executor);
         TestUser testUser = new TestUser();
-        testUser.setUserId(1);
+        testUser.setUserName("zhangsa");
         List list = dao.select(testUser);
         System.out.println(list);
     }

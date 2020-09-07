@@ -12,7 +12,7 @@ import java.util.List;
  * @author liwei_paas
  * @date 2019/11/22
  */
-public interface CurdDao<T extends JpaRowMapper> {
+public interface CurdDao<T> {
 
     /**
      * 正常的条件查询，将对象本身作为条件

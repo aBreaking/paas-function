@@ -1,7 +1,6 @@
 package com.abreaking.easyjpa.sql;
 
 import com.abreaking.easyjpa.mapper.JpaRowMapper;
-import com.abreaking.easyjpa.matrix.Matrix;
 
 /**
  *
@@ -10,12 +9,11 @@ import com.abreaking.easyjpa.matrix.Matrix;
  */
 public class PreparedSqlBuilder {
 
-     public String simpleSelectSql(JpaRowMapper jpaRowMapper){
+     public String simpleSelectSql(String columns[],JpaRowMapper jpaRowMapper){
          StringBuilder sqlBuilder = new StringBuilder("SELECT ");
          sqlBuilder.append(" * FROM ").append(jpaRowMapper.tableName());
-         Matrix matrix = jpaRowMapper.matrix();
          sqlBuilder.append(" WHERE 1=1 ");
-         for (String colName : matrix.columns()) {
+         for (String colName :columns) {
              sqlBuilder.append(" and ");
              sqlBuilder.append(colName);
              sqlBuilder.append("= ? ");

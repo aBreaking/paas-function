@@ -4,6 +4,7 @@ package com.abreaking.easyjpa.dao;
 import com.abreaking.easyjpa.constraint.NoIdOrPkSpecifiedException;
 import com.abreaking.easyjpa.exec.Executor;
 import com.abreaking.easyjpa.mapper.JpaRowMapper;
+import com.abreaking.easyjpa.mapper.impl.DefaultJpaRowMapper;
 import com.abreaking.easyjpa.matrix.Matrix;
 import com.abreaking.easyjpa.sql.PreparedSqlBuilder;
 import org.slf4j.Logger;
@@ -17,41 +18,51 @@ import java.util.List;
  * @author liwei_paas
  * @date 2019/11/22
  */
-public class CurdDaoImpl<T extends JpaRowMapper> implements CurdDao{
+public class CurdDaoImpl implements CurdDao{
 
     private static final Logger logger = LoggerFactory.getLogger(CurdDaoImpl.class);
-
-    public CurdDaoImpl(Executor executor) {
-        this.executor = executor;
-    }
 
     /**
      * sql的执行器
      */
     private Executor executor;
 
-    private PreparedSqlBuilder sqlBuilder = new PreparedSqlBuilder();
+    /**
+     * Prepared sql语句的构造器
+     */
+    private PreparedSqlBuilder sqlBuilder ;
 
-    @Override
-    public List select(JpaRowMapper jpaRowMapper) throws SQLException {
-        Matrix matrix = jpaRowMapper.matrix();
-        String sql = sqlBuilder.simpleSelectSql(jpaRowMapper);
-        return executor.queryForList(sql,matrix.values(),matrix.types(),jpaRowMapper);
+
+    public CurdDaoImpl(Executor executor) {
+        this.executor = executor;
+        this.sqlBuilder = new PreparedSqlBuilder();
+    }
+
+    public CurdDaoImpl(Executor executor, PreparedSqlBuilder sqlBuilder) {
+        this.executor = executor;
+        this.sqlBuilder = sqlBuilder;
     }
 
     @Override
-    public Object update(JpaRowMapper jpaRowMapper) throws NoIdOrPkSpecifiedException {
+    public List select(Object o) throws SQLException {
+        JpaRowMapper mapper = new DefaultJpaRowMapper(o);
+        Matrix matrix = mapper.matrix();
+        String sql = sqlBuilder.simpleSelectSql(matrix.columns(),mapper);
+        return executor.queryForList(sql,matrix.values(),matrix.types(),mapper);
+    }
+
+    @Override
+    public Object update(Object o) throws NoIdOrPkSpecifiedException {
         return null;
     }
 
     @Override
-    public Object insert(JpaRowMapper jpaRowMapper) {
+    public Object insert(Object o) {
         return null;
     }
 
     @Override
-    public Object delete(JpaRowMapper idOrPkCondition) throws NoIdOrPkSpecifiedException {
+    public Object delete(Object idOrPkCondition) throws NoIdOrPkSpecifiedException {
         return null;
     }
-
 }
