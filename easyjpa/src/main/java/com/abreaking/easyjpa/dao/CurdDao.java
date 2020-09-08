@@ -1,7 +1,6 @@
 package com.abreaking.easyjpa.dao;
 
 import com.abreaking.easyjpa.constraint.NoIdOrPkSpecifiedException;
-import com.abreaking.easyjpa.mapper.JpaRowMapper;
 
 import java.sql.SQLException;
 import java.util.List;
@@ -27,21 +26,21 @@ public interface CurdDao<T> {
      * @throws NoIdOrPkSpecifiedException idOrPkObject没有指定id或者pk
      * @return 如果是根据id修改，返回id。否则返回null
      */
-    Object update(T t) throws NoIdOrPkSpecifiedException, SQLException;
+    int update(T t) throws NoIdOrPkSpecifiedException, SQLException;
 
     /**
      * 直接insert对象
      * @param t
      * @return 如果有主键id，返回insert成功的id。否则返回null
      */
-    Object insert(T t);
+    int insert(T t) throws SQLException;
 
     /**
      * 根据给定主键删除对象
-     * @param idOrPkCondition
+     * @param t
      * @return
      * @throws NoIdOrPkSpecifiedException 没有指定主键
      */
-    Object delete(T idOrPkCondition) throws NoIdOrPkSpecifiedException;
+    int delete(T t) throws NoIdOrPkSpecifiedException,SQLException;
 
 }

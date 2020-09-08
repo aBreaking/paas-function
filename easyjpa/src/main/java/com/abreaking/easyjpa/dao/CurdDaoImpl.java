@@ -5,6 +5,7 @@ import com.abreaking.easyjpa.constraint.NoIdOrPkSpecifiedException;
 import com.abreaking.easyjpa.exec.Executor;
 import com.abreaking.easyjpa.mapper.JpaRowMapper;
 import com.abreaking.easyjpa.mapper.impl.DefaultJpaRowMapper;
+import com.abreaking.easyjpa.matrix.ColumnMatrix;
 import com.abreaking.easyjpa.matrix.Matrix;
 import com.abreaking.easyjpa.sql.PreparedSqlBuilder;
 import org.slf4j.Logger;
@@ -52,13 +53,13 @@ public class CurdDaoImpl implements CurdDao{
     }
 
     @Override
-    public Object update(Object o) throws NoIdOrPkSpecifiedException, SQLException {
+    public int update(Object o) throws NoIdOrPkSpecifiedException, SQLException {
         JpaRowMapper mapper = new DefaultJpaRowMapper(o);
         Matrix matrix = mapper.matrix();
-        Matrix _ipm = mapper.id();
-        if (_ipm == null){
+        ColumnMatrix _ipm = mapper.id();
+        if (_ipm.isEmpty()){
             _ipm = mapper.pk();
-            if (_ipm == null){
+            if (_ipm.isEmpty()){
                 throw new NoIdOrPkSpecifiedException("no id or pk specified!you should use @Id oannotation upon your id field , or use @Pk annotation upon your business primary key");
             }
         }
@@ -69,13 +70,22 @@ public class CurdDaoImpl implements CurdDao{
     }
 
     @Override
-    public Object insert(Object o) {
-        return null;
+    public int insert(Object o) throws SQLException {
+        JpaRowMapper mapper = new DefaultJpaRowMapper(o);
+        Matrix matrix = mapper.matrix();
+        String sql = sqlBuilder.simpleInsertSql(mapper.tableName(), matrix.columns());
+        return executor.update(sql,matrix.values(),matrix.types());
     }
 
     @Override
-    public Object delete(Object idOrPkCondition) throws NoIdOrPkSpecifiedException {
-        return null;
+    public int delete(Object o) throws NoIdOrPkSpecifiedException,SQLException {
+        JpaRowMapper mapper = new DefaultJpaRowMapper(o);
+        ColumnMatrix matrix = mapper.matrix();
+        if (matrix.isEmpty()){
+            //FIXME 这里考虑怎么去设置下，高危操作，matrix为空就会把表数据全部给删除了
+        }
+        String sql = sqlBuilder.simpleDeleteSql(mapper.tableName(), matrix.columns());
+        return executor.update(sql,matrix.values(),matrix.types());
     }
 
     private Object[] merge(Object[] t1,Object[] t2){

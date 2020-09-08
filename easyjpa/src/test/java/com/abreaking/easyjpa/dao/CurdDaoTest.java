@@ -46,4 +46,29 @@ public class CurdDaoTest {
     }
 
 
+    @Test
+    public void testInsert() throws Exception {
+        DruidPooledConnection connection = new DruidDataSourceConfiguration().druidDataSource().getConnection();
+        Executor executor = new JdbcExecutor(connection);
+
+        CurdDaoImpl dao = new CurdDaoImpl(executor);
+        TestUser testUser = new TestUser();
+        testUser.setUserId(5);
+        testUser.setBirthday(new Date());
+        testUser.setUserName("rose");
+        dao.insert(testUser);
+    }
+
+    @Test
+    public void testDelete() throws Exception {
+        DruidPooledConnection connection = new DruidDataSourceConfiguration().druidDataSource().getConnection();
+        Executor executor = new JdbcExecutor(connection);
+
+        CurdDaoImpl dao = new CurdDaoImpl(executor);
+        TestUser testUser = new TestUser();
+        testUser.setUserName("lisi");
+        int delete = dao.delete(testUser);
+        System.out.println(delete);
+    }
+
 }

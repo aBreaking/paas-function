@@ -2,10 +2,8 @@ package com.abreaking.easyjpa.mapper;
 
 import com.abreaking.easyjpa.constraint.Column;
 import com.abreaking.easyjpa.constraint.Id;
-import com.abreaking.easyjpa.constraint.NoIdOrPkSpecifiedException;
 import com.abreaking.easyjpa.constraint.Pk;
 import com.abreaking.easyjpa.matrix.ColumnMatrix;
-import com.abreaking.easyjpa.matrix.Matrix;
 import com.abreaking.easyjpa.matrix.impl.AxisColumnMatrix;
 import com.abreaking.easyjpa.util.NameUtil;
 import com.abreaking.easyjpa.util.ReflectUtil;
@@ -56,7 +54,7 @@ public abstract class JpaRowMapper implements RowMapper{
         return ReflectUtil.getTableName(obj);
     }
 
-    public Matrix id(){
+    public ColumnMatrix id(){
         Field[] fields = obj.getDeclaredFields();
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[0];
@@ -66,9 +64,9 @@ public abstract class JpaRowMapper implements RowMapper{
                 return colMatrix;
             }
         }
-        throw new NoIdOrPkSpecifiedException("no id specified!you should use @Id annotation upon your id field");
+        return new AxisColumnMatrix(0);
     }
-    public Matrix pk(){
+    public ColumnMatrix pk(){
         Field[] fields = obj.getDeclaredFields();
         for (int i = 0; i < fields.length; i++) {
             Field field = fields[0];
@@ -78,18 +76,18 @@ public abstract class JpaRowMapper implements RowMapper{
                 return colMatrix;
             }
         }
-        throw new NoIdOrPkSpecifiedException("no primary key specified!you should use @Pk annotation upon your business primary key");
+        return new AxisColumnMatrix(0);
     }
 
-    public Matrix matrixWithNullValue(){
+    public ColumnMatrix matrixWithNullValue(){
         return matrix(obj,null);
     }
 
-    public Matrix matrix(){
+    public ColumnMatrix matrix(){
         return matrix(obj,entity);
     }
 
-    private Matrix matrix(Class clazz,Object o){
+    private ColumnMatrix matrix(Class clazz,Object o){
         Field[] fields = clazz.getDeclaredFields();
         Map<String, Method> methodMap = ReflectUtil.poGetterMethodsMap(clazz);
         ColumnMatrix colMatrix = new AxisColumnMatrix(methodMap.size());
