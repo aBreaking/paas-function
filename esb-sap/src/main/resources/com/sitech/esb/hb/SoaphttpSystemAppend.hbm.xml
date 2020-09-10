@@ -1,0 +1,41 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.sitech.esb.hb.SoaphttpSystemAppend" table="SOAPHTTP_SYSTEM_APPEND">
+		<comment>soap适配器源系统补充信息</comment>
+		<id name="soaphttpSystemId" type="java.lang.Long">
+			<column name="SOAPHTTP_SYSTEMID" precision="22" scale="0"></column>
+			<generator class="foreign">
+				<param name="property">soaphttpSystem</param>
+			</generator>
+		</id>
+		<property name="company" type="java.lang.String">
+			<column name="COMPANY" length="64" not-null="false">
+				<comment>厂商名称</comment>
+			</column>
+		</property>
+		<property name="engineerName" type="java.lang.String">
+			<column name="ENGINEER_NAME" length="64" not-null="false">
+				<comment>维护人员姓名</comment>
+			</column>
+		</property>
+		<property name="engineerContact" type="java.lang.String">
+			<column name="ENGINEER_CONTACT" length="64" not-null="false">
+				<comment>维护人员联系方式</comment>
+			</column>
+		</property>
+		<property name="reserved1" type="java.lang.String">
+			<column name="RESER1" length="64" not-null="false">
+				<comment>预留字段1</comment>
+			</column>
+		</property>
+		<property name="reserved2" type="java.lang.String">
+			<column name="RESER2" length="64" not-null="false">
+				<comment>预留字段2</comment>
+			</column>
+		</property>
+		
+		<one-to-one name="soaphttpSystem" class="com.sitech.esb.hb.SoaphttpSystem" cascade="all"></one-to-one>
+	</class>
+</hibernate-mapping>

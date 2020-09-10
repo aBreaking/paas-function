@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE hibernate-mapping PUBLIC "-//Hibernate/Hibernate Mapping DTD 3.0//EN"
+"http://hibernate.sourceforge.net/hibernate-mapping-3.0.dtd">
+<hibernate-mapping>
+	<class name="com.sitech.esb.hb.OpRecord" table="OP_RECORDS">
+		<id name="recordID" type="java.lang.Long">
+			<column name="OP_ID" precision="22" scale="0" />
+		</id>
+		<property name="opTime" type="java.util.Date">
+			<column name="OP_TIME" length="11" not-null="true" />
+		</property>
+		<property name="opUser" type="java.lang.String">
+			<column name="OP_USER" length="16" not-null="true"/>
+		</property>
+		<property name="opUserIP" type="java.lang.String">
+			<column name="OP_USER_IP" length="255" not-null="false"></column>
+		</property>
+		<property name="serverPort" type="java.lang.Long">
+			<column name="SERVER_PORT" precision="22" scale="0" not-null="true"></column>
+		</property>
+		<property name="serverIP" type="java.lang.String">
+			<column name="SERVER_IP" length="39" not-null="true"></column>
+		</property>
+		<property name="opDescription" type="java.lang.String">
+			<column name="OP_DESCR" length="255" not-null="true"></column>
+		</property>
+	</class>
+</hibernate-mapping>
