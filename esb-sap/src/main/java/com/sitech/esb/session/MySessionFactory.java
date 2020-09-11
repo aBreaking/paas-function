@@ -27,7 +27,10 @@ public class MySessionFactory {
 
     public Session getSession(String poolKey) throws Exception {
         if (SESSION_MAP.containsKey(poolKey)){
-            return SESSION_MAP.get(poolKey);
+            Session session = SESSION_MAP.get(poolKey);
+            if (session.isOpen()){
+                return session;
+            }
         }
         Map<String, Map<String, String>> dataSourceConfig = ymlParser.getDataSourceConfig();
         Map<String, String> map = dataSourceConfig.get(poolKey);
