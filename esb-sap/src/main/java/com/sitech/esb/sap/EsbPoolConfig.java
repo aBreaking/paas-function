@@ -1,4 +1,4 @@
-package com.sitech.esb.sap.autoservice;
+package com.sitech.esb.sap;
 
 import java.io.FileInputStream;
 import java.io.IOException;

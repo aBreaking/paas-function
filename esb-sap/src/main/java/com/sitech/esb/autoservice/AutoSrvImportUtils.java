@@ -1,9 +1,10 @@
-package com.sitech.esb.sap.autoservice;
+package com.sitech.esb.autoservice;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
 import java.util.concurrent.atomic.AtomicInteger;
 
+import com.sitech.esb.sap.SapException;
 import jxl.Workbook;
 import org.apache.log4j.Logger;
 import org.hibernate.Session;
@@ -55,8 +56,8 @@ public class AutoSrvImportUtils {
 
             //默认覆盖服务
             srvResult = importService.importService(workbook,srvnametmp, "1", ss);
-            log.info(poolKey+"服务导入返回信息->"+srvResult);
-            log.info(poolKey+" import "+srvnametmp+" complete ,begin sleep 10000 ms");
+            log.info(poolKey+"service import completed, return ->"+srvResult);
+            log.info(poolKey+"service begin sleep 10000 ms");
             Thread.sleep(10000);// 保留原来的sleep，因为没得esb自动检测应用服务发布的时间点是10秒
             log.info("service sleep complete ,"+poolKey+" begin app bind service");
             boolean isNewApp = autoApp(ss,srvnametmp);

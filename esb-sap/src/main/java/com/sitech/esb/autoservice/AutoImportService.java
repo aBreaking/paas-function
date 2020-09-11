@@ -1,4 +1,4 @@
-package com.sitech.esb.sap.autoservice;
+package com.sitech.esb.autoservice;
 
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
@@ -11,6 +11,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.sitech.esb.hb.*;
+import com.sitech.esb.sap.SapException;
 import jxl.Cell;
 import jxl.Range;
 import jxl.Sheet;
@@ -28,10 +29,9 @@ import com.sitech.esb.util.IOUtil;
 import com.sitech.esb.util.AppSrvConstant;
 
 public class AutoImportService {
-	private static final Logger log = Logger.getLogger("autojob");
+	private static final Logger log = Logger.getLogger("AutoImportService");
 	/** srvInfo类 */
 	private SrvInfo srvInfoApp = null;
-	private String  hasSoapResult = "";
 
 	/**
 	 * 导入服务主程序
@@ -69,12 +69,9 @@ public class AutoImportService {
 		book.close();
 		long endTime = System.currentTimeMillis();
 		log.info("service of" + srvNamesTemp + " import succeeded. take up :" + (endTime - beginTime));
-		return resultSB.toString()+hasSoapResult;
+		return resultSB.toString();
 	}
 
-	public String getHasSoapResult(){
-		return hasSoapResult;
-	}
 	/**
 	 * 导入服务
 	 * @param srvName
@@ -251,7 +248,6 @@ public class AutoImportService {
 		return result;
 	}
 
-	//TODO 这里有个bug，执行到某一行就执行不动了，操，完全懵逼，只有追加日志吧
 	private String importServiceModule(Sheet sheet , Cell cell ,String srvName ,Session session ,SrvType srvType){
 		log.info("debug --> importServiceModule");
 		String result = "";
@@ -1003,8 +999,7 @@ public class AutoImportService {
 				}
 				//当SOAP系统不存在返回具体池名称 add by liuc
 				if(flag){
-					String poolCfg = AutoHibernateSessionFactory.getThreadConfigFile();
-					hasSoapResult+= poolCfg+"上没有("+sheet.getCell(i, cellInitRow).getContents()+")SOAP系统;";
+					throw new RuntimeException("没有("+sheet.getCell(i, cellInitRow).getContents()+")该SOAP系统名;");
 				}
 			}
 		}else if("com.sitech.esb.hb.SrvTimeoutCfg".equals(clazz.getName())){
@@ -1106,15 +1101,6 @@ public class AutoImportService {
 	 * @return
 	 */
 
-	private boolean checkChName(String CName){
-		boolean flag = true;
-		Pattern pp = Pattern.compile("[\u4e00-\u9fa5\\w]+");
-		Matcher mm = pp.matcher(CName);
-		if(!mm.matches()){
-			flag = false;
-		}
-		return flag;
-	}
 	//除去标题头，从第firstServiceRow行才能读取服务
 	private int getContentFirstRowIndex(Sheet sheet){
 		int firstServiceRow = 1;

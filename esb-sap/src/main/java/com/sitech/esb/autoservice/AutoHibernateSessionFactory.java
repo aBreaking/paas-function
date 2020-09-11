@@ -1,4 +1,4 @@
-package com.sitech.esb.sap.autoservice;
+package com.sitech.esb.autoservice;
 
 import org.hibernate.HibernateException;
 import org.hibernate.Session;

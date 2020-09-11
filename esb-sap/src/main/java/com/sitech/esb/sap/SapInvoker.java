@@ -1,5 +1,6 @@
-package com.sitech.esb.sap.autoservice;
+package com.sitech.esb.sap;
 
+import com.sitech.esb.autoservice.AutoSrvImportUtils;
 import jxl.Workbook;
 
 import java.util.Collections;

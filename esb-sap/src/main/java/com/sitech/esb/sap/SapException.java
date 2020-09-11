@@ -1,4 +1,4 @@
-package com.sitech.esb.sap.autoservice;
+package com.sitech.esb.sap;
 
 /**
  * 服务同步过程中的exception

@@ -1,4 +1,4 @@
-package com.sitech.esb.sap.autoservice;
+package com.sitech.esb.sap;
 
 import org.apache.log4j.Logger;
 
