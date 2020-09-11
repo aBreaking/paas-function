@@ -1,13 +1,15 @@
-package com.sitech.esb.sap.autoservice;
+package com.sitech.esb.sap;
 
+import com.sitech.esb.autoservice.AutoHibernateSessionFactory;
 import jxl.Workbook;
+import org.dom4j.dom.DOMDocument;
 import org.hibernate.SQLQuery;
 import org.hibernate.Session;
+import org.hibernate.cfg.Configuration;
 import org.junit.Test;
+import org.w3c.dom.Document;
 
-import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.util.List;
 
 /**
@@ -39,4 +41,14 @@ public class AutoHibernateSessionFactoryTest {
         String call = invoker.call();
         System.out.println(call);
     }
+
+    @Test
+    public void testSessionFactory(){
+        Configuration configuration = new Configuration();
+        Document document = new DOMDocument();
+
+        configuration.configure(document);
+    }
 }
+
+

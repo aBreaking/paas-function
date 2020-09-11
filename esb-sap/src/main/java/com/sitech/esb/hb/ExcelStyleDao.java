@@ -179,33 +179,8 @@ public class ExcelStyleDao extends BaseHibernateDAO {
         }
     }
     
-    public List getExcelColm(Long styleLong,SrvType srvType){
-    	Session session = HibernateSessionFactory.getSession();
+    public List getExcelColm(Long styleLong,SrvType srvType,Session session){
     	return findByPropertys(new String[]{"COLM_STYLE_PARENTID","COLM_STYLE_TYPE"}, new Object[]{styleLong,srvType} , session);
     }
-    
-    public List getExcelColm(SrvType srvType){
-    	Session session = HibernateSessionFactory.getSession();
-    	return findByPropertys(new String[]{"COLM_STYLE_TYPE"}, new Object[]{srvType} , session);
-    }
-    
-    public List getNoPositionColm(SrvType srvType){
-    	Session session = HibernateSessionFactory.getSession();
-    	List arrayList = new ArrayList();
-    	log.debug("finding ExcelStyle instance with properties");
-    	try {
-	    	String queryString = "from ExcelStyle where 1=1 and COLM_STYLE_POSITION = -1 and COLM_STYLE_TYPE = ? ";
-	    	queryString += " order by COLM_STYLE_POSITION";
-	    	Query queryObj = session.createQuery(queryString);
-	    	//ע�����
-    		queryObj.setParameter(0, srvType);
-	    	arrayList = queryObj.list();
-	    	return arrayList;
-    	} catch (RuntimeException re) {
-            log.error("find by propertys failed", re);
-            throw re;
-         }
-    }
-    
     
 }

@@ -1,0 +1,11 @@
+datasource:
+  bj104:
+    connection.url: jdbc:mysql://172.18.231.40:8066/opendb_esb
+    connection.username: chnesb
+    connection.password: chnesb
+    connection.driver_class: com.mysql.jdbc.Driver
+  localhost:
+    connection.url: jdbc:mysql://localhost:3306/esb
+    connection.username: root
+    connection.password: mysqladmin
+    connection.driver_class: com.mysql.jdbc.Driver

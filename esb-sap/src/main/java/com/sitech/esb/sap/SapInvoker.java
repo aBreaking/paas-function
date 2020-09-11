@@ -1,7 +1,8 @@
 package com.sitech.esb.sap;
 
-import com.sitech.esb.autoservice.AutoSrvImportUtils;
+import com.sitech.esb.autoservice.LiucServiceImport;
 import jxl.Workbook;
+import org.apache.log4j.Logger;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
@@ -18,11 +19,21 @@ import java.util.concurrent.Executors;
  */
 public class SapInvoker implements Callable {
 
+    private Logger logger = Logger.getLogger("autojob");
+
     protected Workbook workbook;
     protected EsbPoolConfig config;
 
+    public SapInvoker() {
+    }
+
+    public SapInvoker(Workbook workbook, EsbPoolConfig config) {
+        this.workbook = workbook;
+        this.config = config;
+    }
+
     private String invokeKey;
-    private SapLogger logger;
+
     /**
      * 存储服务同步的返回信息
      */
@@ -43,14 +54,15 @@ public class SapInvoker implements Callable {
         if (config==null){
             throw new SapException("no esb pool configuration data,please check the name of poolkey is correct");
         }
-        AutoSrvImportUtils liuc = new AutoSrvImportUtils();
-        if (logger==null){
-            logger = SapLogger.getLogger(SapLogger.class.getSimpleName());
-        }
+        //TODO
+
+        LiucServiceImport liuc = new LiucServiceImport(null);
+
         String ret;
         try{
             logger.info("begin esb service auto import,EsbPoolConfig is : "+config);
-            ret = liuc.autoSrvImp(workbook, config.getPoolKey(), config.getHbXml(), config.getPoolAddress());
+            liuc.liuc(workbook, config.getPoolAddress());
+            ret = "success";
             logger.info("service import completed:"+ret);
         }catch (Exception e){
             ret = e.getMessage();
@@ -69,9 +81,7 @@ public class SapInvoker implements Callable {
      * @return 同步结果查询key
      */
     public String asyncInvoke(){
-        final String invokeKey = generateInvokeKey(config.getPoolKey());
-        this.setInvokeKey(invokeKey);
-        this.setLogger(SapLogger.getLogger(invokeKey));
+        this.invokeKey = generateInvokeKey(config.getPoolKey());
         logger.info("starts asynchronous service import,the invokeKey of current operation is "+invokeKey);
         /**
          * AutoHibernateSessionFactory#setConfigFile(java.lang.String)这个方法应该是线程冲突了，liuc写了个鸡儿
@@ -79,7 +89,6 @@ public class SapInvoker implements Callable {
          *
          * 一个解决方案只有考虑通过单线程池的方式来提交任务了，线程池数量固定1，任务队列衍生，将当前SapInvoker ，submit(this)
          */
-
         SAP_TASK_POOL.submit(this);
         return invokeKey;
     }
@@ -140,21 +149,5 @@ public class SapInvoker implements Callable {
 
     public void setConfig(EsbPoolConfig config) {
         this.config = config;
-    }
-
-    public String getInvokeKey() {
-        return invokeKey;
-    }
-
-    public void setInvokeKey(String invokeKey) {
-        this.invokeKey = invokeKey;
-    }
-
-    public SapLogger getLogger() {
-        return logger;
-    }
-
-    public void setLogger(SapLogger logger) {
-        this.logger = logger;
     }
 }

@@ -8,10 +8,12 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
-public class AutoReFreshTask implements Runnable {
+public class AutoRefreshTask implements Runnable {
 	private static final Logger log = Logger.getLogger("autojob");
+
 	private String ipport;
-	public AutoReFreshTask(String ipport){
+
+	public AutoRefreshTask(String ipport){
 		this.ipport = ipport;
 	}
 

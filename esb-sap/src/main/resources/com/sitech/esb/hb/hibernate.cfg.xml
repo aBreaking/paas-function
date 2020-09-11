@@ -41,7 +41,7 @@
 		
 		<!-- 容器切换 -->
 		<!--  支持weblogic.websphere,jboss配置 -->
-		<!-- <property name="connection.datasource">chnesbDS</property>  -->
+		<!-- <property name="connection.session">chnesbDS</property>  -->
 		<!-- 支持tomcat配置 -->
 		 <property name="connection.datasource">java:comp/env/chnesbDS</property> 
 		

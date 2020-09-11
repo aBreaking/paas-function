@@ -29,7 +29,7 @@ import com.sitech.esb.util.IOUtil;
 import com.sitech.esb.util.AppSrvConstant;
 
 public class AutoImportService {
-	private static final Logger log = Logger.getLogger("AutoImportService");
+	private static final Logger log = Logger.getLogger("autojob");
 	/** srvInfo类 */
 	private SrvInfo srvInfoApp = null;
 
@@ -360,10 +360,10 @@ public class AutoImportService {
 		ExcelStyleDao excelStyleDao = new ExcelStyleDao();
 
 		//当前service的共有多少个字段
-		excelColmList = excelStyleDao.getExcelColm(Long.valueOf(0),srvType);
-		excelInputList = excelStyleDao.getExcelColm(Long.valueOf(1),srvType);
-		excelOutputList = excelStyleDao.getExcelColm(Long.valueOf(2),srvType);
-		excelErrorList = excelStyleDao.getExcelColm(Long.valueOf(3),srvType);
+		excelColmList = excelStyleDao.getExcelColm(Long.valueOf(0),srvType,session);
+		excelInputList = excelStyleDao.getExcelColm(Long.valueOf(1),srvType,session);
+		excelOutputList = excelStyleDao.getExcelColm(Long.valueOf(2),srvType,session);
+		excelErrorList = excelStyleDao.getExcelColm(Long.valueOf(3),srvType,session);
 
 		ExcelStyle excelStyle = null;
 		String funName = null;
