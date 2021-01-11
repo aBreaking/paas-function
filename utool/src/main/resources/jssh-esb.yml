@@ -1,0 +1,7 @@
+defaultReadSize: 1M
+srvlogFilepath: /paas/chnesb/domains/esbdomain*/logs/inParam.log
+esb:
+  esbKey:
+    host: 172.18.231.114
+    username: chnesb
+    password: Chnesb123.com

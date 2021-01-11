@@ -1,4 +1,4 @@
-package com.sitech.esb.util;
+package com.sitech.esb.jssh.util;
 
 import java.util.ArrayList;
 import java.util.List;

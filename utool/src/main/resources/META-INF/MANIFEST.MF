@@ -1,4 +1,4 @@
 Manifest-Version: 1.0
 Class-Path: ganymed-ssh2-build210.jar
-Main-Class: com.sitech.esb.shell.SshUtil
+Main-Class: com.sitech.esb.jssh.shell.SshUtil
 
