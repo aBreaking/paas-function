@@ -1,4 +1,4 @@
-package com.sitech.esb.jssh.reader;
+package com.sitech.esb.jssh.beat;
 
 import java.util.Date;
 
@@ -10,9 +10,9 @@ import java.util.Date;
 public class FileRecord {
 
     private String filePath;
-    private int lastRow = 0;  // 上次读取到的行号
+    private int lastLineNum = 0;  // 上次读取到的行号
     private int offset; // 每次读多少行
-    private Date startReadTime; //文件的起始读取时间
+    private Long startReadTimestamp; //文件的起始读取时间
     private Date lastReadTime; //最近一次的读取时间
 
     public String getFilePath() {
@@ -23,12 +23,12 @@ public class FileRecord {
         this.filePath = filePath;
     }
 
-    public int getLastRow() {
-        return lastRow;
+    public int getLastLineNum() {
+        return lastLineNum;
     }
 
-    public void setLastRow(int lastRow) {
-        this.lastRow = lastRow;
+    public void setLastLineNum(int lastLineNum) {
+        this.lastLineNum = lastLineNum;
     }
 
     public int getOffset() {
@@ -39,12 +39,12 @@ public class FileRecord {
         this.offset = offset;
     }
 
-    public Date getStartReadTime() {
-        return startReadTime;
+    public Long getStartReadTimestamp() {
+        return startReadTimestamp;
     }
 
-    public void setStartReadTime(Date startReadTime) {
-        this.startReadTime = startReadTime;
+    public void setStartReadTimestamp(Long startReadTimestamp) {
+        this.startReadTimestamp = startReadTimestamp;
     }
 
     public Date getLastReadTime() {

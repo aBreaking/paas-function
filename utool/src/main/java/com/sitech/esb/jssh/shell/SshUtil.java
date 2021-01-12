@@ -10,26 +10,25 @@ import java.util.Scanner;
  */
 public class SshUtil {
 
-    static String ip = "172.18.231.114";
+    static String ip = "172.18.231.104";
     static String username = "chnesb";
     static String password = "Chnesb123.com";
 
-    public static void main(String[] args) throws Exception{
+    public static void main02(String[] args) throws Exception{
         RemoteShellExecutor shellExecutor = ShellExecutorFactory.login(ip, username, password);
         shellExecutor.doExecute("", out -> {
-            BufferedReader reader = new BufferedReader(new InputStreamReader(out));
-            String s = reader.readLine();
-            System.out.println(s);
         });
     }
 
-    public static void main02(String[] args) throws IOException {
+    public static void main(String[] args) throws IOException {
         RemoteShellExecutor shellExecutor = ShellExecutorFactory.login(ip, username, password);
-        shellExecutor.doExecute("sed -n 1,2p /paas/chnesb/domains/esbdomain9/logs/inParam.log", out -> {
+        long start = System.currentTimeMillis();
+        shellExecutor.doExecute("wc -l /paas/chnesb/gdltjfesb51600/console51600.log", out -> {
             BufferedReader reader = new BufferedReader(new InputStreamReader(out));
             String s = reader.readLine();
             System.out.println(s);
         });
+        System.out.println(System.currentTimeMillis()-start);
     }
 
     public static void main01(String args[]) throws IOException {

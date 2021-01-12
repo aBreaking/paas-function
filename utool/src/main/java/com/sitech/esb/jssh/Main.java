@@ -1,5 +1,8 @@
 package com.sitech.esb.jssh;
 
+import java.util.ArrayList;
+import java.util.List;
+
 /**
  *
  * @author liwei_paas
@@ -8,10 +11,10 @@ package com.sitech.esb.jssh;
 public class Main {
 
     public static void main(String[] args) {
-
+        for (int i = 1; i <10; ++i) {
+            System.out.println(i);
+        }
     }
 
-    public static void startup(){
 
-    }
 }
