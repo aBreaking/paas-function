@@ -7,7 +7,6 @@ import com.sitech.esb.jssh.shell.ShellExecutorFactory;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
-import java.util.*;
 
 /**
  * linux主机文件读取
@@ -26,29 +25,32 @@ public class FileReader {
      * @return 根据lineNum判断文件是否还有数据并已经处理了
      * @throws IOException
      */
-    public boolean readAndHandleLine(FileRecord fileRecord,FileLineHandler fileLineHandler) throws IOException{
+    public void readAndHandleLine(FileRecord fileRecord,FileLineHandler fileLineHandler) throws IOException{
         int startLineNum = fileRecord.getLastLineNum(); // 开始读取的位置，上次的位置+1
         int offset = fileRecord.getOffset(); // 每次读多少行数据
+        int nlct = fileRecord.getNullLineConsecutiveTimes(); // 连续多少次没有内容
         String command = command2readFileRow(fileRecord.getFilePath(),(startLineNum+1),offset); // 默认使用sed命令来获取文件数据
         RemoteShellExecutor remoteShellExecutor = ShellExecutorFactory.getLoggedShellExecutor();
         remoteShellExecutor.doExecute(command, out -> {
             BufferedReader reader = new BufferedReader(new InputStreamReader(out));
+            //先判断下有没有内容
+            String currentLine = reader.readLine();
+            if (currentLine == null){
+                // 如果没有读取到数据
+                fileRecord.setNullLineConsecutiveTimes(nlct+1);
+                return;
+            }
+            fileRecord.setNullLineConsecutiveTimes(0); //说明有内容了
+
             int start = startLineNum+1;
-            while (true){
-                String line = reader.readLine();
-                boolean isLastLine = line == null; //该行是否是最后一行了，即没有数据了
-                if (fileLineHandler.handLine(line, start,isLastLine)){
+            //使用nextLine来判断currentLine是不是最后一行了
+            for (String nextLine = reader.readLine() ; currentLine!=null ; currentLine = nextLine){
+                if (fileLineHandler.handLine(currentLine, start,nextLine==null)){
                     fileRecord.setLastLineNum(start); // 记录已经处理过的行号
-                    fileRecord.setLastReadTime(new Date());
-                }
-                if (isLastLine){
-                    break;
                 }
                 start++;
             }
         });
-        int currentLineNum = fileRecord.getLastLineNum();
-        return currentLineNum>startLineNum;
     }
 
     /**

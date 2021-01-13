@@ -1,50 +1,102 @@
 package com.sitech.esb.jssh.beat;
 
-
 import com.sitech.esb.jssh.handler.FileLineHandler;
 import com.sitech.esb.jssh.shell.RemoteShellExecutor;
 import com.sitech.esb.jssh.shell.ShellExecutorFactory;
 
-import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.io.*;
+import java.util.*;
 
 /**
- * 用来探测文件内容是否有更新，可对批量的文件进行探测
+ * 用来探测文件内容是否有更新，可对批量的文件进行探测，类似elk的FileBeat
  * 对文件内容可以使用解析器来解析
+ * 本工具对文件的读取记录不会丢失，它会将文件的读取记录通过序列话的方式保存在指定位置
  * @author liwei_paas
  * @date 2021/1/12
  */
-public class FileBeat {
+public class FileBeat implements Externalizable {
 
-    public static int MAX_KEEP_ALIVE_TIME = 1; //文件最大保持检测时间
+    private static int MAX_KEEP_ALIVE_TIME = 60*60; //文件最大保持检测时间
 
-    public static int DEFAULT_READ_DATA_SIZE = 1*1024*1024; //单次读取内容数据大小，跟网络、内存大小而定
+    private static int DEFAULT_READ_DATA_SIZE = 1*1024*1024; //单次读取内容数据大小，跟网络、内存大小而定
 
-    private static final Map<String,FileRecord> fileRecordMap = new HashMap<>();
+    /**
+     * 记录文件的读取情况，每一次的heartbeat 都会对指定文件进行一次内容读取；
+     *  如果文件没有读取完，文件的读取信息（比如已经读到第几行了）将会存放在该FILE_RECORD_MAP里
+     */
+    private final Map<String,FileRecord> FILE_RECORD_MAP = new HashMap<>();
 
-    private int rowOffset = 0;
+    /**
+     * 用于存放已经被读取过的文件名，防止被重复读
+     * FIXME 它应该有设置最大长度，或过期时间
+     */
+    private final Set<String> FILE_ABANDONMENT_SET = new HashSet<>();
 
-    FileLineHandler fileLineHandler;
 
-    public void listen(String filePath) throws IOException {
+    private int rowOffset = 0; //默认的读取行数
+
+    FileLineHandler fileLineHandler; // 处理文件里每行数据的方法
+
+    private volatile static FileBeat fileBeat ;
+
+    private FileBeat() {
+    }
+
+    public static FileBeat getInstance(){
+        if (fileBeat==null){
+            synchronized (fileBeat){
+                if (fileBeat==null){
+                    fileBeat = new FileBeat();
+                }
+            }
+        }
+        return fileBeat;
+    }
+
+
+    public void heartbeat(String filePath) throws IOException {
+        // 就算一秒读取一次，都这么久了也没读取到内容，也该不要了吧
+        heartbeat(filePath,Integer.MAX_VALUE);
+    }
+
+    /**
+     * 对文件进行一次心跳检测，读取文件里的内容，并可以通过fileLineHandler对读到的内容进行处理
+     * 每个文件的最大心跳保持时间不会超过MAX_KEEP_ALIVE_TIME，已读过的文件将会被放入垃圾箱FILE_COMPLETE_SET
+     * @param filePath 文件位置（一般是文件的全路径名）
+     * @param maxNullLineConsecutiveTimes 多少次没有读取到数据就被遗弃
+     * @throws IOException
+     */
+    public void heartbeat(String filePath,int maxNullLineConsecutiveTimes) throws IOException {
+        if (FILE_ABANDONMENT_SET.contains(filePath)){
+            // 防止重复读取
+            return;
+        }
         FileRecord fileRecord;
-        if (fileRecordMap.containsKey(filePath)){
-            fileRecord = fileRecordMap.get(filePath);
+        if (FILE_RECORD_MAP.containsKey(filePath)){
+            fileRecord = FILE_RECORD_MAP.get(filePath);
             Long timeDifference = System.currentTimeMillis()-fileRecord.getStartReadTimestamp();
             if (timeDifference/1000 > MAX_KEEP_ALIVE_TIME){
-                fileRecordMap.remove(filePath);
+                abandon(filePath);
                 return;
             }
         }else{
             fileRecord = new FileRecord();
             fileRecord.setStartReadTimestamp(System.currentTimeMillis());
             fileRecord.setOffset(offset(filePath));
-            fileRecordMap.put(filePath,fileRecord);
+            FILE_RECORD_MAP.put(filePath,fileRecord);
         }
         FileReader fileReader = new FileReader();
-        fileReader.readAndHandleLine(fileRecord,fileLineHandler);
-        //是否考虑：如果连接超过n次都没从文件里读取到内容，也将该文件删除
+        fileReader.readAndHandleLine(fileRecord, fileLineHandler);
+        fileRecord.setLastReadTime(new Date());
+        if (fileRecord.getNullLineConsecutiveTimes()>=maxNullLineConsecutiveTimes){
+            //连续了n次都没有读取到内容，也就abandon该文件了
+            abandon(filePath);
+        }
+    }
+
+    private void abandon(String filePath){
+        FILE_RECORD_MAP.remove(filePath);
+        FILE_ABANDONMENT_SET.add(filePath);
     }
 
     /**
@@ -73,7 +125,36 @@ public class FileBeat {
         }catch (IOException e){
             return 1024;
         }
-
     }
 
+    /**
+     * 将两个缓存里的内容保存到本地，防止工程重启丢失了读取记录
+     */
+    @Override
+    public void writeExternal(ObjectOutput out) throws IOException {
+        out.writeObject(FILE_RECORD_MAP);
+        out.writeObject(FILE_ABANDONMENT_SET);
+    }
+
+    @Override
+    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
+        FILE_RECORD_MAP.putAll((Map<String, FileRecord>) in.readObject());
+        FILE_ABANDONMENT_SET.addAll((Set<String>) in.readObject());
+    }
+
+    public int getRowOffset() {
+        return rowOffset;
+    }
+
+    public void setRowOffset(int rowOffset) {
+        this.rowOffset = rowOffset;
+    }
+
+    public FileLineHandler getFileLineHandler() {
+        return fileLineHandler;
+    }
+
+    public void setFileLineHandler(FileLineHandler fileLineHandler) {
+        this.fileLineHandler = fileLineHandler;
+    }
 }
