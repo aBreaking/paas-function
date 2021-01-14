@@ -17,7 +17,7 @@ import java.util.Map;
  * @author liwei_paas
  * @date 2021/1/12
  */
-public class FileLineBatchDbHandler extends FileLineBatchHandler {
+public class FileLineBatch2DbHandler extends FileLineBatchHandler {
 
     // 文件每行的解析工具
     FileLineParser fileLineParser ;
@@ -27,7 +27,7 @@ public class FileLineBatchDbHandler extends FileLineBatchHandler {
 
     String tableName;
 
-    public FileLineBatchDbHandler(Connection connection) {
+    public FileLineBatch2DbHandler(Connection connection) {
         this.easyJpaDao = new EasyJpaDaoImpl(connection);
     }
 
@@ -55,6 +55,9 @@ public class FileLineBatchDbHandler extends FileLineBatchHandler {
         }catch (Exception e){
             //判断是否是表名不存在的问题，如果表不存在就自动创建表,然后再执行一遍操作
             String message = e.getMessage();
+            if (e.getCause()!=null){
+                message += e.getCause().getMessage();
+            }
             if (message.matches(".*Table.*doesn't exist.*") || message.indexOf("ORA-00942")!=-1){
                 createTable(table,map);
                 String placeholderSql = map2InsertPlaceholderSql(table, map);
@@ -63,11 +66,17 @@ public class FileLineBatchDbHandler extends FileLineBatchHandler {
                 throw new RuntimeException(e);
             }
         }
-
     }
 
     private void createTable(String table,Map<String,Object> map){
-
+        StringBuilder sqlBuilder = new StringBuilder();
+        sqlBuilder.append("CREATE TABLE ").append(table).append("(");
+        for (String key : map.keySet()){
+            sqlBuilder.append(key).append(" varchar(255)").append(",");
+        }
+        StringUtils.cutAtLastSeparator(sqlBuilder,",");
+        sqlBuilder.append(") ENGINE=InnoDB AUTO_INCREMENT=10087 DEFAULT CHARSET=utf8");
+        easyJpaDao.executePrepareSql(EasyJpa.buildPrepared(sqlBuilder.toString()));
     }
 
     /**
@@ -89,8 +98,8 @@ public class FileLineBatchDbHandler extends FileLineBatchHandler {
         StringUtils.cutAtLastSeparator(placeholder,",");
         placeholder.append(") VALUES(");
         for (String column : map.keySet()){
-            placeholder.append(column);
-            placeholder.append("#{").append(map.get(column)).append(")");
+            placeholder.append("#{").append(column).append("}");
+            placeholder.append(",");
         }
         StringUtils.cutAtLastSeparator(placeholder,",");
         placeholder.append(")");

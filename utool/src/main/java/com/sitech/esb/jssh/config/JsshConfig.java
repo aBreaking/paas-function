@@ -16,6 +16,10 @@ public class JsshConfig {
         return (String) configMap.get(configKey);
     }
 
+    public static Object getOrDefault(String key,Object value){
+        return configMap.containsKey(key)?configMap.get(key):value;
+    }
+
     public String getSrvlogFilePath(String esbKey){
         Map<String,String> s = (Map<String, String>) configMap.get(esbKey);
         return s.containsKey("srvlogFilepath")?s.get("srvlogFilepath"):(String) configMap.get("srvlogFilepath");
