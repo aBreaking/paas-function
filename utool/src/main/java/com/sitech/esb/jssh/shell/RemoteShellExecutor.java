@@ -57,7 +57,7 @@ public class RemoteShellExecutor {
 
             List<String> list = getLine(errInputStream);
             if (!list.isEmpty()){
-                throw new IOException(list.toString());
+                throw new IOException(command+"->"+list.toString());
             }
             handler.hand(soutInputStream);
         }finally {
@@ -79,10 +79,30 @@ public class RemoteShellExecutor {
         return list;
     }
 
+    /**
+     * 文件总大小 单位,bit
+     * @param filePath
+     * @return
+     * @throws IOException
+     */
+    public long getFileSize(String filePath) throws IOException{
+        String s = executeAndGetSingle("ls -lt " + filePath + " | awk '{print $5}'");
+        return Long.parseLong(s);
+    }
+
+    /**
+     * 文件总行数
+     * @return
+     */
+    public long getFileTotalLineNum(String filePath) throws IOException {
+        String s = executeAndGetSingle("wc -l " + filePath + " | awk '{print $1}'");
+        return Long.parseLong(s);
+    }
+
+
     public String executeAndGetSingle(String command) throws IOException{
-        List<String> list = new ArrayList<>();
-        doExecute(command,out -> collectLine(out,list));
-        return list.isEmpty()?list.get(0):null;
+        List<String> list = execute(command);
+        return list.isEmpty()?null:list.get(0);
     }
 
     public static List<String> getLine(InputStream inputStream) throws IOException {
@@ -133,4 +153,5 @@ public class RemoteShellExecutor {
     public void setPassword(String password) {
         this.password = password;
     }
+
 }

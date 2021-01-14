@@ -1,5 +1,7 @@
 package com.sitech.esb.jssh.handler;
 
+import com.sitech.esb.jssh.beat.FileLineHandler;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,7 +10,7 @@ import java.util.List;
  * @author liwei_paas
  * @date 2021/1/12
  */
-public abstract class FileLineBatchHandler implements FileLineHandler{
+public abstract class FileLineBatchHandler implements FileLineHandler {
 
     //批量处理的量
     private static int BATCH_HANDLE_SIZE = 1024;
@@ -16,22 +18,23 @@ public abstract class FileLineBatchHandler implements FileLineHandler{
     private List<String> lineList = new ArrayList<>(BATCH_HANDLE_SIZE);
 
     @Override
-    public boolean handLine(String line, int lineNum, boolean isLastLine) {
+    public boolean handLine(String filePath,String line, long lineNum, boolean isLastLine) {
         if (line==null){
             return false;
         }
+        lineList.add(line);
         if (!isLastLine && lineNum%BATCH_HANDLE_SIZE!=0){
-            lineList.add(line);
             return false;
         }
-        batchHandle(lineList);
+        batchHandle(filePath,lineList);
         lineList.clear();
         return true;
     }
 
     /**
-     * 对LineList的批量处理
+     * 文件读取到的内容批量处理
+     * @param filePath
      * @param lineList
      */
-    protected abstract void batchHandle(List<String> lineList);
+    protected abstract void batchHandle(String filePath,List<String> lineList);
 }

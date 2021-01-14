@@ -1,50 +1,45 @@
-package com.sitech.esb.jssh.handler;
+package com.sitech.esb.jssh.handler.db;
 
 
 import com.abreaking.easyjpa.dao.EasyJpa;
 import com.abreaking.easyjpa.dao.EasyJpaDao;
+import com.abreaking.easyjpa.dao.impl.EasyJpaDaoImpl;
 import com.abreaking.easyjpa.util.StringUtils;
+import com.sitech.esb.jssh.handler.FileLineBatchHandler;
+import com.sitech.esb.jssh.handler.FileLineParser;
 
 import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
 /**
- * 批量保存到db
+ * 批量解析文件内容，然后保存到数据库
  * @author liwei_paas
  * @date 2021/1/12
  */
-public class FileLineBatchDbHandler extends FileLineBatchHandler{
+public class FileLineBatchDbHandler extends FileLineBatchHandler {
 
+    // 文件每行的解析工具
     FileLineParser fileLineParser ;
 
-    Connection connection;
-
+    //jdbc执行工具
     EasyJpaDao easyJpaDao;
 
     String tableName;
+
+    public FileLineBatchDbHandler(Connection connection) {
+        this.easyJpaDao = new EasyJpaDaoImpl(connection);
+    }
 
     /**
      * 处理方式是保存到数据库
      * @param lineList
      */
     @Override
-    protected void batchHandle(List<String> lineList) {
-        try{
-            connection.setAutoCommit(false);
-            for (String line : lineList){
-                Map<String, Object> map = fileLineParser.parse(line);
-                save2dbWithAutoTable(tableName,map);
-            }
-            connection.commit();
-        } catch (Exception e) {
-            try {
-                connection.rollback();
-            } catch (SQLException e1) {
-                e = e1;
-            }
-            throw new RuntimeException(e);
+    protected void batchHandle(String filePath,List<String> lineList) {
+        for (String line : lineList){
+            Map<String, Object> map = fileLineParser.parse(filePath,line);
+            save2dbWithAutoTable(tableName,map);
         }
     }
 
@@ -73,7 +68,6 @@ public class FileLineBatchDbHandler extends FileLineBatchHandler{
 
     private void createTable(String table,Map<String,Object> map){
 
-
     }
 
     /**
@@ -101,6 +95,22 @@ public class FileLineBatchDbHandler extends FileLineBatchHandler{
         StringUtils.cutAtLastSeparator(placeholder,",");
         placeholder.append(")");
         return placeholder.toString();
+    }
+
+    public FileLineParser getFileLineParser() {
+        return fileLineParser;
+    }
+
+    public void setFileLineParser(FileLineParser fileLineParser) {
+        this.fileLineParser = fileLineParser;
+    }
+
+    public String getTableName() {
+        return tableName;
+    }
+
+    public void setTableName(String tableName) {
+        this.tableName = tableName;
     }
 
 }

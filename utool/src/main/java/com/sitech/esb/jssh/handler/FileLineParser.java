@@ -10,10 +10,11 @@ import java.util.Map;
 public interface FileLineParser {
 
     /**
-     * 默认解析成map对象
-     * @param line
+     * 默认解析文件每行的内容成map对象
+     * @param filePath 文件
+     * @param line 文件中每行的内容
      * @return
      */
-    Map<String,Object> parse(String line);
+    Map<String,Object> parse(String filePath,String line);
 
 }

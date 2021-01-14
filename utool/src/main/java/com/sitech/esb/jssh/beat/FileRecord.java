@@ -1,7 +1,6 @@
 package com.sitech.esb.jssh.beat;
 
 import java.io.*;
-import java.util.Date;
 
 /**
  * 文件读取记录
@@ -9,12 +8,10 @@ import java.util.Date;
  * @date 2021/1/11
  */
 public class FileRecord implements Serializable {
-    private String filePath;
-    private int lastLineNum = 0;  // 上次读取到的行号
-    private int offset; // 每次读多少行
+    private String filePath; //文件路径
+    private long lineNum = 0;  // 读取到的行号
     private int nullLineConsecutiveTimes = 0; // 连续多少几次没有读取到内容
     private Long startReadTimestamp; //文件的起始读取时间
-    private Date lastReadTime; //最近一次的读取时间
 
     public String getFilePath() {
         return filePath;
@@ -24,20 +21,20 @@ public class FileRecord implements Serializable {
         this.filePath = filePath;
     }
 
-    public int getLastLineNum() {
-        return lastLineNum;
+    public long getLineNum() {
+        return lineNum;
     }
 
-    public void setLastLineNum(int lastLineNum) {
-        this.lastLineNum = lastLineNum;
+    public void setLineNum(long lineNum) {
+        this.lineNum = lineNum;
     }
 
-    public int getOffset() {
-        return offset;
+    public int getNullLineConsecutiveTimes() {
+        return nullLineConsecutiveTimes;
     }
 
-    public void setOffset(int offset) {
-        this.offset = offset;
+    public void setNullLineConsecutiveTimes(int nullLineConsecutiveTimes) {
+        this.nullLineConsecutiveTimes = nullLineConsecutiveTimes;
     }
 
     public Long getStartReadTimestamp() {
@@ -48,19 +45,4 @@ public class FileRecord implements Serializable {
         this.startReadTimestamp = startReadTimestamp;
     }
 
-    public Date getLastReadTime() {
-        return lastReadTime;
-    }
-
-    public void setLastReadTime(Date lastReadTime) {
-        this.lastReadTime = lastReadTime;
-    }
-
-    public int getNullLineConsecutiveTimes() {
-        return nullLineConsecutiveTimes;
-    }
-
-    public void setNullLineConsecutiveTimes(int nullLineConsecutiveTimes) {
-        this.nullLineConsecutiveTimes = nullLineConsecutiveTimes;
-    }
 }

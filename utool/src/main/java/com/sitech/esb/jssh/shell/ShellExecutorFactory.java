@@ -13,23 +13,6 @@ public class ShellExecutorFactory {
 
     private static Map<String,RemoteShellExecutor> shellExecutorFactory = new HashMap<>();
 
-    private static ThreadLocal<RemoteShellExecutor> localShellExecutor = new ThreadLocal<>();
-
-    /**
-     * 获取本地线程已登录过的连接
-     * @return
-     */
-    public static RemoteShellExecutor getLoggedShellExecutor(){
-        RemoteShellExecutor remoteShellExecutor = localShellExecutor.get();
-        try{
-            if (!remoteShellExecutor.hasLogin()){
-                remoteShellExecutor.login();
-            }
-            return remoteShellExecutor;
-        }catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     /**
      * 注册或获取一个连接

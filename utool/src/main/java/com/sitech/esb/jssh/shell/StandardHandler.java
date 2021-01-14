@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 /**
- *
+ * 对获取到shell的输出流处理
  * @author liwei_paas
  * @date 2021/1/11
  */
