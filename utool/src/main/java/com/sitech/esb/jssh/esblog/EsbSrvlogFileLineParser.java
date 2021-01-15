@@ -15,11 +15,17 @@ public class EsbSrvlogFileLineParser implements FileLineParser {
 
     private static final int MAX_VALUE_LENGTH = 255;
 
+    private static final String separator = "，";
+
     @Override
     public Map<String, Object> parse(String filePath,String line) {
-        String[] split = line.split("，");//esb的日志文件分割符是中文逗号！
+        String[] split = line.split(separator);//esb的日志文件分割符是中文逗号！
         Map<String,Object> map = new HashMap<>(split.length);
         SrvLogEnum[] enums = SrvLogEnum.values();
+        if (split.length<enums.length-1){
+            //如果需要解析的值 长度没有超过指定长度(即可能esb srvlog 日志不全，那么也就不考虑)
+            return null;
+        }
         for (SrvLogEnum logEnum : enums){
             int index = logEnum.index;
             String name = logEnum.name();

@@ -1,9 +1,9 @@
 package com.sitech.esb.jssh.beat;
 
+import com.sitech.esb.jssh.config.JsshLocalHolder;
 import com.sitech.esb.jssh.shell.RemoteShellExecutor;
 
 import java.io.*;
-import java.util.*;
 
 /**
  * 远程探测linux文件
@@ -16,29 +16,15 @@ import java.util.*;
  * @author liwei_paas
  * @date 2021/1/12
  */
-public class SshFileLineBeat implements Externalizable,FileLineBeat {
+public class SshFileLineBeat implements FileLineBeat {
 
 
-    /**
-     * 记录文件的读取情况，每一次的heartbeat 都会对指定文件进行一次内容读取；
-     *  如果文件没有读取完，文件的读取信息（比如已经读到第几行了）将会存放在该FILE_RECORD_MAP里
-     */
-    private final Map<String,FileRecord> FILE_RECORD_MAP = new HashMap<>();
-
-    /**
-     * 用于存放已经被读取过的文件名，防止被重复读
-     * FIXME 它应该有设置最大长度，或过期时间
-     */
-    private final Set<String> FILE_ABANDONMENT_SET = new HashSet<>();
-
-    private RemoteShellExecutor remoteShellExecutor;
-
-    private int maxKeepAliveSecond = 60*60; //文件最大保持心跳检测时间
+    private int keepAliveSecond = 60*60; //文件最大保持心跳检测时间
 
     /**
      * 单次读取内容数据行数，注意不是大小。
      *  需要跟你实际的网络情况、每行数据大小来设置一个最优值，它（ineOffset）等于 网络每秒传送量/单行数据大小
-     *  比如你网络一般，一秒钟传送1M的数据；你的文件中每行的数据有1024bit大小，那么，该值建议就是：1M/1024bit = 1024
+     *  比如你网络一般，一秒钟传送1M的数据；你的文件中每行的数据有1024字节大小，那么，该值建议就是：1M/1024字节 = 1024
      *
      */
     private int lineOffset = 1*1024;
@@ -47,8 +33,12 @@ public class SshFileLineBeat implements Externalizable,FileLineBeat {
 
     private String filePath; //要读取的文件（一般是文件的全路径名）
 
-    public SshFileLineBeat(RemoteShellExecutor remoteShellExecutor) {
-        this.remoteShellExecutor = remoteShellExecutor;
+    public SshFileLineBeat() {
+    }
+
+    public SshFileLineBeat(String filePath, FileLineHandler fileLineHandler) {
+        this.fileLineHandler = fileLineHandler;
+        this.filePath = filePath;
     }
 
     public void heartbeat() throws IOException {
@@ -64,36 +54,26 @@ public class SshFileLineBeat implements Externalizable,FileLineBeat {
      * @throws IOException
      */
     public void heartbeat(int maxNullLineConsecutiveTimes) throws IOException {
-        if (FILE_ABANDONMENT_SET.contains(filePath)){
-            // 防止重复读取
+        FileRecordCache localFileCache = JsshLocalHolder.getLocalFileCache();
+        if (localFileCache.isAbandoned(filePath)){
+            // 防止重复读取无效文件
             return;
         }
-        FileRecord fileRecord;
-        if (FILE_RECORD_MAP.containsKey(filePath)){
-            fileRecord = FILE_RECORD_MAP.get(filePath);
-            Long timeDifference = System.currentTimeMillis()-fileRecord.getStartReadTimestamp();
-            if (timeDifference/1000 > maxKeepAliveSecond){
-                abandon(filePath);
-                System.out.println("abandon filePath");
-                return;
-            }
+        FileRecord fileRecord = localFileCache.getOrStartFileRecord(filePath);
+        if (System.currentTimeMillis()-fileRecord.getStartReadTimestamp() >= keepAliveSecond*1000){
+            //文件已过期的话，也将该文件遗弃
+            localFileCache.abandon(filePath);
         }else{
-            fileRecord = new FileRecord();
-            fileRecord.setStartReadTimestamp(System.currentTimeMillis());
-            fileRecord.setFilePath(filePath);
-            FILE_RECORD_MAP.put(filePath,fileRecord);
+            readAndHandleLine(fileRecord, fileLineHandler);
         }
-        readAndHandleLine(fileRecord, fileLineHandler);
+
         if (fileRecord.getNullLineConsecutiveTimes()>=maxNullLineConsecutiveTimes){
             //连续了n次都没有读取到内容，也就abandon该文件了
-            abandon(filePath);
+            localFileCache.abandon(filePath);
         }
     }
 
-    private void abandon(String filePath){
-        FILE_RECORD_MAP.remove(filePath);
-        FILE_ABANDONMENT_SET.add(filePath);
-    }
+
 
     /**
      * 对文件进行分页读取每行数据并处理,默认通过sed+分页的方式读取
@@ -106,16 +86,25 @@ public class SshFileLineBeat implements Externalizable,FileLineBeat {
      * @throws IOException
      */
     private void readAndHandleLine(FileRecord fileRecord,FileLineHandler fileLineHandler) throws IOException{
+        RemoteShellExecutor remoteShellExecutor = JsshLocalHolder.getLocalShellExecutor();
         final int nlct = fileRecord.getNullLineConsecutiveTimes(); // 连续多少次没有内容
-
-        final long currentTotalLine = remoteShellExecutor.getFileTotalLineNum(filePath); //当前总行数
-        final long lastLineNum = fileRecord.getLineNum(); // 上次读到的行
-        //根据文件大小来判断文件有没有更新过
-        if (currentTotalLine <= lastLineNum){
+        //先根据文件大小来判断文件有没有更新过，考虑到大文件，通过判断大小比较效率较高
+        long fileSize = remoteShellExecutor.getFileSize(filePath);
+        if (fileSize <= fileRecord.getFileSize()){
             //说明文件内容没有更新，就不需要再执行后续操作了
             fileRecord.setNullLineConsecutiveTimes(nlct+1);
             return;
         }
+        fileRecord.setFileSize(fileSize);
+
+        final long currentTotalLine = remoteShellExecutor.getFileTotalLineNum(filePath); //当前总行数
+        final long lastLineNum = fileRecord.getLineNum(); // 上次读到的行
+        if (currentTotalLine<=lastLineNum){
+            //还有一种极端情况，文件有更新，但内容行数并没有增加，比如最一行追加了内容，这种也不需要考虑
+            fileRecord.setNullLineConsecutiveTimes(nlct+1);
+            return;
+        }
+
         // 使用什么命令来读取文件内容
         final String command = command2readFileRow(filePath,currentTotalLine,lastLineNum,lineOffset);
 
@@ -160,31 +149,37 @@ public class SshFileLineBeat implements Externalizable,FileLineBeat {
         return command.toString();
     }
 
-    /**
-     * 将两个缓存里的内容保存到本地，防止工程重启丢失了读取记录
-     */
-    @Override
-    public void writeExternal(ObjectOutput out) throws IOException {
-        out.writeObject(FILE_RECORD_MAP);
-        out.writeObject(FILE_ABANDONMENT_SET);
+    public int getKeepAliveSecond() {
+        return keepAliveSecond;
     }
 
-    @Override
-    public void readExternal(ObjectInput in) throws IOException, ClassNotFoundException {
-        FILE_RECORD_MAP.putAll((Map<String, FileRecord>) in.readObject());
-        FILE_ABANDONMENT_SET.addAll((Set<String>) in.readObject());
+    public void setKeepAliveSecond(int keepAliveSecond) {
+        this.keepAliveSecond = keepAliveSecond;
+    }
+
+    public int getLineOffset() {
+        return lineOffset;
     }
 
     public void setLineOffset(int lineOffset) {
         this.lineOffset = lineOffset;
     }
 
+    public FileLineHandler getFileLineHandler() {
+        return fileLineHandler;
+    }
+
+    @Override
     public void setFileLineHandler(FileLineHandler fileLineHandler) {
         this.fileLineHandler = fileLineHandler;
     }
 
+    public String getFilePath() {
+        return filePath;
+    }
+
+    @Override
     public void setFilePath(String filePath) {
         this.filePath = filePath;
     }
-
 }

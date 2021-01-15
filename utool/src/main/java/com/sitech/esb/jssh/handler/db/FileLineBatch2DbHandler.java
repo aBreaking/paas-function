@@ -39,6 +39,9 @@ public class FileLineBatch2DbHandler extends FileLineBatchHandler {
     protected void batchHandle(String filePath,List<String> lineList) {
         for (String line : lineList){
             Map<String, Object> map = fileLineParser.parse(filePath,line);
+            if (map == null || map.isEmpty()){
+                continue;
+            }
             save2dbWithAutoTable(tableName,map);
         }
     }

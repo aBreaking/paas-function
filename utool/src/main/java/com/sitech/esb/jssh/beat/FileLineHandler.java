@@ -14,7 +14,7 @@ public interface FileLineHandler {
      * @param lineNum 行号 一般都是从1开始
      * @param isLastLine
      * @param isLastLine 该行是否是最后一行
-     * @return  是否处理完毕，
+     * @return  表示该行是否已经处理完毕，
      */
     boolean handLine(String filePath,String line, long lineNum, boolean isLastLine);
 

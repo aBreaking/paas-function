@@ -19,7 +19,7 @@ public abstract class FileLineBatchHandler implements FileLineHandler {
 
     @Override
     public boolean handLine(String filePath,String line, long lineNum, boolean isLastLine) {
-        if (line==null){
+        if (line==null || line.trim().isEmpty()){
             return false;
         }
         lineList.add(line);

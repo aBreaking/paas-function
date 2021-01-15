@@ -9,6 +9,7 @@ import java.io.*;
  */
 public class FileRecord implements Serializable {
     private String filePath; //文件路径
+    private long fileSize; //文件大小，用于区分文件是否有被更新过
     private long lineNum = 0;  // 读取到的行号
     private int nullLineConsecutiveTimes = 0; // 连续多少几次没有读取到内容
     private Long startReadTimestamp; //文件的起始读取时间
@@ -19,6 +20,14 @@ public class FileRecord implements Serializable {
 
     public void setFilePath(String filePath) {
         this.filePath = filePath;
+    }
+
+    public long getFileSize() {
+        return fileSize;
+    }
+
+    public void setFileSize(long fileSize) {
+        this.fileSize = fileSize;
     }
 
     public long getLineNum() {
