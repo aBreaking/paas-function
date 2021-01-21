@@ -46,6 +46,11 @@ public class FileRecordCache implements Externalizable {
         return  FILE_ABANDONMENT_SET.contains(filePath);
     }
 
+    /**
+     * 过期时间，应该没必要set吧
+     * @param filePath
+     * @param maxKeepAliveSecond
+     */
     private void expire(String filePath,int maxKeepAliveSecond){
         FileRecord fileRecord = FILE_RECORD_MAP.get(filePath);
         Long timeDifference = System.currentTimeMillis()-fileRecord.getStartReadTimestamp();

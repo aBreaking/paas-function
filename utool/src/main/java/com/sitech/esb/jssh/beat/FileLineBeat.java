@@ -1,6 +1,5 @@
 package com.sitech.esb.jssh.beat;
 
-import java.io.IOException;
 
 /**
  * 用来探测文件内容是否有更新，可对批量的文件进行探测，类似elk的FileBeat
@@ -13,19 +12,10 @@ public interface FileLineBeat {
 
     /**
      * 对文件进行一次心跳检测，读取文件里的内容，并可以通过fileLineHandler对读到的内容进行处理
+     * @param filePath 要读取的文件（一般是文件的全路径名）
+     * @param handler 处理文件里每行数据的方法
+     * @return 是否有读取到内容
      */
-    void heartbeat() throws IOException;
-
-    /**
-     * 要读取的文件（一般是文件的全路径名）
-     * @param filePath
-     */
-    void setFilePath(String filePath);
-
-    /**
-     * 处理文件里每行数据的方法
-     * @param fileHandler
-     */
-    void setFileLineHandler(FileLineHandler fileHandler);
+    boolean heartbeat(String filePath,FileLineHandler handler);
 
 }

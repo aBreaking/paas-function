@@ -1,7 +1,33 @@
-defaultReadSize: 1M
-srvlogFilepath: /paas/chnesb/domains/esbdomain*/logs/inParam.log
-esb:
-  esbKey:
-    host: 172.18.231.114
-    username: chnesb
-    password: Chnesb123.com
+jssh:
+  chnesb104:
+    ssh:
+      host: 172.18.231.104
+      username: chnesb
+      password: Chnesb123.com
+    datasource:
+      url: jdbc:mysql://localhost:3306/test?characterEncoding=utf-8
+      driver: com.mysql.jdbc.Driver
+      username: root
+      password: mysqladmin
+    beat:
+      srvlog:
+        filePath: /paas/chnesb/logs/srvlog.sx.backlog
+        parser: com.sitech.esb.jssh.esblog.EsbSrvlogFileLineParser
+        keepAliveSecond: 3600
+        lineOffset: 2048
+  chnesb114:
+    ssh:
+      host: 172.18.231.114
+      username: chnesb
+      password: Chnesb123.com
+    datasource:
+      url: jdbc:mysql://localhost:3306/test?characterEncoding=utf-8
+      driver: com.mysql.jdbc.Driver
+      username: root
+      password: mysqladmin
+    beat:
+      srvlog:
+        filePath: /paas/chnesb/liwei/srvlog.2.log
+        parser: com.sitech.esb.jssh.esblog.EsbSrvlogFileLineParser
+        keepAliveSecond: 3600
+        lineOffset: 1024

@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+ 
+    <property name="log.path" value="./logs" />
+    <property name="log.pattern"
+        value=" %d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{20} - [%method,%line] - %msg%n" />
+ 
+    <!-- 控制台输出 -->
+    <appender name="console" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+ 
+    </appender>
+    <!-- 系统日志输出 -->
+    <appender name="file_info"
+        class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/sys-info.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <!-- 按天回滚 daily -->
+            <fileNamePattern>${log.path}/sys-info.%d{yyyy-MM-dd}.log
+            </fileNamePattern>
+            <!-- 日志最大的历史 60天 -->
+            <maxHistory>60</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
+            <level>INFO</level>
+        </filter>
+    </appender>
+ 
+    <appender name="file_error"
+        class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/sys-error.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/sys-error.%d{yyyy-MM-dd}.log
+            </fileNamePattern>
+            <!-- 日志最大的历史 60天 -->
+            <maxHistory>60</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>[%date{yyyy-MM-dd HH:mm:ss.SSS}] %X{logthreadId} %-5level %logger{80} %line - %msg%n</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>ERROR</level>
+            <onMatch>ACCEPT</onMatch>
+            <onMismatch>DENY</onMismatch>
+        </filter>
+    </appender>
+<!--  --> 
+ <appender name="autojob"
+        class="ch.qos.logback.core.rolling.RollingFileAppender">
+        <file>${log.path}/autojob.log</file>
+        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
+            <fileNamePattern>${log.path}/autojob.%d{yyyy-MM-dd}.log
+            </fileNamePattern>
+            日志最大的历史 60天
+            <maxHistory>60</maxHistory>
+        </rollingPolicy>
+        <encoder>
+            <pattern>${log.pattern}</pattern>
+        </encoder>
+        <filter class="ch.qos.logback.classic.filter.LevelFilter">
+            <level>INFO</level>
+            <level>ERROR</level>
+        </filter>
+    </appender>
+<!--  --> 
+ 
+    <!-- 显示形成的sql、使用的参数、结果集 -->
+    <!-- <logger name="java.sql" level="debug" /> <logger name="org.springframework.jdbc" 
+        level="debug" /> -->
+ 
+    <logger name="com.sitech.paas" level="info" />
+ 
+    <root level="info">
+        <appender-ref ref="console" />
+    </root>
+     <logger name="autojoblog" level="INFO" additivity="false">
+        <appender-ref ref="autojob" />
+    </logger>
+ 
+    <!--系统操作日志 -->
+    <root level="info">
+        <appender-ref ref="file_info" />
+        <appender-ref ref="file_error" />
+    </root>
+ 
+    <!--系统用户操作日志 -->
+ 
+</configuration>

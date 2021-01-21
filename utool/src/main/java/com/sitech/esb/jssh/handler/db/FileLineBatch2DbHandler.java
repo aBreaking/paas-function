@@ -6,9 +6,11 @@ import com.abreaking.easyjpa.dao.EasyJpaDao;
 import com.abreaking.easyjpa.dao.impl.EasyJpaDaoImpl;
 import com.abreaking.easyjpa.util.StringUtils;
 import com.sitech.esb.jssh.handler.FileLineBatchHandler;
-import com.sitech.esb.jssh.handler.FileLineParser;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -19,6 +21,8 @@ import java.util.Map;
  */
 public class FileLineBatch2DbHandler extends FileLineBatchHandler {
 
+    private static Logger logger = LoggerFactory.getLogger(FileLineBatch2DbHandler.class);
+
     // 文件每行的解析工具
     FileLineParser fileLineParser ;
 
@@ -27,23 +31,42 @@ public class FileLineBatch2DbHandler extends FileLineBatchHandler {
 
     String tableName;
 
+    Connection connection;
+
     public FileLineBatch2DbHandler(Connection connection) {
+        this.connection = connection;
         this.easyJpaDao = new EasyJpaDaoImpl(connection);
     }
 
     /**
-     * 处理方式是保存到数据库
+     * 处理方式是保存到数据库,使用jdbc事务的方式
      * @param lineList
      */
     @Override
     protected void batchHandle(String filePath,List<String> lineList) {
-        for (String line : lineList){
-            Map<String, Object> map = fileLineParser.parse(filePath,line);
-            if (map == null || map.isEmpty()){
-                continue;
+        try{
+            logger.info("准备保存到数据库表中，表格式->"+tableName);
+            connection.setAutoCommit(false);
+            for (String line : lineList){
+                String[] split = line.split("->");
+                Map<String, Object> map = fileLineParser.parse(filePath,split[1],Long.parseLong(split[0]));
+                String table = fileLineParser.formatTableName(tableName,map);
+                if (map == null || map.isEmpty()){
+                    continue;
+                }
+                save2dbWithAutoTable(table,map);
             }
-            save2dbWithAutoTable(tableName,map);
+            connection.commit();
+            logger.info("数据库保存成功");
+        }catch (Exception e){
+            try {
+                connection.rollback();
+            } catch (SQLException e1) {
+            }
+            logger.error("数据库存储数据失败",e);
+            throw new RuntimeException(e);
         }
+
     }
 
     /**
@@ -53,33 +76,29 @@ public class FileLineBatch2DbHandler extends FileLineBatchHandler {
      */
     private void save2dbWithAutoTable(String table,Map<String, Object> map){
         try{
-            String placeholderSql = map2InsertPlaceholderSql(table, map);
-            easyJpaDao.executePlaceholderSql(EasyJpa.buildPlaceholder(placeholderSql,map));
+            easyJpaDao.executePlaceholderSql(EasyJpa.buildPlaceholder(map2InsertPlaceholderSql(table, map),map));
         }catch (Exception e){
             //判断是否是表名不存在的问题，如果表不存在就自动创建表,然后再执行一遍操作
             String message = e.getMessage();
-            if (e.getCause()!=null){
-                message += e.getCause().getMessage();
-            }
-            if (message.matches(".*Table.*doesn't exist.*") || message.indexOf("ORA-00942")!=-1){
-                createTable(table,map);
-                String placeholderSql = map2InsertPlaceholderSql(table, map);
-                easyJpaDao.executePlaceholderSql(EasyJpa.buildPlaceholder(placeholderSql,map));
-            }else{
-                throw new RuntimeException(e);
-            }
-        }
-    }
+            if (message!=null){
+                if (e.getCause()!=null){
+                    message += e.getCause().getMessage();
+                }
+                if (message.matches(".*Table.*doesn't exist.*") || message.indexOf("ORA-00942")!=-1){
+                    synchronized (EasyJpaDao.class){
+                        logger.warn("检测到{}表不存在，即将自动创建表{},而后自动再insert",table);
+                        String tableSql = fileLineParser.createTableSql(table);
+                        easyJpaDao.executePrepareSql(EasyJpa.buildPrepared(tableSql));
+                        easyJpaDao.executePlaceholderSql(EasyJpa.buildPlaceholder(map2InsertPlaceholderSql(table, map),map));
+                        logger.info("建表完毕，数据已经insert");
+                        return;
+                    }
 
-    private void createTable(String table,Map<String,Object> map){
-        StringBuilder sqlBuilder = new StringBuilder();
-        sqlBuilder.append("CREATE TABLE ").append(table).append("(");
-        for (String key : map.keySet()){
-            sqlBuilder.append(key).append(" varchar(255)").append(",");
+                }
+            }
+            logger.error("插入数据到表"+table+"失败",e);
+            throw new RuntimeException(e);
         }
-        StringUtils.cutAtLastSeparator(sqlBuilder,",");
-        sqlBuilder.append(") ENGINE=InnoDB AUTO_INCREMENT=10087 DEFAULT CHARSET=utf8");
-        easyJpaDao.executePrepareSql(EasyJpa.buildPrepared(sqlBuilder.toString()));
     }
 
     /**
@@ -93,32 +112,21 @@ public class FileLineBatch2DbHandler extends FileLineBatchHandler {
         placeholder.append(table);
         placeholder.append("(");
 
-        for (String key : map.keySet()){
-            String column = StringUtils.underscoreName(key);
-            placeholder.append(column);
-            placeholder.append(",");
+        for (String column : map.keySet()){
+            placeholder.append(column).append(",");
         }
         StringUtils.cutAtLastSeparator(placeholder,",");
         placeholder.append(") VALUES(");
         for (String column : map.keySet()){
-            placeholder.append("#{").append(column).append("}");
-            placeholder.append(",");
+            placeholder.append("#{").append(column).append("},");
         }
         StringUtils.cutAtLastSeparator(placeholder,",");
         placeholder.append(")");
         return placeholder.toString();
     }
 
-    public FileLineParser getFileLineParser() {
-        return fileLineParser;
-    }
-
     public void setFileLineParser(FileLineParser fileLineParser) {
         this.fileLineParser = fileLineParser;
-    }
-
-    public String getTableName() {
-        return tableName;
     }
 
     public void setTableName(String tableName) {

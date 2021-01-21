@@ -13,17 +13,26 @@ import java.util.List;
 public abstract class FileLineBatchHandler implements FileLineHandler {
 
     //批量处理的量
-    private static int BATCH_HANDLE_SIZE = 1024;
+    private int batchHandleSize ;
 
-    private List<String> lineList = new ArrayList<>(BATCH_HANDLE_SIZE);
+    private List<String> lineList ;
+
+    public FileLineBatchHandler() {
+        this(1024);
+    }
+
+    public FileLineBatchHandler(int batchHandleSize) {
+        this.batchHandleSize = batchHandleSize;
+        this.lineList = new ArrayList<>(batchHandleSize);
+    }
 
     @Override
     public boolean handLine(String filePath,String line, long lineNum, boolean isLastLine) {
         if (line==null || line.trim().isEmpty()){
             return false;
         }
-        lineList.add(line);
-        if (!isLastLine && lineNum%BATCH_HANDLE_SIZE!=0){
+        lineList.add(lineNum+"->"+line); //记录行号及行内容
+        if (!isLastLine && lineNum%batchHandleSize!=0){
             return false;
         }
         batchHandle(filePath,lineList);
@@ -37,4 +46,12 @@ public abstract class FileLineBatchHandler implements FileLineHandler {
      * @param lineList
      */
     protected abstract void batchHandle(String filePath,List<String> lineList);
+
+    public int getBatchHandleSize() {
+        return batchHandleSize;
+    }
+
+    public void setBatchHandleSize(int batchHandleSize) {
+        this.batchHandleSize = batchHandleSize;
+    }
 }
