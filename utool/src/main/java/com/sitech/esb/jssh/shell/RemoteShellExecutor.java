@@ -21,20 +21,25 @@ public class RemoteShellExecutor {
     private String remoteHost;
     private String username;
     private String password;
-
+    private String pemFile;
     private boolean hasLogin;
 
-    public RemoteShellExecutor(String remoteHost,String username,String password)  {
+    public RemoteShellExecutor(String remoteHost,String username,String password,String pemFile)  {
         this.remoteHost = remoteHost;
         this.username = username;
         this.password = password;
+        this.pemFile = pemFile;
     }
 
     public boolean login() throws IOException {
         connection = new Connection(remoteHost);
         connection.connect();
         hasLogin = true;
-        return connection.authenticateWithPassword(username, password);
+        if (pemFile!=null){
+            return connection.authenticateWithPublicKey(username,new File(pemFile),password);
+        }else{
+            return connection.authenticateWithPassword(username,password);
+        }
     }
 
     /**

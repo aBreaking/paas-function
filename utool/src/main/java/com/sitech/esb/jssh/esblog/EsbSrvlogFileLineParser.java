@@ -16,8 +16,6 @@ import java.util.Map;
  */
 public class EsbSrvlogFileLineParser implements FileLineParser {
 
-    private static final int MAX_VALUE_LENGTH = 255;
-
     private static final String separator = "，";
 
     private static final String tablePrefix = "srv_log_";
@@ -51,7 +49,7 @@ public class EsbSrvlogFileLineParser implements FileLineParser {
     }
 
     @Override
-    public String formatTableName(String tableName,Map<String, Object> parsedMap) {
+    public String getTableName(Map<String, Object> parsedMap) {
         //表名使用默认的
         Date callTime = (Date) parsedMap.get(SrvLogEnum.CALL_BEGINTIME.name());
         Date date = callTime==null?new Date():callTime;

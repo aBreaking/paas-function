@@ -128,7 +128,7 @@ public class JsshLocalContext {
     public static RemoteShellExecutor getLocalShellExecutor(){
         return getLocal(CACHE_SHELL_EXECUTOR,key->{
             Map<String,String> o = (Map) JsshConfiguration.get("jssh." + key+".ssh");
-            RemoteShellExecutor remoteShellExecutor = new RemoteShellExecutor(o.get("host"), o.get("username"), o.get("password"));
+            RemoteShellExecutor remoteShellExecutor = new RemoteShellExecutor(o.get("host"), o.get("username"), o.get("password"),o.get("pemFile"));
             if (!remoteShellExecutor.hasLogin()){
                 try {
                     remoteShellExecutor.login();

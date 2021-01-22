@@ -66,9 +66,7 @@ public class SshFileLineBeat implements FileLineBeat {
             return false;
         }
         FileRecord fileRecord = localFileCache.getOrStartFileRecord(filePath);
-        if (true){
-            logger.warn(fileRecord.getFilePath()+"test->"+lineOffset+"->"+fileRecord.getLineNum());
-        }
+        logger.info(fileRecord.getFilePath()+"lineOffset->"+lineOffset+",linenum->"+fileRecord.getLineNum());
         fileRecord.setLastReadTime(new Date());
         if (System.currentTimeMillis()-fileRecord.getStartReadTimestamp() >= keepAliveSecond*1000){
             //文件已过期的话，也将该文件遗弃
@@ -143,9 +141,6 @@ public class SshFileLineBeat implements FileLineBeat {
             for (long start = lastLineNum+1; currentLine!=null ;start++){
                 if (fileLineHandler.handLine(filePath,currentLine, start,nextLine==null)){
                     logger.info("批处理一次完成，当前的行号为{}",start);
-                    if (true){
-                        logger.warn("{}批处理一次完成，当前的行号为{}",filePath,start);
-                    }
                     fileRecord.setLineNum(start); // 记录已经处理过的行号
                 }
                 currentLine = nextLine;

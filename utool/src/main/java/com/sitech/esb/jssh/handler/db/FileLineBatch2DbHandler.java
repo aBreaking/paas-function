@@ -29,13 +29,16 @@ public class FileLineBatch2DbHandler extends FileLineBatchHandler {
     //jdbc执行工具
     EasyJpaDao easyJpaDao;
 
-    String tableName;
-
+    //数据库链接
     Connection connection;
 
     public FileLineBatch2DbHandler(Connection connection) {
         this.connection = connection;
         this.easyJpaDao = new EasyJpaDaoImpl(connection);
+    }
+
+    public void setFileLineParser(FileLineParser fileLineParser) {
+        this.fileLineParser = fileLineParser;
     }
 
     /**
@@ -45,12 +48,11 @@ public class FileLineBatch2DbHandler extends FileLineBatchHandler {
     @Override
     protected void batchHandle(String filePath,List<String> lineList) {
         try{
-            logger.info("准备保存到数据库表中，表格式->"+tableName);
             connection.setAutoCommit(false);
             for (String line : lineList){
                 String[] split = line.split("->");
                 Map<String, Object> map = fileLineParser.parse(filePath,split[1],Long.parseLong(split[0]));
-                String table = fileLineParser.formatTableName(tableName,map);
+                String table = fileLineParser.getTableName(map);
                 if (map == null || map.isEmpty()){
                     continue;
                 }
@@ -66,7 +68,6 @@ public class FileLineBatch2DbHandler extends FileLineBatchHandler {
             logger.error("数据库存储数据失败",e);
             throw new RuntimeException(e);
         }
-
     }
 
     /**
@@ -75,30 +76,44 @@ public class FileLineBatch2DbHandler extends FileLineBatchHandler {
      * @param map
      */
     private void save2dbWithAutoTable(String table,Map<String, Object> map){
-        try{
-            easyJpaDao.executePlaceholderSql(EasyJpa.buildPlaceholder(map2InsertPlaceholderSql(table, map),map));
-        }catch (Exception e){
-            //判断是否是表名不存在的问题，如果表不存在就自动创建表,然后再执行一遍操作
-            String message = e.getMessage();
-            if (message!=null){
-                if (e.getCause()!=null){
-                    message += e.getCause().getMessage();
-                }
-                if (message.matches(".*Table.*doesn't exist.*") || message.indexOf("ORA-00942")!=-1){
-                    synchronized (EasyJpaDao.class){
-                        logger.warn("检测到{}表不存在，即将自动创建表{},而后自动再insert",table);
-                        String tableSql = fileLineParser.createTableSql(table);
-                        easyJpaDao.executePrepareSql(EasyJpa.buildPrepared(tableSql));
-                        easyJpaDao.executePlaceholderSql(EasyJpa.buildPlaceholder(map2InsertPlaceholderSql(table, map),map));
-                        logger.info("建表完毕，数据已经insert");
-                        return;
+        if (insertWithIsNoTable(table,map)){
+            synchronized (connection){
+                if (insertWithIsNoTable(table,map)){
+                    logger.warn("检测到{}表不存在，即将自动创建表{},而后自动再insert",table);
+                    try{
+                        connection.rollback();
+                        autoCreateTable(table);
+                    }catch (Exception e){
+                        throw new RuntimeException(e);
                     }
-
+                    doInsert(table,map);
+                    logger.info("建表完毕，数据已经insert");
                 }
             }
-            logger.error("插入数据到表"+table+"失败",e);
+        }
+    }
+
+    /**
+     * 插入数据，并返回是不是表不存在的问题
+     * @param table
+     * @param map
+     * @return
+     */
+    private boolean insertWithIsNoTable(String table,Map<String, Object> map){
+        try {
+            doInsert(table,map);
+            return false;
+        }catch (Exception e){
+            if (isTableNotExistException(e)){
+                return true;
+            }
             throw new RuntimeException(e);
         }
+    }
+
+    private void autoCreateTable(String table){
+        String tableSql = fileLineParser.createTableSql(table);
+        easyJpaDao.executePrepareSql(EasyJpa.buildPrepared(tableSql));
     }
 
     /**
@@ -107,7 +122,7 @@ public class FileLineBatch2DbHandler extends FileLineBatchHandler {
      * @param map
      * @return
      */
-    private String map2InsertPlaceholderSql(String table,Map<String, Object> map){
+    private void doInsert(String table,Map<String, Object> map){
         StringBuilder placeholder = new StringBuilder("INSERT INTO ");
         placeholder.append(table);
         placeholder.append("(");
@@ -122,15 +137,23 @@ public class FileLineBatch2DbHandler extends FileLineBatchHandler {
         }
         StringUtils.cutAtLastSeparator(placeholder,",");
         placeholder.append(")");
-        return placeholder.toString();
+        easyJpaDao.executePlaceholderSql(EasyJpa.buildPlaceholder(placeholder.toString(),map));
     }
 
-    public void setFileLineParser(FileLineParser fileLineParser) {
-        this.fileLineParser = fileLineParser;
-    }
-
-    public void setTableName(String tableName) {
-        this.tableName = tableName;
+    /**
+     * 判断是不是表不存在的异常，这样可以支持创建表
+     * @param e
+     * @return
+     */
+    private boolean isTableNotExistException(Exception e){
+        String message = e.getMessage();
+        if (message==null){
+            return false;
+        }
+        if (e.getCause()!=null){
+            message += e.getCause().getMessage();
+        }
+        return message.matches(".*Table.*doesn't exist.*") || message.indexOf("ORA-00942")!=-1;
     }
 
 }

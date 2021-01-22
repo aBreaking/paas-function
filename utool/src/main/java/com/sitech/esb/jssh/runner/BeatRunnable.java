@@ -83,13 +83,11 @@ public class BeatRunnable implements Runnable {
     private FileLineHandler initHandler(Map<String,Object> beatMap) throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException {
         Connection connection = JsshLocalContext.getLocalConnection();
         String parserClass = assertGet(beatMap,"parser");
-        String tableName = getOrDefault(beatMap,"table",key);
         int lineOffset = getOrDefault(beatMap,"lineOffset",1024);
         FileLineBatch2DbHandler handler = new FileLineBatch2DbHandler(connection);
         Class<?> parserClazz = Class.forName(parserClass);
         FileLineParser parser = (FileLineParser) parserClazz.newInstance();
         handler.setFileLineParser(parser);
-        handler.setTableName(tableName);
         handler.setBatchHandleSize(lineOffset);
         return handler;
     }

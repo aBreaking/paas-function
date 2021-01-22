@@ -20,11 +20,10 @@ public interface FileLineParser {
 
     /**
      * 格式化表名，可能给定的表名格式是带格式化字符串的，比如时间，需要将其进行格式化
-     * @param tableName 给定的表名
      * @param parsedMap 解析后的value
      * @return
      */
-    String formatTableName(String tableName,Map<String,Object> parsedMap);
+    String getTableName(Map<String,Object> parsedMap);
 
     /**
      * 针对动态表，可以指定创建表的sql，这样就支持动态创建表了
