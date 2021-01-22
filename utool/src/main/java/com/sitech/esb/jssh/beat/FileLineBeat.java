@@ -10,12 +10,20 @@ package com.sitech.esb.jssh.beat;
  */
 public interface FileLineBeat {
 
+    int STATUS_NORMAL = 0; // filebeat正常状态
+    int STATUS_ABANDON = 1; // 已经无效了
+    int STATUS_NO_UPDATE = 2; // 没有新内容
+    int STATUS_EXCEPTION = 3; // 出现异常了
+    int STATUS_ABANDON_BY_EXPIRE = 11; // 已经过期了被抛弃
+    int STATUS_ABANDON_NO_UPDATE = 12; // 连续很多次没有读取到内容被抛弃了
+
+
     /**
      * 对文件进行一次心跳检测，读取文件里的内容，并可以通过fileLineHandler对读到的内容进行处理
      * @param filePath 要读取的文件（一般是文件的全路径名）
      * @param handler 处理文件里每行数据的方法
-     * @return 是否有读取到内容
+     * @return heatbeat的状态
      */
-    boolean heartbeat(String filePath,FileLineHandler handler);
+    int heartbeat(String filePath,FileLineHandler handler);
 
 }

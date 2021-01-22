@@ -9,8 +9,6 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.sql.Connection;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
 
@@ -45,19 +43,15 @@ public class BeatRunnable implements Runnable {
         }
         // beat的配置信息处理
         try {
-            Map<String, Map> beatsMap = JsshConfiguration.getConfigUnderJsshKey("beat");
-            for (String beatName : beatsMap.keySet()){
-                Map<String,Object> beatConfig = beatsMap.get(beatName);
+            Map<String,?> map = JsshConfiguration.getConfigUnderJsshKey("beat");
+            for (String beatName : map.keySet()){
+                logger.info("filebeat开始，key->{},beatName->{}",key,beatName);
                 // 初始化handler
-                FileLineHandler fileLineHandler = initHandler(beatConfig);
-                logger.info("初始化{}的handler完毕",beatName);
+                FileLineHandler fileLineHandler = JsshLocalContext.getFileLineHandler(beatName);
                 // 初始化FileLineBeat
                 FileLineBeat beat = JsshLocalContext.getLocalFileLineBeat(beatName);
-                logger.info("初始化beat完毕->"+beatName);
                 //开始检测文件heartbeat
-                String filePath = assertGet(beatConfig,"filePath");
-                logger.info("开始检测文件内容，文件->"+filePath);
-                startHeartBeat(beat,filePath,fileLineHandler);
+                startHeartBeat(beat,beatName,fileLineHandler);
                 logger.info("文件检测完毕");
             }
             // 保存记录
@@ -68,39 +62,18 @@ public class BeatRunnable implements Runnable {
         }finally {
             JsshLocalContext.localCompleted(key);
         }
-
     }
 
-
-    public void startHeartBeat(FileLineBeat beat,String filePath,FileLineHandler handler) throws IOException {
+    public void startHeartBeat(FileLineBeat beat,String beatName,FileLineHandler handler) throws IOException {
+        //先找beatName下面所有的file,因为file可能是单个带通配符的路径名
         RemoteShellExecutor localShellExecutor = JsshLocalContext.getLocalShellExecutor();
+        Map<String, Object> beatMap = JsshConfiguration.getConfigUnderJsshKey("beat." + beatName);
+        String filePath = JsshLocalContext.assertGet(beatMap, "filePath");
         List<String> filePathList = localShellExecutor.execute("ls " + filePath);
         for (String file : filePathList){
+            logger.info("开始检测文件内容，文件->"+file);
             beat.heartbeat(file, handler);
         }
-    }
-
-    private FileLineHandler initHandler(Map<String,Object> beatMap) throws ClassNotFoundException, IllegalAccessException, InstantiationException, SQLException {
-        Connection connection = JsshLocalContext.getLocalConnection();
-        String parserClass = assertGet(beatMap,"parser");
-        int lineOffset = getOrDefault(beatMap,"lineOffset",1024);
-        FileLineBatch2DbHandler handler = new FileLineBatch2DbHandler(connection);
-        Class<?> parserClazz = Class.forName(parserClass);
-        FileLineParser parser = (FileLineParser) parserClazz.newInstance();
-        handler.setFileLineParser(parser);
-        handler.setBatchHandleSize(lineOffset);
-        return handler;
-    }
-
-    private <T> T assertGet(Map<String,Object> map,String key){
-        if (map.containsKey(key)) {
-            return (T) map.get(key);
-        }
-        throw new RuntimeException("必须指定配置:"+key);
-    }
-
-    private <T> T getOrDefault(Map<String,Object> map,String key,T defaultValue){
-        return map.containsKey(key)? (T) map.get(key) :defaultValue;
     }
 
 }

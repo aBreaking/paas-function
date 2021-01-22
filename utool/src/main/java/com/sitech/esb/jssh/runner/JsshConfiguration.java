@@ -1,10 +1,12 @@
 package com.sitech.esb.jssh.runner;
 
-
+import com.sitech.esb.jssh.util.ResourceUtil;
+import jdk.internal.util.xml.impl.Input;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
 
-import java.io.File;
-import java.io.InputStream;
+import java.io.*;
 import java.net.URL;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -16,68 +18,74 @@ import java.util.Map;
  */
 public class JsshConfiguration {
 
-    public static String CONFIG_FILE_NAME_PATH = "jssh-esb.yml";
+    private static Logger logger = LoggerFactory.getLogger(JsshConfiguration.class);
+
+    private static String CONFIG_FILE_NAME_PATH = "jssh-esb.yml";
 
     private static final String KEY_OF_JSSH = "jssh";
 
     private static Map YML_CONFIG_MAP = new LinkedHashMap();
 
-    public static void readYamlAndInitConfigMap(){
-        InputStream in = JsshConfiguration.class.getClassLoader().getResourceAsStream(CONFIG_FILE_NAME_PATH);
-        readYamlAndInitConfigMap(in);
+    public static void initConfiguration() {
+        logger.info("=======初始化全局配置=======");
+        URL resource = JsshConfiguration.class.getResource("");
+
+        String protocol = resource.getProtocol();
+        if (protocol.equals("jar")){
+            try {
+                logger.info("检测到是jar包启动该工程，将使用jar包同目录下的配置文件->"+CONFIG_FILE_NAME_PATH);
+                String filePath = ResourceUtil.getJarConfigFilePath(CONFIG_FILE_NAME_PATH);
+                initConfigMapAndRefreshConfigPath(filePath);
+                return;
+            } catch (FileNotFoundException e) {
+                logger.warn("jar包同目录下不存在该配置文件，将使用jar包类的配置文件："+CONFIG_FILE_NAME_PATH);
+            }
+        }
+        logger.info("加载classpath下的配置文件->"+CONFIG_FILE_NAME_PATH);
+        String filePath = ResourceUtil.getClasspathFilePath(CONFIG_FILE_NAME_PATH);
+        try {
+            initConfigMapAndRefreshConfigPath(filePath);
+        } catch (FileNotFoundException e) {
+            logger.error("classpath下没有"+CONFIG_FILE_NAME_PATH+"配置文件",e);
+            throw new RuntimeException(e);
+        }
     }
 
-    public static void readYamlAndInitConfigMap(InputStream in){
-        Map<String,?> yamlMap = new Yaml().load(in);
-        Map<String,?> jsshMap = (Map) yamlMap.get(KEY_OF_JSSH);
-
-        // 判断yaml 中是否有common这个配置
-        String keyOfCommon = "common";
-        if (!jsshMap.containsKey(keyOfCommon)){
+    private static void initConfigMapAndRefreshConfigPath(String filePath) throws FileNotFoundException {
+        InputStream in = null ;
+        try {
+            in = new FileInputStream(filePath);
+            Map<String,?> yamlMap = new Yaml().load(in);
             YML_CONFIG_MAP.putAll(yamlMap);
-            return;
-        }
-
-        Map<String,Object> common = (Map<String, Object>) jsshMap.get(keyOfCommon);
-        for (String key : jsshMap.keySet()){
-            if (key.equals(keyOfCommon)){
-                continue;
-            }
-            // FIXME 这里应该需要深度遍历map
-            Map<String,Object> map = (Map) jsshMap.get(key);
-            for (String commonKey : common.keySet()){
-                if (!map.containsKey(commonKey)){
-                    map.put(commonKey,common.get(key));
+            CONFIG_FILE_NAME_PATH = filePath.substring(0,filePath.lastIndexOf("/")+1) +  CONFIG_FILE_NAME_PATH;
+            logger.info("配置加载完毕");
+        }finally {
+            if (in != null){
+                try {
+                    in.close();
+                } catch (IOException e) {
+                    logger.error("配置文件关闭失败",e);
+                    throw new RuntimeException(e);
                 }
             }
-            YML_CONFIG_MAP.put(key,map);
         }
     }
 
     public static String getCacheFilePath(String localKey){
-        String file;
-        if (CONFIG_FILE_NAME_PATH.indexOf(File.separator)!=-1){
-            file = CONFIG_FILE_NAME_PATH;
-        }else{
-            URL url = JsshConfiguration.class.getClassLoader().getResource(CONFIG_FILE_NAME_PATH);
-            file = url.getFile();
-        }
+        String file = CONFIG_FILE_NAME_PATH;
         String prefix = file.substring(0, file.lastIndexOf("jssh-esb.yml"));
         return prefix+"beat-cache-file."+localKey+".cache";
     }
 
     public static Map getConfigUnderJsshKey(String configKey){
-        String key = "jssh." + JsshLocalContext.getLocalKey() + "."+configKey;
+        String key = KEY_OF_JSSH+"."+ JsshLocalContext.getLocalKey() + "."+configKey;
         return (Map) JsshConfiguration.get(key);
     }
 
     public static Object get(String qualifiedKey){
-        Object property = getProperty(YML_CONFIG_MAP, qualifiedKey);
-        if (property == null){
-            throw new RuntimeException(" no config of "+qualifiedKey);
-        }
-        return property;
+        return getProperty(YML_CONFIG_MAP, qualifiedKey);
     }
+
 
     private static Object getProperty(Map map,String qualifiedKey){
         if(map==null){

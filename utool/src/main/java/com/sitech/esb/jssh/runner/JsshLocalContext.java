@@ -1,8 +1,11 @@
 package com.sitech.esb.jssh.runner;
 
 import com.sitech.esb.jssh.beat.FileLineBeat;
+import com.sitech.esb.jssh.beat.FileLineHandler;
 import com.sitech.esb.jssh.beat.FileRecordCache;
 import com.sitech.esb.jssh.beat.SshFileLineBeat;
+import com.sitech.esb.jssh.handler.db.FileLineBatch2DbHandler;
+import com.sitech.esb.jssh.handler.db.FileLineParser;
 import com.sitech.esb.jssh.shell.RemoteShellExecutor;
 
 import java.io.*;
@@ -26,6 +29,8 @@ public class JsshLocalContext {
 
     private static Map<String,Connection> CACHE_CONNECTION = new HashMap<>();
 
+    private static Map<String,FileLineHandler> CACHE_FILELINEHANDLER = new HashMap<>();
+
     private static ThreadLocal<String> LOCAL_KEY = new ThreadLocal<>();
 
     private static Set<String> FLAG_OF_LOCAL_COMPLETION = Collections.synchronizedSet(new HashSet<>());
@@ -46,6 +51,26 @@ public class JsshLocalContext {
 
     protected static void localCompleted(String key){
         FLAG_OF_LOCAL_COMPLETION.remove(key);
+    }
+
+    public static FileLineHandler getFileLineHandler(String beatName){
+        return getLocal(CACHE_FILELINEHANDLER,getLocalKey()+"."+beatName,key->{
+            Connection connection = JsshLocalContext.getLocalConnection();
+            Map<String, Object> beatMap = JsshConfiguration.getConfigUnderJsshKey("beat."+beatName);
+            String parserClass = assertGet(beatMap,"parser");
+            int lineOffset = getOrDefault(beatMap,"lineOffset",1024);
+            FileLineBatch2DbHandler handler = new FileLineBatch2DbHandler(connection);
+            try{
+                Class<?> parserClazz = Class.forName(parserClass);
+                FileLineParser parser = (FileLineParser) parserClazz.newInstance();
+                handler.setFileLineParser(parser);
+                handler.setBatchHandleSize(lineOffset);
+                return handler;
+            }catch (Exception e){
+                throw new RuntimeException(e);
+            }
+
+        });
     }
 
     public static Connection getLocalConnection(){
@@ -152,5 +177,15 @@ public class JsshLocalContext {
         return map.get(key);
     }
 
+    public static  <T> T assertGet(Map<String,Object> map,String key){
+        if (map.containsKey(key)) {
+            return (T) map.get(key);
+        }
+        throw new RuntimeException("必须指定配置:"+key);
+    }
+
+    private static  <T> T getOrDefault(Map<String,Object> map,String key,T defaultValue){
+        return map.containsKey(key)? (T) map.get(key) :defaultValue;
+    }
 
 }

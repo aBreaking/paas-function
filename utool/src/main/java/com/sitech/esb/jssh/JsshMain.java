@@ -1,10 +1,11 @@
 package com.sitech.esb.jssh;
 
+import com.sitech.esb.jssh.beat.FileLineBeat;
 import com.sitech.esb.jssh.runner.BeatRunnable;
 import com.sitech.esb.jssh.runner.JsshConfiguration;
 import com.sitech.esb.jssh.runner.JsshThreadFactory;
+import com.sitech.esb.jssh.runner.SingleFileBeatRunnable;
 
-import java.io.*;
 import java.util.Map;
 import java.util.Set;
 import java.util.concurrent.*;
@@ -16,42 +17,62 @@ import java.util.concurrent.*;
  */
 public class JsshMain {
 
-    private static ExecutorService threadPool ;
-    private static Set<String> JsshBeatKeys ;
+    public static void main(String[] args) throws Exception {
 
-    public static void justBeat() {
-        for (String key : JsshBeatKeys) {
-            threadPool.submit(new BeatRunnable(key));
+        if (args.length==0){
+            startup();
         }
+        if (args.length == 1){
+            handleSingeFile(args[0]);
+        }
+        if (args.length >= 3){
+            handleSingeFile(args[0],args[1],args[2]);
+        }
+        System.out.println("args in not correct");
     }
 
-    public static void main(String[] args) throws Exception{
-        initConfiguration();
+    public static void startup() throws Exception{
+        JsshConfiguration.initConfiguration();
+        Map jssh = (Map) JsshConfiguration.get("jssh");
+        Set<String> JsshBeatKeys = jssh.keySet();
+        ExecutorService threadPool = Executors.newFixedThreadPool(JsshBeatKeys.size(),new JsshThreadFactory());
         while(true){
-            justBeat();
+            for (String key : JsshBeatKeys) {
+                threadPool.submit(new BeatRunnable(key));
+            }
             Thread.sleep(1000);
         }
     }
 
-    private static void initConfiguration() {
-        try{
-            JsshConfiguration.readYamlAndInitConfigMap(getJarConfigFileInputStream(JsshConfiguration.CONFIG_FILE_NAME_PATH));
-        }catch (Exception e){
-            JsshConfiguration.readYamlAndInitConfigMap();
-        }
-        Map jssh = (Map) JsshConfiguration.get("jssh");
-        JsshBeatKeys = jssh.keySet();
-        if (JsshBeatKeys.contains("common")){
-            JsshBeatKeys.remove("common");
-        }
-        threadPool = Executors.newFixedThreadPool(JsshBeatKeys.size(),new JsshThreadFactory());
+    public static void handleSingeFile(String file) throws ExecutionException, InterruptedException {
+        JsshConfiguration.initConfiguration();
+        Map<String,Map> jssh = (Map) JsshConfiguration.get("jssh");
+        Set<String> keySet = jssh.keySet();
+        String key = keySet.iterator().next();
+        Map<String,?> beat = (Map) jssh.get(key).get("beat");
+        String beatName = beat.keySet().iterator().next();
+        doHandleSingeFile(key,beatName,file);
     }
 
-    private static InputStream getJarConfigFileInputStream(String file) throws IOException {
-        String path = JsshMain.class.getProtectionDomain().getCodeSource().getLocation().getPath();
-        path = path.substring(0, path.lastIndexOf("/"));
-        String locationPath = path+File.separator+file;
-        JsshConfiguration.CONFIG_FILE_NAME_PATH = locationPath;
-        return new BufferedInputStream(new FileInputStream(locationPath));
+    public static void handleSingeFile(String key,String beatName,String file) throws ExecutionException, InterruptedException {
+        JsshConfiguration.initConfiguration();
+        doHandleSingeFile(key,beatName,file);
+    }
+
+    /**
+     * 单个文件解析处理
+     * @param file
+     * @throws ExecutionException
+     * @throws InterruptedException
+     */
+    private static void doHandleSingeFile(String key,String beatName,String file) throws ExecutionException, InterruptedException {
+        ExecutorService threadPool = Executors.newSingleThreadExecutor(new JsshThreadFactory());
+        int status = 0;
+        while (status==FileLineBeat.STATUS_NORMAL){
+            Future<Integer> future = threadPool.submit(new SingleFileBeatRunnable(key,beatName,file));
+            status = future.get();
+        }
+        threadPool.shutdown();
+        System.out.println(file+" beat has done");
     }
 }

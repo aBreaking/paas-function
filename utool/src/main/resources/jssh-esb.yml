@@ -11,8 +11,9 @@ jssh:
       password: mysqladmin
     beat:
       srvlog:
-        filePath: /paas/chnesb/logs/srvlog.sx.log
+        filePath: /paas/chnesb/logs/srvlog.a.log
         parser: com.sitech.esb.jssh.esblog.EsbSrvlogFileLineParser
         keepAliveSecond: 3600
-        lineOffset: 1024
+        lineOffset: 2048
         maxNullLineConsecutiveTimes: 10
+

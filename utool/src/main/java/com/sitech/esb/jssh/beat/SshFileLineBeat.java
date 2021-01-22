@@ -43,7 +43,7 @@ public class SshFileLineBeat implements FileLineBeat {
      * @param filePath 要读取的文件（一般是文件的全路径名）
      * @param handler 处理文件里每行数据的方法
      */
-    public boolean heartbeat(String filePath,FileLineHandler handler) {
+    public int heartbeat(String filePath,FileLineHandler handler) {
         // 就算一秒读取一次，都这么久了也没读取到内容，也该不要了吧
        return heartbeat(filePath,handler,maxNullLineConsecutiveTimes);
     }
@@ -55,7 +55,7 @@ public class SshFileLineBeat implements FileLineBeat {
      * @param maxNullLineConsecutiveTimes 多少次没有读取到数据就被遗弃
      * @throws IOException
      */
-    public boolean heartbeat(String filePath,FileLineHandler handler,int maxNullLineConsecutiveTimes)  {
+    public int heartbeat(String filePath,FileLineHandler handler,int maxNullLineConsecutiveTimes)  {
         FileRecordCache localFileCache = JsshLocalContext.getLocalFileRecordCache();
         if(localFileCache==null){
             System.out.println(Thread.currentThread().getName());
@@ -63,7 +63,7 @@ public class SshFileLineBeat implements FileLineBeat {
         if (localFileCache.isAbandoned(filePath)){
             logger.info(filePath+"已经无效，可能已经读取完毕或过期无效了");
             // 防止重复读取无效文件
-            return false;
+            return STATUS_ABANDON;
         }
         FileRecord fileRecord = localFileCache.getOrStartFileRecord(filePath);
         logger.info(fileRecord.getFilePath()+"lineOffset->"+lineOffset+",linenum->"+fileRecord.getLineNum());
@@ -72,25 +72,26 @@ public class SshFileLineBeat implements FileLineBeat {
             //文件已过期的话，也将该文件遗弃
             localFileCache.abandon(filePath);
             logger.info("{}已经过期，后续不再读取",filePath);
-            return false;
+            return STATUS_ABANDON_BY_EXPIRE;
         }
         try {
             logger.info("开始读取并批处理文件:{}",filePath);
-            readAndHandleLine(fileRecord, handler);
-            logger.info("{}文件批量读取一次完毕。",filePath);
+            int status = readAndHandleLine(fileRecord, handler);
+            if (status==STATUS_NO_UPDATE){
+                //连续了n次都没有读取到内容，也就abandon该文件了
+                if (fileRecord.getNullLineConsecutiveTimes()>=maxNullLineConsecutiveTimes){
+                    localFileCache.abandon(filePath);
+                    logger.error("{}已经超过连续{}次没有读取到内容，将其抛弃，后续不再读取",filePath,maxNullLineConsecutiveTimes);
+                    return STATUS_ABANDON_NO_UPDATE;
+                }
+            }
+            return status;
         } catch (IOException e) {
+            // 记录失败原因
             fileRecord.addErrorLog(e);
             logger.error(filePath+"读取或批处理失败",e);
-            return false;
+            return STATUS_EXCEPTION;
         }
-
-        //连续了n次都没有读取到内容，也就abandon该文件了
-        if (fileRecord.getNullLineConsecutiveTimes()>=maxNullLineConsecutiveTimes){
-            localFileCache.abandon(filePath);
-            logger.error("{}已经超过连续{}次没有读取到内容，将其抛弃，后续不再读取",filePath,maxNullLineConsecutiveTimes);
-            return false;
-        }
-        return true;
     }
 
     /**
@@ -103,19 +104,12 @@ public class SshFileLineBeat implements FileLineBeat {
      * @return 根据lineNum判断文件是否还有数据并已经处理了
      * @throws IOException
      */
-    private void readAndHandleLine(FileRecord fileRecord,FileLineHandler fileLineHandler) throws IOException{
+    private int readAndHandleLine(FileRecord fileRecord,FileLineHandler fileLineHandler) throws IOException{
         RemoteShellExecutor remoteShellExecutor = JsshLocalContext.getLocalShellExecutor();
         String filePath = fileRecord.getFilePath();
         final int nlct = fileRecord.getNullLineConsecutiveTimes(); // 连续多少次没有内容
 
-        /*//先根据文件大小来判断文件有没有更新过，考虑到大文件，通过判断大小比较效率较高，但是有个问题：如果刚开始读该文件，并没有读完，文件不更新
-        long fileSize = remoteShellExecutor.getFileSize(filePath);
-        if (fileSize <= fileRecord.getFileSize()){
-            //说明文件内容没有更新，就不需要再执行后续操作了
-            fileRecord.setNullLineConsecutiveTimes(nlct+1);
-            return;
-        }
-        fileRecord.setFileSize(fileSize);*/
+        /*先根据文件大小来判断文件有没有更新过 有个问题，考虑到大文件，通过判断大小比较效率较高，但是有个问题：如果刚开始读该文件，并没有读完，文件不更新*/
 
         final long currentTotalLine = remoteShellExecutor.getFileTotalLineNum(filePath); //当前总行数
         fileRecord.setLineTotal(currentTotalLine);
@@ -125,7 +119,7 @@ public class SshFileLineBeat implements FileLineBeat {
             //还有一种极端情况，文件有更新，但内容行数并没有增加，比如最一行追加了内容，这种也不需要考虑
             fileRecord.setNullLineConsecutiveTimes(nlct+1);
             logger.info("{}没有检测文件行数到有更新",filePath);
-            return;
+            return STATUS_NO_UPDATE;
         }
 
         // 使用什么命令来读取文件内容
@@ -148,6 +142,7 @@ public class SshFileLineBeat implements FileLineBeat {
             }
             fileRecord.setNullLineConsecutiveTimes(0); //说明有内容了
         });
+        return STATUS_NORMAL;
     }
 
 

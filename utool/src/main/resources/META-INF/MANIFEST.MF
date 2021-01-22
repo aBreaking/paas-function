@@ -1,4 +1,6 @@
 Manifest-Version: 1.0
-Class-Path: ganymed-ssh2-build210.jar
-Main-Class: com.sitech.esb.jssh.shell.SshUtil
+Class-Path: logback-core-1.2.3.jar slf4j-api-1.7.29.jar ganymed-ssh2-b
+ uild210.jar mysql-connector-java-5.1.47.jar easyjpa-core.jar snakeyam
+ l-1.19.jar druid-1.1.17.jar logback-classic-1.2.3.jar
+Main-Class: com.sitech.esb.jssh.JsshMain
 
