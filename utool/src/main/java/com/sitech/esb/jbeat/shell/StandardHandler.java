@@ -1,4 +1,4 @@
-package com.sitech.esb.jssh.shell;
+package com.sitech.esb.jbeat.shell;
 
 import java.io.IOException;
 import java.io.InputStream;

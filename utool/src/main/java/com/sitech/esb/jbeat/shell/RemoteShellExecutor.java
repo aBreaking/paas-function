@@ -1,4 +1,4 @@
-package com.sitech.esb.jssh.shell;
+package com.sitech.esb.jbeat.shell;
 
 import ch.ethz.ssh2.Connection;
 import ch.ethz.ssh2.Session;

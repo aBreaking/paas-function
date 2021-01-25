@@ -1,4 +1,4 @@
-package com.sitech.esb.jssh.beat;
+package com.sitech.esb.jbeat.beat;
 
 
 import java.io.*;
@@ -26,14 +26,23 @@ public class FileRecordCache implements Externalizable {
      */
     private final Set<String> FILE_ABANDONMENT_SET = new HashSet<>();
 
+
+    String filePathPrefix;
+
+    public FileRecordCache(String filePathPrefix) {
+        this.filePathPrefix = filePathPrefix;
+    }
+
     public FileRecord getOrStartFileRecord(String filePath){
-        if (FILE_RECORD_MAP.containsKey(filePath)){
-            return FILE_RECORD_MAP.get(filePath);
+        String key = ketOfFile(filePath);
+
+        if (FILE_RECORD_MAP.containsKey(key)){
+            return FILE_RECORD_MAP.get(key);
         }
         FileRecord fileRecord = new FileRecord();
         fileRecord.setStartReadTimestamp(System.currentTimeMillis());
         fileRecord.setFilePath(filePath);
-        FILE_RECORD_MAP.put(filePath,fileRecord);
+        FILE_RECORD_MAP.put(key,fileRecord);
         return fileRecord;
     }
 
@@ -43,7 +52,8 @@ public class FileRecordCache implements Externalizable {
      * @return
      */
     public boolean isAbandoned(String filePath){
-        return  FILE_ABANDONMENT_SET.contains(filePath);
+        String key = ketOfFile(filePath);
+        return  FILE_ABANDONMENT_SET.contains(key);
     }
 
     /**
@@ -61,13 +71,18 @@ public class FileRecordCache implements Externalizable {
         }
     }
 
+    private String ketOfFile(String filePath){
+        return filePathPrefix+"."+filePath;
+    }
+
     /**
      * 遗弃该文件，以后都不需要再读该文件了
      * @param filePath
      */
     public void abandon(String filePath){
-        FILE_RECORD_MAP.remove(filePath);
-        FILE_ABANDONMENT_SET.add(filePath);
+        String key = ketOfFile(filePath);
+        FILE_RECORD_MAP.remove(key);
+        FILE_ABANDONMENT_SET.add(key);
     }
 
     /**

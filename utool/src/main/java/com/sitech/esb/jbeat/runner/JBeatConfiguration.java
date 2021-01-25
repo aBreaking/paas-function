@@ -1,7 +1,6 @@
-package com.sitech.esb.jssh.runner;
+package com.sitech.esb.jbeat.runner;
 
-import com.sitech.esb.jssh.util.ResourceUtil;
-import jdk.internal.util.xml.impl.Input;
+import com.sitech.esb.jbeat.util.ResourceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.yaml.snakeyaml.Yaml;
@@ -16,19 +15,19 @@ import java.util.Map;
  * @author liwei_paas
  * @date 2021/1/11
  */
-public class JsshConfiguration {
+public class JBeatConfiguration {
 
-    private static Logger logger = LoggerFactory.getLogger(JsshConfiguration.class);
+    private static Logger logger = LoggerFactory.getLogger(JBeatConfiguration.class);
 
-    private static String CONFIG_FILE_NAME_PATH = "jssh-esb.yml";
+    private static String CONFIG_FILE_NAME_PATH = "jbeat-esb.yml";
 
-    private static final String KEY_OF_JSSH = "jssh";
+    public static final String KEY_OF_JBEAT = "jbeat";
 
     private static Map YML_CONFIG_MAP = new LinkedHashMap();
 
     public static void initConfiguration() {
         logger.info("=======初始化全局配置=======");
-        URL resource = JsshConfiguration.class.getResource("");
+        URL resource = JBeatConfiguration.class.getResource("");
 
         String protocol = resource.getProtocol();
         if (protocol.equals("jar")){
@@ -73,14 +72,23 @@ public class JsshConfiguration {
 
     public static String getCacheFilePath(String localKey){
         String file = CONFIG_FILE_NAME_PATH;
-        String prefix = file.substring(0, file.lastIndexOf("jssh-esb.yml"));
+        String prefix = file.substring(0, file.lastIndexOf("jbeat-esb.yml"));
         return prefix+"beat-cache-file."+localKey+".cache";
     }
 
-    public static Map getConfigUnderJsshKey(String configKey){
-        String key = KEY_OF_JSSH+"."+ JsshLocalContext.getLocalKey() + "."+configKey;
-        return (Map) JsshConfiguration.get(key);
+    public static String getConfigNameUnderLocalKey(String configKey){
+        return KEY_OF_JBEAT +"."+ JBeatLocalContext.getLocalKey()+"."+configKey;
     }
+
+    public static Map getConfigUnderLocalKey(String configKey){
+        String key = KEY_OF_JBEAT +"."+ JBeatLocalContext.getLocalKey();
+        if (configKey==null || configKey.isEmpty()){
+            return (Map) JBeatConfiguration.get(key);
+        }
+        key += "."+configKey;
+        return (Map) JBeatConfiguration.get(key);
+    }
+
 
     public static Object get(String qualifiedKey){
         return getProperty(YML_CONFIG_MAP, qualifiedKey);

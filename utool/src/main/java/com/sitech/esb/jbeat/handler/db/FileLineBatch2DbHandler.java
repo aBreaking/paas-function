@@ -1,11 +1,11 @@
-package com.sitech.esb.jssh.handler.db;
+package com.sitech.esb.jbeat.handler.db;
 
 
 import com.abreaking.easyjpa.dao.EasyJpa;
 import com.abreaking.easyjpa.dao.EasyJpaDao;
 import com.abreaking.easyjpa.dao.impl.EasyJpaDaoImpl;
 import com.abreaking.easyjpa.util.StringUtils;
-import com.sitech.esb.jssh.handler.FileLineBatchHandler;
+import com.sitech.esb.jbeat.handler.FileLineBatchHandler;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 

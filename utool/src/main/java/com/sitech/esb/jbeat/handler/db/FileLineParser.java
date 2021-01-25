@@ -1,4 +1,4 @@
-package com.sitech.esb.jssh.handler.db;
+package com.sitech.esb.jbeat.handler.db;
 
 import java.util.Map;
 

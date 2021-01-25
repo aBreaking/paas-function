@@ -1,4 +1,4 @@
-package com.sitech.esb.jssh.util;
+package com.sitech.esb.jbeat.util;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,7 +22,7 @@ public class RangeUtil {
      * @param range
      * @return
      */
-    public static List<String> parseRange(String range){
+    public static List<String> parseHostIpRange(String range){
 
         List<String> ret = new ArrayList();
         /**
@@ -31,7 +31,7 @@ public class RangeUtil {
         if (range.indexOf(",")!=-1){
             String[] split = range.split(",");
             for (String s : split){
-                ret.addAll(parseRange(s));
+                ret.addAll(parseHostIpRange(s));
             }
             return ret;
         }

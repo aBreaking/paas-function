@@ -1,4 +1,4 @@
-package com.sitech.esb.jssh.beat;
+package com.sitech.esb.jbeat.beat;
 
 
 /**

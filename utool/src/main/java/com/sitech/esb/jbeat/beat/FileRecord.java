@@ -1,4 +1,4 @@
-package com.sitech.esb.jssh.beat;
+package com.sitech.esb.jbeat.beat;
 
 import java.io.*;
 import java.text.SimpleDateFormat;

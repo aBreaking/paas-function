@@ -1,4 +1,4 @@
-package com.sitech.esb.jssh.esblog;
+package com.sitech.esb.jbeat.esblog;
 
 /**
  * esb srvlog 的字段解析对照

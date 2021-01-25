@@ -1,12 +1,13 @@
-package com.sitech.esb.jssh.runner;
+package com.sitech.esb.jbeat.runner;
 
-import com.sitech.esb.jssh.beat.FileLineBeat;
-import com.sitech.esb.jssh.beat.FileLineHandler;
-import com.sitech.esb.jssh.beat.FileRecordCache;
-import com.sitech.esb.jssh.beat.SshFileLineBeat;
-import com.sitech.esb.jssh.handler.db.FileLineBatch2DbHandler;
-import com.sitech.esb.jssh.handler.db.FileLineParser;
-import com.sitech.esb.jssh.shell.RemoteShellExecutor;
+import com.sitech.esb.jbeat.beat.FileLineBeat;
+import com.sitech.esb.jbeat.beat.FileLineHandler;
+import com.sitech.esb.jbeat.beat.FileRecordCache;
+import com.sitech.esb.jbeat.beat.SshFileLineBeat;
+import com.sitech.esb.jbeat.handler.db.FileLineBatch2DbHandler;
+import com.sitech.esb.jbeat.handler.db.FileLineParser;
+import com.sitech.esb.jbeat.shell.RemoteShellExecutor;
+import com.sitech.esb.jbeat.util.JBeatServiceLoader;
 
 import java.io.*;
 import java.sql.Connection;
@@ -19,7 +20,7 @@ import java.util.function.Function;
  * @author liwei_paas
  * @date 2021/1/20
  */
-public class JsshLocalContext {
+public class JBeatLocalContext {
 
     private static Map<String,RemoteShellExecutor> CACHE_SHELL_EXECUTOR = new HashMap<>();
 
@@ -53,33 +54,31 @@ public class JsshLocalContext {
         FLAG_OF_LOCAL_COMPLETION.remove(key);
     }
 
-    public static FileLineHandler getFileLineHandler(String beatName){
-        return getLocal(CACHE_FILELINEHANDLER,getLocalKey()+"."+beatName,key->{
-            Connection connection = JsshLocalContext.getLocalConnection();
-            Map<String, Object> beatMap = JsshConfiguration.getConfigUnderJsshKey("beat."+beatName);
-            String parserClass = assertGet(beatMap,"parser");
-            int lineOffset = getOrDefault(beatMap,"lineOffset",1024);
+    public static FileLineHandler getFileLineHandler(String hostName,String parserName){
+        String handlerKey = hostName+"."+parserName;
+        return getLocal(CACHE_FILELINEHANDLER,handlerKey,key->{
+            Connection connection = JBeatLocalContext.getLocalConnection();
             FileLineBatch2DbHandler handler = new FileLineBatch2DbHandler(connection);
+            Map<String, Object> beatMap = JBeatConfiguration.getConfigUnderLocalKey(handlerKey);
+            int lineOffset = getOrDefault(beatMap,"lineOffset",1024);
+            handler.setBatchHandleSize(lineOffset);
             try{
-                Class<?> parserClazz = Class.forName(parserClass);
-                FileLineParser parser = (FileLineParser) parserClazz.newInstance();
-                handler.setFileLineParser(parser);
-                handler.setBatchHandleSize(lineOffset);
+                FileLineParser lineParser = JBeatServiceLoader.load(FileLineParser.class, parserName);
+                handler.setFileLineParser(lineParser);
                 return handler;
             }catch (Exception e){
                 throw new RuntimeException(e);
             }
-
         });
     }
 
     public static Connection getLocalConnection(){
         return getLocal(CACHE_CONNECTION,key->{
-            Map<String,String> map = JsshConfiguration.getConfigUnderJsshKey("datasource");
-            String url = map.get("url");
-            String driver = map.get("driver");
-            String username = map.get("username");
-            String password = map.get("password");
+            Map<String,String> map = JBeatConfiguration.getConfigUnderLocalKey("datasource");
+            String url = assertGet(map,"url");
+            String driver = assertGet(map,"driver");
+            String username = assertGet(map,"username");
+            String password = assertGet(map,"password");
             try{
                 Class.forName(driver);
                 return DriverManager.getConnection(url,username,password);
@@ -89,27 +88,28 @@ public class JsshLocalContext {
         });
     }
 
-    public static FileLineBeat getLocalFileLineBeat(String beatName){
-        return getLocal(CACHE_FILELINEBEAT,LOCAL_KEY.get()+"."+beatName,beatKey->{
+    public static FileLineBeat getLocalFileLineBeat(String hostName,String hostIp){
+        String beatKey = hostName+"."+hostIp;
+        return getLocal(CACHE_FILELINEBEAT,beatKey,key->{
             SshFileLineBeat beat = new SshFileLineBeat();
-            Map<String, Object> beatMap = JsshConfiguration.getConfigUnderJsshKey("beat."+beatName);
+            RemoteShellExecutor localShellExecutor = getLocalShellExecutor(hostName, hostIp);
+            beat.setRemoteShellExecutor(localShellExecutor);
+            FileRecordCache localFileRecordCache = getLocalFileRecordCache(hostIp);
+            beat.setFileRecordCache(localFileRecordCache);
+            Map<String, Object> beatMap = JBeatConfiguration.getConfigUnderLocalKey(hostName);
             if (beatMap.containsKey("keepAliveSecond")){
                 beat.setKeepAliveSecond((Integer) beatMap.get("keepAliveSecond"));
-            }
-            if (beatMap.containsKey("lineOffset")){
-                beat.setLineOffset((Integer) beatMap.get("lineOffset"));
             }
             if (beatMap.containsKey("maxNullLineConsecutiveTimes")){
                 beat.setMaxNullLineConsecutiveTimes((Integer) beatMap.get("maxNullLineConsecutiveTimes"));
             }
             return beat;
         });
-
     }
 
-    public static FileRecordCache getLocalFileRecordCache(){
-        return getLocal(CACHE_FILERECORD, key -> {
-            String cacheFile = JsshConfiguration.getCacheFilePath(key);
+    public static FileRecordCache getLocalFileRecordCache(String hostIp){
+        return getLocal(CACHE_FILERECORD,hostIp, key -> {
+            String cacheFile = JBeatConfiguration.getCacheFilePath(key);
             File file = new File(cacheFile);
             ObjectInputStream objectInputStream = null;
             try{
@@ -126,14 +126,14 @@ public class JsshLocalContext {
                     }
                 }
             }
-            return new FileRecordCache();
+            return new FileRecordCache(hostIp);
         });
     }
 
     public static void saveLocalCache(){
         String key = LOCAL_KEY.get();
         FileRecordCache fileRecordCache = CACHE_FILERECORD.get(key);
-        String cacheFile = JsshConfiguration.getCacheFilePath(key);
+        String cacheFile = JBeatConfiguration.getCacheFilePath(key);
         ObjectOutputStream objectOutputStream = null;
         try{
             objectOutputStream = new ObjectOutputStream(new FileOutputStream(cacheFile));
@@ -150,10 +150,18 @@ public class JsshLocalContext {
         }
     }
 
-    public static RemoteShellExecutor getLocalShellExecutor(){
-        return getLocal(CACHE_SHELL_EXECUTOR,key->{
-            Map<String,String> o = (Map) JsshConfiguration.get("jssh." + key+".ssh");
-            RemoteShellExecutor remoteShellExecutor = new RemoteShellExecutor(o.get("host"), o.get("username"), o.get("password"),o.get("pemFile"));
+    public static RemoteShellExecutor getLocalShellExecutor(String hostName,String hostIp){
+        return getLocal(CACHE_SHELL_EXECUTOR,hostIp,key->{
+            Map<String,String> map = JBeatConfiguration.getConfigUnderLocalKey(hostName+".ssh");
+            String username = assertGet(map,"username");
+            if (!map.containsKey("password") && !map.containsKey("pemFile")){
+                String keyPrefix = JBeatConfiguration.getConfigNameUnderLocalKey(hostName+".ssh");
+                throw new JBeatConfigurationException("必须指定主机登录（密码或id_rsa）的配置:"+keyPrefix+".password或:"+keyPrefix+".pemFile");
+            }
+            String password = map.get("password");
+            String pemFile = map.get("pemFile");
+
+            RemoteShellExecutor remoteShellExecutor = new RemoteShellExecutor(hostIp,username,password,pemFile);
             if (!remoteShellExecutor.hasLogin()){
                 try {
                     remoteShellExecutor.login();
@@ -168,7 +176,8 @@ public class JsshLocalContext {
     private static <T> T getLocal(Map<String,T> map,Function<String,T> function){
         return getLocal(map,LOCAL_KEY.get(),function);
     }
-    private static <T> T getLocal(Map<String,T> map,String key,Function<String,T> function){
+    private static <T> T getLocal(Map<String,T> map,String keyOfLocal,Function<String,T> function){
+        String key = keyOfLocal==null || keyOfLocal.isEmpty()?getLocalKey():getLocalKey()+"."+keyOfLocal;
         if (!map.containsKey(key)){
             T defaultValue = function.apply(key);
             map.put(key,defaultValue);
@@ -177,9 +186,9 @@ public class JsshLocalContext {
         return map.get(key);
     }
 
-    public static  <T> T assertGet(Map<String,Object> map,String key){
+    public static  <T> T assertGet(Map<String,T> map,String key){
         if (map.containsKey(key)) {
-            return (T) map.get(key);
+            return map.get(key);
         }
         throw new RuntimeException("必须指定配置:"+key);
     }

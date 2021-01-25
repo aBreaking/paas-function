@@ -1,6 +1,6 @@
-package com.sitech.esb.jssh.util;
+package com.sitech.esb.jbeat.util;
 
-import com.sitech.esb.jssh.runner.JsshConfiguration;
+import com.sitech.esb.jbeat.runner.JBeatConfiguration;
 
 import java.io.*;
 
@@ -12,13 +12,13 @@ import java.io.*;
 public class ResourceUtil {
 
     public static String getJarConfigFilePath(String file){
-        String path =  JsshConfiguration.class.getProtectionDomain().getCodeSource().getLocation().getPath();
+        String path =  JBeatConfiguration.class.getProtectionDomain().getCodeSource().getLocation().getPath();
         path = path.substring(0, path.lastIndexOf("/"));
         return path+File.separator+file;
     }
 
     public static String getClasspathFilePath(String file){
-        return JsshConfiguration.class.getClassLoader().getResource(file).getPath();
+        return JBeatConfiguration.class.getClassLoader().getResource(file).getPath();
     }
 
 }

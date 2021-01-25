@@ -1,4 +1,4 @@
-package com.sitech.esb.jssh.runner;
+package com.sitech.esb.jbeat.runner;
 
 import java.util.concurrent.ThreadFactory;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -8,16 +8,16 @@ import java.util.concurrent.atomic.AtomicInteger;
  * @author liwei_paas
  * @date 2021/1/21
  */
-public class JsshThreadFactory implements ThreadFactory {
+public class JBeatThreadFactory implements ThreadFactory {
     private final ThreadGroup group;
     private final AtomicInteger threadNumber = new AtomicInteger(1);
     private final String namePrefix;
 
-    public JsshThreadFactory() {
+    public JBeatThreadFactory() {
         SecurityManager s = System.getSecurityManager();
         group = (s != null) ? s.getThreadGroup() :
                 Thread.currentThread().getThreadGroup();
-        namePrefix = "JsshFileBeat-thread-";
+        namePrefix = "JBeat-thread-";
     }
 
     public Thread newThread(Runnable r) {

@@ -1,6 +1,6 @@
-package com.sitech.esb.jssh.esblog;
+package com.sitech.esb.jbeat.esblog;
 
-import com.sitech.esb.jssh.handler.db.FileLineParser;
+import com.sitech.esb.jbeat.handler.db.FileLineParser;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
