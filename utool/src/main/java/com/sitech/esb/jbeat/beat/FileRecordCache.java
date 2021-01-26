@@ -63,7 +63,7 @@ public class FileRecordCache implements Serializable {
         }
     }
 
-    public FileRecord getOrStartFileRecord(String key){
+    public FileRecord getFileRecord(String key){
         if (FILE_RECORD_MAP.containsKey(key)){
             return FILE_RECORD_MAP.get(key);
         }

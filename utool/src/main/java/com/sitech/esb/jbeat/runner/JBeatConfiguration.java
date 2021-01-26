@@ -72,24 +72,14 @@ public class JBeatConfiguration {
         }
     }
 
-    public static String getConfigNameUnderLocalKey(String configKey){
-        return KEY_OF_JBEAT +"."+ JBeatLocalContext.getLocalKey()+"."+configKey;
-    }
-
-    public static Map getConfigUnderLocalKey(String configKey){
-        String key = KEY_OF_JBEAT +"."+ JBeatLocalContext.getLocalKey()+"."+configKey;
-        return (Map) JBeatConfiguration.get(key);
-    }
-
-    public static Map getConfigOfLocalkey(){
-        String key = KEY_OF_JBEAT +"."+ JBeatLocalContext.getLocalKey();
-        return (Map) JBeatConfiguration.get(key);
+    public static Map getConfigUnderJBeat(String qualifiedKeyUnderJbeat){
+        String key = KEY_OF_JBEAT+"."+qualifiedKeyUnderJbeat;
+        return (Map) get(key);
     }
 
     public static Object get(String qualifiedKey){
         return getProperty(YML_CONFIG_MAP, qualifiedKey);
     }
-
 
     private static Object getProperty(Map map,String qualifiedKey){
         if(map==null){

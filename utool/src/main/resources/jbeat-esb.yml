@@ -7,7 +7,24 @@ jbeat: # 这个是固定的，不需要管
       password: mysqladmin
     host1: # （必须）需要定义一个主机名，标识该esb主机，也就是需要去该主机上抓取日志文件
       ssh:  # 主机的连接信息
-        host: 172.18.231.104,172.18.231.114  # 相同内容的主机ip可以指定多个，用逗号分开，那么下面的username,pemFile都会有作用
+        host: 172.18.231.104  # 相同内容的主机ip可以指定多个，用逗号分开，那么下面的username,pemFile都会有作用
+        username: chnesb
+        password: Chnesb123.com #（与pemFile二选一） 可以使用密码登录，那就不要pemFile了
+        # pemFile: ~/.ssh/id_rsa #（与password二选一） 如果主机之间有信任关系，可以指定id_rsa文件位置，就不需要password
+      sxEsbSrvlog: # （必须）表示以下文件都将以山西 esb srvlog 日志文件格式来进行解析
+        filePath: /paas/chnesb/logs/srvlog.sx.log # （必须）文件路径，可以使用通配符，可以指定多个，多个以逗号分开
+        lineOffset: 1024 # （可选）表示每次抓取并解析文件多少行数据，默认1024，建议通过 网络每秒带宽/文件单行数据大小  来计算从而使性能最高效
+        keepAliveSecond: 3600 # （可选）表示检测该文件的最大时间（秒），默认为1小时
+        maxNullLineConsecutiveTimes: 100 # （可选）表示连续多少次没有检测文件内容有更新了，然后就不再检测该文件了，默认该值很大很大
+  pool2: # （必须）需要定义一个esb池的名，用来标识一个esb集群，注意多个esb集群该key不能重复
+    datasource: # （必须）下面指定数据源连接信息
+      url: jdbc:mysql://localhost:3306/test?characterEncoding=utf-8
+      driver: com.mysql.jdbc.Driver
+      username: root
+      password: mysqladmin
+    host1: # （必须）需要定义一个主机名，标识该esb主机，也就是需要去该主机上抓取日志文件
+      ssh:  # 主机的连接信息
+        host: 172.18.231.114  # 相同内容的主机ip可以指定多个，用逗号分开，那么下面的username,pemFile都会有作用
         username: chnesb
         password: Chnesb123.com #（与pemFile二选一） 可以使用密码登录，那就不要pemFile了
         # pemFile: ~/.ssh/id_rsa #（与password二选一） 如果主机之间有信任关系，可以指定id_rsa文件位置，就不需要password
@@ -16,4 +33,3 @@ jbeat: # 这个是固定的，不需要管
         lineOffset: 2048 # （可选）表示每次抓取并解析文件多少行数据，默认1024，建议通过 网络每秒带宽/文件单行数据大小  来计算从而使性能最高效
         keepAliveSecond: 3600 # （可选）表示检测该文件的最大时间（秒），默认为1小时
         maxNullLineConsecutiveTimes: 100 # （可选）表示连续多少次没有检测文件内容有更新了，然后就不再检测该文件了，默认该值很大很大
-
