@@ -21,7 +21,7 @@
             <fileNamePattern>${log.path}/sys-info.%d{yyyy-MM-dd}.log
             </fileNamePattern>
             <!-- 日志最大的历史 60天 -->
-            <maxHistory>60</maxHistory>
+            <maxHistory>7</maxHistory>
         </rollingPolicy>
         <encoder>
             <pattern>${log.pattern}</pattern>
@@ -49,38 +49,13 @@
             <onMismatch>DENY</onMismatch>
         </filter>
     </appender>
-<!--  --> 
- <appender name="autojob"
-        class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>${log.path}/autojob.log</file>
-        <rollingPolicy class="ch.qos.logback.core.rolling.TimeBasedRollingPolicy">
-            <fileNamePattern>${log.path}/autojob.%d{yyyy-MM-dd}.log
-            </fileNamePattern>
-            日志最大的历史 60天
-            <maxHistory>60</maxHistory>
-        </rollingPolicy>
-        <encoder>
-            <pattern>${log.pattern}</pattern>
-        </encoder>
-        <filter class="ch.qos.logback.classic.filter.LevelFilter">
-            <level>INFO</level>
-            <level>ERROR</level>
-        </filter>
-    </appender>
-<!--  --> 
- 
-    <!-- 显示形成的sql、使用的参数、结果集 -->
-    <!-- <logger name="java.sql" level="debug" /> <logger name="org.springframework.jdbc" 
-        level="debug" /> -->
+
  
     <logger name="com.sitech.paas" level="info" />
  
     <root level="info">
         <appender-ref ref="console" />
     </root>
-     <logger name="autojoblog" level="INFO" additivity="false">
-        <appender-ref ref="autojob" />
-    </logger>
  
     <!--系统操作日志 -->
     <root level="info">

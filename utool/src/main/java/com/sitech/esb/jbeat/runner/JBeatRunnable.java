@@ -39,15 +39,15 @@ public class JBeatRunnable implements Runnable {
             logger.warn(runnerKey+"->上一个beat线程还未结束，请等待或稍后重试，本次操作取消");
             return;
         }
-        logger.info("{}任务开始",runnerKey);
+        logger.debug("{}任务开始",runnerKey);
         try{
             Map<String,?> parserMap = JBeatConfiguration.getConfigUnderJBeat(runnerKey.toHostName());
             for (String parser : parserMap.keySet()){
                 if (parser.equals("ssh"))continue;
-                logger.info("准备使用{}解析器来解析{}下文件",parser,runnerKey.toString());
+                logger.debug("准备使用{}解析器来解析{}下文件",parser,runnerKey.toString());
                 startHeartBeat(parser);
             }
-            logger.info("{}任务结束",runnerKey);
+            logger.debug("{}任务结束",runnerKey);
         }catch (Throwable e){
             logger.error("filbeat失败,runner key->"+runnerKey,e);
         }finally {
@@ -61,14 +61,7 @@ public class JBeatRunnable implements Runnable {
         Map<String,String> parserMap = JBeatConfiguration.getConfigUnderJBeat(runnerKey.qualifiedKeyAfterHostName(parser));
         String file = JBeatLocalContext.assertGet(parserMap, "filePath");
         RemoteShellExecutor localShellExecutor = JBeatLocalContext.getLocalShellExecutor();
-        //先找beatName下面所有的file,因为file可能是单个带通配符的路径名
-        List<String> filePathList = null;
-        try {
-            filePathList = localShellExecutor.execute("ls " + file);
-        } catch (IOException e) {
-            logger.warn("查询filePath所有的文件路径失败，将直接使用该路径作为文件",e);
-            filePathList = Collections.singletonList(file);
-        }
+        List<String> filePathList = getFileList(file,localShellExecutor);
         if (filePathList.isEmpty()){
             logger.warn("{}主机下没有可用文件，可能配置文件信息有误,filePath配置信息为:{}",runnerKey.getHostIp(),file);
             return;
@@ -76,7 +69,6 @@ public class JBeatRunnable implements Runnable {
         logger.info("{}主机下的文件列表:{}",runnerKey.getHostIp(),filePathList);
 
         FileRecordCache fileRecordCache = FileRecordCache.getFileRecordCache();
-
         for (String filePath : filePathList){
             String fileKey = runnerKey.toString()+"_"+filePath;
             if (fileRecordCache.isAbandoned(fileKey)){
@@ -96,9 +88,23 @@ public class JBeatRunnable implements Runnable {
                     fileRecordCache.abandon(fileKey);
                     logger.info("{}文件已过期，将抛弃，后续不再读取",fileKey);
                 }
-                logger.info("{}单次读取完毕，读取记录将缓存",fileKey);
+                logger.debug("{}单次读取完毕，读取记录将缓存",fileKey);
                 fileRecordCache.save();
             }
         }
+    }
+
+    private List<String> getFileList(String file,RemoteShellExecutor localShellExecutor){
+        List<String> filePathList = new ArrayList<>();
+        String[] split = file.split(",");
+        for (String s : split){
+            //先找beatName下面所有的file,因为file可能是单个带通配符的路径名
+            try {
+                filePathList.addAll(localShellExecutor.execute("ls " + s));
+            } catch (IOException e) {
+                logger.warn("查询{}下的{}文件路径失败，可能文件不存在,错误信息为{}",runnerKey,s,e.getMessage());
+            }
+        }
+        return filePathList;
     }
 }
