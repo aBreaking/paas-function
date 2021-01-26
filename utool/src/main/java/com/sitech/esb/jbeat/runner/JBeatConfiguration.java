@@ -34,7 +34,7 @@ public class JBeatConfiguration {
         String protocol = resource.getProtocol();
         if (protocol.equals("jar")){
             try {
-                logger.info("检测到是jar包启动该工程，将使用jar包同目录下的配置文件->"+CONFIG_FILE_NAME_PATH);
+                logger.info("检测到是jar包启动该工程");
                 String filePath = ResourceUtil.getJarConfigFilePath(CONFIG_FILE_NAME_PATH);
                 initConfigMapAndRefreshConfigPath(filePath);
                 return;
@@ -45,6 +45,7 @@ public class JBeatConfiguration {
         logger.info("加载classpath下的配置文件->"+CONFIG_FILE_NAME_PATH);
         String filePath = ResourceUtil.getClasspathFilePath(CONFIG_FILE_NAME_PATH);
         try {
+            logger.info("将使用classpath路径下的配置文件");
             initConfigMapAndRefreshConfigPath(filePath);
         } catch (FileNotFoundException e) {
             logger.error("classpath下没有"+CONFIG_FILE_NAME_PATH+"配置文件",e);
@@ -56,6 +57,7 @@ public class JBeatConfiguration {
         InputStream in = null ;
         try {
             in = new FileInputStream(filePath);
+            logger.info("开始加载配置文件内容，文件路径:{}",filePath);
             Map<String,?> yamlMap = new Yaml().load(in);
             YML_CONFIG_MAP.putAll(yamlMap);
             PRODUCT_PATH = filePath.substring(0,filePath.lastIndexOf("/")+1);

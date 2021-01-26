@@ -40,7 +40,6 @@ public class JBeatMain {
                         runnerKey.setPool(pool);
                         runnerKey.setHostIp(hostIp);
                         runnerKey.setHostName(hostName);
-                        System.out.println("thread->start");
                         threadPool.submit(new JBeatRunnable(runnerKey));
                     }
                 }
@@ -69,5 +68,6 @@ public class JBeatMain {
             }
         }
         threadPool = Executors.newFixedThreadPool(corePoolSize,new JBeatThreadFactory("main"));
+        System.out.println("线程池初始化完毕，核心线程数量为"+corePoolSize);
     }
 }

@@ -58,7 +58,6 @@ public class SshFileLineBeat implements FileLineBeat {
             return STATUS_ABANDON_BY_EXPIRE;
         }
         try {
-            logger.info("开始读取并批处理文件:{}",filePath);
             int status = readAndHandleLine(fileRecord, handler);
             if (status==STATUS_NO_UPDATE){
                 //连续了n次都没有读取到内容，也就abandon该文件了
@@ -95,7 +94,7 @@ public class SshFileLineBeat implements FileLineBeat {
         final long currentTotalLine = remoteShellExecutor.getFileTotalLineNum(filePath); //当前总行数
         fileRecord.setLineTotal(currentTotalLine);
         final long lastLineNum = fileRecord.getLineNum(); // 上次读到的行
-        logger.info("上次读取到的行号为:{}",lastLineNum);
+        logger.info("{}上次读取到的行号为:{}",filePath,lastLineNum);
         if (currentTotalLine<=lastLineNum){
             //还有一种极端情况，文件有更新，但内容行数并没有增加，比如最一行追加了内容，这种也不需要考虑
             fileRecord.setNullLineConsecutiveTimes(nlct+1);

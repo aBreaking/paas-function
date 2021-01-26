@@ -48,7 +48,7 @@ public class JBeatRunnable implements Runnable {
                 startHeartBeat(parser);
             }
             logger.info("{}任务结束",runnerKey);
-        }catch (Exception e){
+        }catch (Throwable e){
             logger.error("filbeat失败,runner key->"+runnerKey,e);
         }finally {
             JBeatLocalContext.completed(runnerKey);
@@ -96,8 +96,8 @@ public class JBeatRunnable implements Runnable {
                     fileRecordCache.abandon(fileKey);
                     logger.info("{}文件已过期，将抛弃，后续不再读取",fileKey);
                 }
-                fileRecordCache.save();
                 logger.info("{}单次读取完毕，读取记录将缓存",fileKey);
+                fileRecordCache.save();
             }
         }
     }

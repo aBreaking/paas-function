@@ -1,9 +1,7 @@
 package com.sitech.esb.jbeat.util;
 
-import com.sitech.esb.jbeat.handler.db.FileLineParser;
 
 import java.io.*;
-import java.net.URL;
 
 /**
  * 自定义的classLoader
@@ -15,10 +13,9 @@ public class JBeatServiceLoader {
     private static final String PREFIX = "META-INF/jbeat/";
 
     public static <S> S load(Class<S> interfaceClass,String key){
-        URL url = ClassLoader.getSystemResource(PREFIX+interfaceClass.getName());
         BufferedReader reader = null;
         try{
-            reader = new BufferedReader(new InputStreamReader(new FileInputStream(url.getFile())));
+            reader = new BufferedReader(new InputStreamReader(ClassLoader.getSystemResourceAsStream(PREFIX + interfaceClass.getName())));
             String s ;
             while ((s=reader.readLine())!=null){
                 String[] split = s.split("=");
