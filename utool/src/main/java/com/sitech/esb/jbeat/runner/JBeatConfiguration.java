@@ -81,14 +81,14 @@ public class JBeatConfiguration {
     }
 
     public static Map getConfigUnderLocalKey(String configKey){
-        String key = KEY_OF_JBEAT +"."+ JBeatLocalContext.getLocalKey();
-        if (configKey==null || configKey.isEmpty()){
-            return (Map) JBeatConfiguration.get(key);
-        }
-        key += "."+configKey;
+        String key = KEY_OF_JBEAT +"."+ JBeatLocalContext.getLocalKey()+"."+configKey;
         return (Map) JBeatConfiguration.get(key);
     }
 
+    public static Map getConfigOfLocalkey(){
+        String key = KEY_OF_JBEAT +"."+ JBeatLocalContext.getLocalKey();
+        return (Map) JBeatConfiguration.get(key);
+    }
 
     public static Object get(String qualifiedKey){
         return getProperty(YML_CONFIG_MAP, qualifiedKey);

@@ -11,7 +11,6 @@ package com.sitech.esb.jbeat.beat;
 public interface FileLineBeat {
 
     int STATUS_NORMAL = 0; // filebeat正常状态
-    int STATUS_ABANDON = 1; // 已经无效了
     int STATUS_NO_UPDATE = 2; // 没有新内容
     int STATUS_EXCEPTION = 3; // 出现异常了
     int STATUS_ABANDON_BY_EXPIRE = 11; // 已经过期了被抛弃

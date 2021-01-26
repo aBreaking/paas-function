@@ -8,6 +8,7 @@ import com.sitech.esb.jbeat.handler.db.FileLineBatch2DbHandler;
 import com.sitech.esb.jbeat.handler.db.FileLineParser;
 import com.sitech.esb.jbeat.shell.RemoteShellExecutor;
 import com.sitech.esb.jbeat.util.JBeatServiceLoader;
+import com.sitech.esb.jbeat.util.RangeUtil;
 
 import java.io.*;
 import java.sql.Connection;
@@ -30,9 +31,9 @@ public class JBeatLocalContext {
 
     private static Map<String,Connection> CACHE_CONNECTION = new HashMap<>();
 
-    private static Map<String,FileLineHandler> CACHE_FILELINEHANDLER = new HashMap<>();
+    protected static Map<String,Map<String,List>> CACHE_HOST_MAP = new HashMap<>();
 
-    private static ThreadLocal<String> LOCAL_KEY = new ThreadLocal<>();
+    private static InheritableThreadLocal<String> LOCAL_KEY = new InheritableThreadLocal<>();
 
     private static Set<String> FLAG_OF_LOCAL_COMPLETION = Collections.synchronizedSet(new HashSet<>());
 
@@ -54,22 +55,30 @@ public class JBeatLocalContext {
         FLAG_OF_LOCAL_COMPLETION.remove(key);
     }
 
-    public static FileLineHandler getFileLineHandler(String hostName,String parserName){
-        String handlerKey = hostName+"."+parserName;
-        return getLocal(CACHE_FILELINEHANDLER,handlerKey,key->{
-            Connection connection = JBeatLocalContext.getLocalConnection();
-            FileLineBatch2DbHandler handler = new FileLineBatch2DbHandler(connection);
-            Map<String, Object> beatMap = JBeatConfiguration.getConfigUnderLocalKey(handlerKey);
-            int lineOffset = getOrDefault(beatMap,"lineOffset",1024);
-            handler.setBatchHandleSize(lineOffset);
-            try{
-                FileLineParser lineParser = JBeatServiceLoader.load(FileLineParser.class, parserName);
-                handler.setFileLineParser(lineParser);
-                return handler;
-            }catch (Exception e){
-                throw new RuntimeException(e);
-            }
+    public static Map<String,List> getHostMap(String hostName){
+        return getLocal(CACHE_HOST_MAP,hostName,key->{
+            Map<String,List> ret = new HashMap<>();
+            Map<String,String> map = JBeatConfiguration.getConfigUnderLocalKey(hostName+".ssh");
+            String host = map.get("host");
+            List<String> list = RangeUtil.parseHostIpRange(host);
+            ret.put(hostName,list);
+            return ret;
         });
+    }
+
+    public static FileLineHandler getFileLineHandler(String hostName,String parserName){
+        Connection connection = JBeatLocalContext.getLocalConnection();
+        FileLineBatch2DbHandler handler = new FileLineBatch2DbHandler(connection);
+        Map<String, Object> beatMap = JBeatConfiguration.getConfigUnderLocalKey(hostName+"."+parserName);
+        int lineOffset = getOrDefault(beatMap,"lineOffset",1024);
+        handler.setBatchHandleSize(lineOffset);
+        try{
+            FileLineParser lineParser = JBeatServiceLoader.load(FileLineParser.class, parserName);
+            handler.setFileLineParser(lineParser);
+            return handler;
+        }catch (Exception e){
+            throw new RuntimeException(e);
+        }
     }
 
     public static Connection getLocalConnection(){
@@ -94,8 +103,6 @@ public class JBeatLocalContext {
             SshFileLineBeat beat = new SshFileLineBeat();
             RemoteShellExecutor localShellExecutor = getLocalShellExecutor(hostName, hostIp);
             beat.setRemoteShellExecutor(localShellExecutor);
-            FileRecordCache localFileRecordCache = getLocalFileRecordCache(hostIp);
-            beat.setFileRecordCache(localFileRecordCache);
             Map<String, Object> beatMap = JBeatConfiguration.getConfigUnderLocalKey(hostName);
             if (beatMap.containsKey("keepAliveSecond")){
                 beat.setKeepAliveSecond((Integer) beatMap.get("keepAliveSecond"));
@@ -107,8 +114,8 @@ public class JBeatLocalContext {
         });
     }
 
-    public static FileRecordCache getLocalFileRecordCache(String hostIp){
-        return getLocal(CACHE_FILERECORD,hostIp, key -> {
+    public static FileRecordCache getLocalFileRecordCache(){
+        return getLocal(CACHE_FILERECORD, key -> {
             String cacheFile = JBeatConfiguration.getCacheFilePath(key);
             File file = new File(cacheFile);
             ObjectInputStream objectInputStream = null;
@@ -118,6 +125,7 @@ public class JBeatLocalContext {
                     return  (FileRecordCache) objectInputStream.readObject();
                 }
             }catch (Exception e){
+                e.printStackTrace();
             }finally {
                 if (objectInputStream!=null){
                     try {
@@ -126,7 +134,7 @@ public class JBeatLocalContext {
                     }
                 }
             }
-            return new FileRecordCache(hostIp);
+            return new FileRecordCache();
         });
     }
 
@@ -174,7 +182,7 @@ public class JBeatLocalContext {
     }
 
     private static <T> T getLocal(Map<String,T> map,Function<String,T> function){
-        return getLocal(map,LOCAL_KEY.get(),function);
+        return getLocal(map,"",function);
     }
     private static <T> T getLocal(Map<String,T> map,String keyOfLocal,Function<String,T> function){
         String key = keyOfLocal==null || keyOfLocal.isEmpty()?getLocalKey():getLocalKey()+"."+keyOfLocal;

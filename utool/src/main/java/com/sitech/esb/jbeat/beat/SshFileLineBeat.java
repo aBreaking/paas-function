@@ -28,7 +28,7 @@ public class SshFileLineBeat implements FileLineBeat {
 
     private int maxNullLineConsecutiveTimes = Integer.MAX_VALUE; //多少次没有读取到数据就被遗弃
 
-    private FileRecordCache fileRecordCache;
+    private FileRecord fileRecord;
 
     public SshFileLineBeat() {
     }
@@ -51,16 +51,9 @@ public class SshFileLineBeat implements FileLineBeat {
      * @throws IOException
      */
     public int heartbeat(String filePath,FileLineHandler handler,int maxNullLineConsecutiveTimes)  {
-        if (fileRecordCache.isAbandoned(filePath)){
-            logger.info(filePath+"已经无效，可能已经读取完毕或过期无效了");
-            // 防止重复读取无效文件
-            return STATUS_ABANDON;
-        }
-        FileRecord fileRecord = fileRecordCache.getOrStartFileRecord(filePath);
         fileRecord.setLastReadTime(new Date());
         if (System.currentTimeMillis()-fileRecord.getStartReadTimestamp() >= keepAliveSecond*1000){
             //文件已过期的话，也将该文件遗弃
-            fileRecordCache.abandon(filePath);
             logger.info("{}已经过期，后续不再读取",filePath);
             return STATUS_ABANDON_BY_EXPIRE;
         }
@@ -70,7 +63,6 @@ public class SshFileLineBeat implements FileLineBeat {
             if (status==STATUS_NO_UPDATE){
                 //连续了n次都没有读取到内容，也就abandon该文件了
                 if (fileRecord.getNullLineConsecutiveTimes()>=maxNullLineConsecutiveTimes){
-                    fileRecordCache.abandon(filePath);
                     logger.error("{}已经超过连续{}次没有读取到内容，将其抛弃，后续不再读取",filePath,maxNullLineConsecutiveTimes);
                     return STATUS_ABANDON_NO_UPDATE;
                 }
@@ -183,11 +175,11 @@ public class SshFileLineBeat implements FileLineBeat {
         return maxNullLineConsecutiveTimes;
     }
 
-    public FileRecordCache getFileRecordCache() {
-        return fileRecordCache;
+    public FileRecord getFileRecord() {
+        return fileRecord;
     }
 
-    public void setFileRecordCache(FileRecordCache fileRecordCache) {
-        this.fileRecordCache = fileRecordCache;
+    public void setFileRecord(FileRecord fileRecord) {
+        this.fileRecord = fileRecord;
     }
 }

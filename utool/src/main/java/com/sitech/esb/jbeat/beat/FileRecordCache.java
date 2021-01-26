@@ -26,15 +26,11 @@ public class FileRecordCache implements Externalizable {
      */
     private final Set<String> FILE_ABANDONMENT_SET = new HashSet<>();
 
-
-    String filePathPrefix;
-
-    public FileRecordCache(String filePathPrefix) {
-        this.filePathPrefix = filePathPrefix;
+    public FileRecordCache() {
     }
 
-    public FileRecord getOrStartFileRecord(String filePath){
-        String key = ketOfFile(filePath);
+    public FileRecord getOrStartFileRecord(String salt,String filePath){
+        String key = key(salt,filePath);
 
         if (FILE_RECORD_MAP.containsKey(key)){
             return FILE_RECORD_MAP.get(key);
@@ -51,38 +47,23 @@ public class FileRecordCache implements Externalizable {
      * @param filePath
      * @return
      */
-    public boolean isAbandoned(String filePath){
-        String key = ketOfFile(filePath);
+    public boolean isAbandoned(String salt,String filePath){
+        String key = key(salt,filePath);
         return  FILE_ABANDONMENT_SET.contains(key);
-    }
-
-    /**
-     * 过期时间，应该没必要set吧
-     * @param filePath
-     * @param maxKeepAliveSecond
-     */
-    private void expire(String filePath,int maxKeepAliveSecond){
-        FileRecord fileRecord = FILE_RECORD_MAP.get(filePath);
-        Long timeDifference = System.currentTimeMillis()-fileRecord.getStartReadTimestamp();
-        if (timeDifference/1000 > maxKeepAliveSecond){
-            abandon(filePath);
-            System.out.println("abandon filePath");
-            return;
-        }
-    }
-
-    private String ketOfFile(String filePath){
-        return filePathPrefix+"."+filePath;
     }
 
     /**
      * 遗弃该文件，以后都不需要再读该文件了
      * @param filePath
      */
-    public void abandon(String filePath){
-        String key = ketOfFile(filePath);
+    public void abandon(String salt,String filePath){
+        String key = key(salt,filePath);
         FILE_RECORD_MAP.remove(key);
         FILE_ABANDONMENT_SET.add(key);
+    }
+
+    private String key(String salt,String file){
+        return salt+"."+file;
     }
 
     /**

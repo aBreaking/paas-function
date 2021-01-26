@@ -13,11 +13,11 @@ public class JBeatThreadFactory implements ThreadFactory {
     private final AtomicInteger threadNumber = new AtomicInteger(1);
     private final String namePrefix;
 
-    public JBeatThreadFactory() {
+    public JBeatThreadFactory(String name) {
         SecurityManager s = System.getSecurityManager();
         group = (s != null) ? s.getThreadGroup() :
                 Thread.currentThread().getThreadGroup();
-        namePrefix = "JBeat-thread-";
+        namePrefix = "JBeat."+name+"-thread-";
     }
 
     public Thread newThread(Runnable r) {

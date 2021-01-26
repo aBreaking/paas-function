@@ -16,7 +16,7 @@ import java.util.concurrent.*;
 public class JBeatMain {
 
     public static void main(String[] args) throws Exception {
-        int interval = 3000;
+        int interval = 5000;
         if (args.length!=0){
             interval = Integer.parseInt(args[0]) * 1000;
         }
@@ -25,11 +25,11 @@ public class JBeatMain {
 
     public static void startup(int interval) throws Exception{
         JBeatConfiguration.initConfiguration();
-        Map jssh = (Map) JBeatConfiguration.get("jbeat");
-        Set<String> JsshBeatKeys = jssh.keySet();
-        ExecutorService threadPool = Executors.newFixedThreadPool(JsshBeatKeys.size(),new JBeatThreadFactory());
+        Map jbeat = (Map) JBeatConfiguration.get(JBeatConfiguration.KEY_OF_JBEAT);
+        Set<String> keys = jbeat.keySet();
+        ExecutorService threadPool = Executors.newFixedThreadPool(keys.size(),new JBeatThreadFactory("main"));
         while(true){
-            for (String key : JsshBeatKeys) {
+            for (String key : keys) {
                 threadPool.submit(new JBeatRunnable(key));
             }
             Thread.sleep(interval);
