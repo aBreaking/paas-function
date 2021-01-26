@@ -111,15 +111,19 @@ public class JBeatRunnable implements Runnable {
             return;
         }
         logger.info("{}主机下的，将使用{}解析器来解析，文件列表:{}",hostName+"->"+hostIp,parser,filePathList);
-        //TODO 这里还有线程安全的bug
-        FileRecordCache fileRecordCache = JBeatLocalContext.getLocalFileRecordCache();
+
+        FileRecordCache fileRecordCache = FileRecordCache.getFileRecordCache();
+
         for (String filePath : filePathList){
-            if (fileRecordCache.isAbandoned(hostIp,filePath)){
+            String fileKey = key +"_"+hostIp+"_"+filePath;
+            if (fileRecordCache.isAbandoned(fileKey)){
                 logger.info(filePath+"已经无效，可能已经读取完毕或过期无效了");
                 // 防止重复读取无效文件
                 continue;
             }
-            FileRecord fileRecord = fileRecordCache.getOrStartFileRecord(hostIp, filePath);
+            FileRecord fileRecord = fileRecordCache.getOrStartFileRecord(fileKey);
+            fileRecord.setFilePath(filePath);
+            fileRecord.setStartReadTimestamp(System.currentTimeMillis());
             fileBeat.setFileRecord(fileRecord);
             logger.info("开始检测文件内容，文件->"+filePath);
             int status = FileLineBeat.STATUS_NORMAL;
@@ -127,9 +131,9 @@ public class JBeatRunnable implements Runnable {
                 // 保存记录
                 status = fileBeat.heartbeat(filePath,handler);
                 if (status >= FileLineBeat.STATUS_ABANDON_BY_EXPIRE){
-                    fileRecordCache.abandon(hostIp,filePath);
+                    fileRecordCache.abandon(fileKey);
                 }
-                JBeatLocalContext.saveLocalCache();
+                fileRecordCache.save();
             }
             logger.info("{}内容检测完毕",filePath);
         }

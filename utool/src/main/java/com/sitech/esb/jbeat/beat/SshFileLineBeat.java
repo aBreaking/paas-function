@@ -99,7 +99,7 @@ public class SshFileLineBeat implements FileLineBeat {
         if (currentTotalLine<=lastLineNum){
             //还有一种极端情况，文件有更新，但内容行数并没有增加，比如最一行追加了内容，这种也不需要考虑
             fileRecord.setNullLineConsecutiveTimes(nlct+1);
-            logger.info("{}没有检测文件行数到有更新",filePath);
+            logger.info("{}文件行数无更新",filePath);
             return STATUS_NO_UPDATE;
         }
 

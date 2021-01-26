@@ -19,11 +19,13 @@ public class JBeatConfiguration {
 
     private static Logger logger = LoggerFactory.getLogger(JBeatConfiguration.class);
 
-    private static String CONFIG_FILE_NAME_PATH = "jbeat-esb.yml";
+    public static final String CONFIG_FILE_NAME_PATH = "jbeat-esb.yml";
 
     public static final String KEY_OF_JBEAT = "jbeat";
 
     private static Map YML_CONFIG_MAP = new LinkedHashMap();
+
+    public static String PRODUCT_PATH = ""; //项目路径
 
     public static void initConfiguration() {
         logger.info("=======初始化全局配置=======");
@@ -56,7 +58,7 @@ public class JBeatConfiguration {
             in = new FileInputStream(filePath);
             Map<String,?> yamlMap = new Yaml().load(in);
             YML_CONFIG_MAP.putAll(yamlMap);
-            CONFIG_FILE_NAME_PATH = filePath.substring(0,filePath.lastIndexOf("/")+1) +  CONFIG_FILE_NAME_PATH;
+            PRODUCT_PATH = filePath.substring(0,filePath.lastIndexOf("/")+1);
             logger.info("配置加载完毕");
         }finally {
             if (in != null){
@@ -68,12 +70,6 @@ public class JBeatConfiguration {
                 }
             }
         }
-    }
-
-    public static String getCacheFilePath(String localKey){
-        String file = CONFIG_FILE_NAME_PATH;
-        String prefix = file.substring(0, file.lastIndexOf("jbeat-esb.yml"));
-        return prefix+"beat-cache-file."+localKey+".cache";
     }
 
     public static String getConfigNameUnderLocalKey(String configKey){

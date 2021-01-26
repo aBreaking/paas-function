@@ -2,7 +2,6 @@ package com.sitech.esb.jbeat.runner;
 
 import com.sitech.esb.jbeat.beat.FileLineBeat;
 import com.sitech.esb.jbeat.beat.FileLineHandler;
-import com.sitech.esb.jbeat.beat.FileRecordCache;
 import com.sitech.esb.jbeat.beat.SshFileLineBeat;
 import com.sitech.esb.jbeat.handler.db.FileLineBatch2DbHandler;
 import com.sitech.esb.jbeat.handler.db.FileLineParser;
@@ -23,17 +22,15 @@ import java.util.function.Function;
  */
 public class JBeatLocalContext {
 
-    private static Map<String,RemoteShellExecutor> CACHE_SHELL_EXECUTOR = new HashMap<>();
+    private static InheritableThreadLocal<String> LOCAL_KEY = new InheritableThreadLocal<>();
 
-    private static Map<String,FileRecordCache> CACHE_FILERECORD = new HashMap<>();
+    private static Map<String,RemoteShellExecutor> CACHE_SHELL_EXECUTOR = new HashMap<>();
 
     private static Map<String,FileLineBeat> CACHE_FILELINEBEAT = new HashMap<>();
 
     private static Map<String,Connection> CACHE_CONNECTION = new HashMap<>();
 
     protected static Map<String,Map<String,List>> CACHE_HOST_MAP = new HashMap<>();
-
-    private static InheritableThreadLocal<String> LOCAL_KEY = new InheritableThreadLocal<>();
 
     private static Set<String> FLAG_OF_LOCAL_COMPLETION = Collections.synchronizedSet(new HashSet<>());
 
@@ -114,50 +111,6 @@ public class JBeatLocalContext {
         });
     }
 
-    public static FileRecordCache getLocalFileRecordCache(){
-        return getLocal(CACHE_FILERECORD, key -> {
-            String cacheFile = JBeatConfiguration.getCacheFilePath(key);
-            File file = new File(cacheFile);
-            ObjectInputStream objectInputStream = null;
-            try{
-                if(file.exists()){
-                    objectInputStream = new ObjectInputStream(new FileInputStream(file));
-                    return  (FileRecordCache) objectInputStream.readObject();
-                }
-            }catch (Exception e){
-                e.printStackTrace();
-            }finally {
-                if (objectInputStream!=null){
-                    try {
-                        objectInputStream.close();
-                    } catch (IOException e) {
-                    }
-                }
-            }
-            return new FileRecordCache();
-        });
-    }
-
-    public static void saveLocalCache(){
-        String key = LOCAL_KEY.get();
-        FileRecordCache fileRecordCache = CACHE_FILERECORD.get(key);
-        String cacheFile = JBeatConfiguration.getCacheFilePath(key);
-        ObjectOutputStream objectOutputStream = null;
-        try{
-            objectOutputStream = new ObjectOutputStream(new FileOutputStream(cacheFile));
-            objectOutputStream.writeObject(fileRecordCache);
-        }catch (Exception e){
-            e.printStackTrace();
-        }finally {
-            if (objectOutputStream!=null){
-                try {
-                    objectOutputStream.close();
-                } catch (IOException e) {
-                }
-            }
-        }
-    }
-
     public static RemoteShellExecutor getLocalShellExecutor(String hostName,String hostIp){
         return getLocal(CACHE_SHELL_EXECUTOR,hostIp,key->{
             Map<String,String> map = JBeatConfiguration.getConfigUnderLocalKey(hostName+".ssh");
@@ -184,6 +137,7 @@ public class JBeatLocalContext {
     private static <T> T getLocal(Map<String,T> map,Function<String,T> function){
         return getLocal(map,"",function);
     }
+
     private static <T> T getLocal(Map<String,T> map,String keyOfLocal,Function<String,T> function){
         String key = keyOfLocal==null || keyOfLocal.isEmpty()?getLocalKey():getLocalKey()+"."+keyOfLocal;
         if (!map.containsKey(key)){
