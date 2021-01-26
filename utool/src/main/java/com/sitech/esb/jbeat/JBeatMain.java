@@ -17,13 +17,13 @@ import java.util.concurrent.*;
 public class JBeatMain {
 
     static ExecutorService threadPool;
+
     static Map<String,Map<String,List>> hostMap ;
 
+    static int DEFAULT_INTERVAL = 30*1000;
+
     public static void main(String[] args) throws Exception {
-        int interval = 5000;
-        if (args.length!=0){
-            interval = Integer.parseInt(args[0]) * 1000;
-        }
+        int interval = args.length!=0?Integer.parseInt(args[0]) * 1000 : DEFAULT_INTERVAL;
         startup(interval);
     }
 
